@@ -216,11 +216,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.model.SocialMedia
+import com.snorlax.snorlax.model.SocialMedia.SocialPlatform.EMAIL
+import com.snorlax.snorlax.model.SocialMedia.SocialPlatform.FACEBOOK
 import com.snorlax.snorlax.utils.customTab.CustomTabHelper
 import com.snorlax.snorlax.utils.inflate
 import kotlinx.android.synthetic.main.button_item.view.*
 
-class PlatformButtonAdaptor(private val socialMedia: List<Pair<SocialMedia.SocialPlatform, SocialMedia>>) :
+class PlatformButtonAdaptor(private val socialMedia: List<SocialMedia>) :
     RecyclerView.Adapter<PlatformButtonAdaptor.ButtonHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ButtonHolder {
@@ -234,10 +236,10 @@ class PlatformButtonAdaptor(private val socialMedia: List<Pair<SocialMedia.Socia
 
         val currentPlatform = socialMedia[position]
 
-        val platform = currentPlatform.first
-        val socialMedia = currentPlatform.second
+        val platform = currentPlatform.type
+        val socialMediaID = currentPlatform.link
 
-        val url = platform.getPrefix() + socialMedia.link
+        val url = platform.getPrefix() + socialMediaID
 
         val tabIntent = CustomTabsIntent.Builder().apply {
             setToolbarColor(ContextCompat.getColor(holder.itemView.context, R.color.colorPrimary))
@@ -257,21 +259,20 @@ class PlatformButtonAdaptor(private val socialMedia: List<Pair<SocialMedia.Socia
 
         holder.platformButton.apply {
 
-
             when (platform) {
-                SocialMedia.SocialPlatform.EMAIL -> {
+                EMAIL -> {
                     setOnClickListener {
                         Intent(Intent.ACTION_SENDTO).apply {
                             data = Uri.parse(platform.getPrefix())
                             putExtra(
                                 Intent.EXTRA_EMAIL,
-                                arrayOf(socialMedia.link)
+                                arrayOf(socialMediaID)
                             )
                             context.startActivity(this)
                         }
                     }
                 }
-                SocialMedia.SocialPlatform.FACEBOOK -> {
+                FACEBOOK -> {
                     setOnClickListener {
                         try {
                             val fbInfo = context.packageManager.getApplicationInfo(
@@ -282,7 +283,7 @@ class PlatformButtonAdaptor(private val socialMedia: List<Pair<SocialMedia.Socia
                                 context.startActivity(
                                     Intent(
                                         Intent.ACTION_VIEW,
-                                        Uri.parse("fb://profile/" + socialMedia.link)
+                                        Uri.parse("fb://profile/$socialMediaID")
                                     )
                                 )
                             }

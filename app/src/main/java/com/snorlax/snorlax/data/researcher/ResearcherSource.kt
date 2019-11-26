@@ -210,36 +210,48 @@ import com.snorlax.snorlax.model.Researcher
 import com.snorlax.snorlax.model.SocialMedia
 import com.snorlax.snorlax.model.SocialMedia.SocialPlatform.*
 
+/**
+ * Researcher source, note that facebook is base on profile id not on username because it is static and not changeable
+ */
 object ResearcherSource {
 
+    /**
+     *  Firebase storage researcher image reference
+     */
     private val firebaseStorage = FirebaseStorage.getInstance().reference.child("researchers/display_image/")
 
+    /**
+     *  List of developers, note it is separated so as to be put on another recyclerview
+     */
     val developers = listOf(
         Researcher(
             "Oliver Rhyme G. Añasco",
             "App Developer",
             "Simple random coder",
             firebaseStorage.child("oliver.jpg"),
-            mapOf(
-                EMAIL to SocialMedia("oliveranasco@gmail.com"),
-                FACEBOOK to SocialMedia("100003776636938","oliver.rhyme"),
-                TWITTER to SocialMedia("Oliver_Rhyme"),
-                INSTAGRAM to SocialMedia("justme_oliver")
+            listOf(
+                SocialMedia(EMAIL, "oliveranasco@gmail.com"),
+                SocialMedia(FACEBOOK, "100003776636938"),
+                SocialMedia(TWITTER, "Oliver_Rhyme"),
+                SocialMedia(INSTAGRAM, "justme_oliver")
             )
         )
     )
 
+    /**
+     *  List of researchers
+     */
     val researchers = listOf(
         Researcher(
             "Dollrainple Gwyneth B. Dabalos",
             "Researcher",
             "Sun love rain and vice versa",
             firebaseStorage.child("dollrainple.jpg"),
-            mapOf(
-                EMAIL to SocialMedia("dgwyneth0623@gmail.com"),
-                FACEBOOK to SocialMedia("100007328164500", "dgwyndabalos"),
-                TWITTER to SocialMedia("gwynethdabalos"),
-                INSTAGRAM to SocialMedia("gwynethdabalos")
+            listOf(
+                SocialMedia(EMAIL, "dgwyneth0623@gmail.com"),
+                SocialMedia(FACEBOOK, "100007328164500"),
+                SocialMedia(TWITTER, "gwynethdabalos"),
+                SocialMedia(INSTAGRAM, "gwynethdabalos")
             )
         ),
         Researcher(
@@ -247,10 +259,10 @@ object ResearcherSource {
             "Researcher",
             null,
             firebaseStorage.child("trisha.jpg"),
-            mapOf(
-                EMAIL to SocialMedia("trshxkryzyl.ie@gmail.com"),
-                FACEBOOK to SocialMedia("100001111092899", "trshxkryzyl"),
-                TWITTER to SocialMedia("trshxkryzyl")
+            listOf(
+                SocialMedia(EMAIL, "trshxkryzyl.ie@gmail.com"),
+                SocialMedia(FACEBOOK, "100001111092899"),
+                SocialMedia(TWITTER, "trshxkryzyl")
             )
         ),
         Researcher(
@@ -258,11 +270,11 @@ object ResearcherSource {
             "Researcher",
             null,
             firebaseStorage.child("abegail.jpg"),
-            mapOf(
-                EMAIL to SocialMedia("borces.abegail.d@gmail.com"),
-                FACEBOOK to SocialMedia("100006557435370", "abegail.borces"),
-                TWITTER to SocialMedia("BORSATCHE"),
-                INSTAGRAM to SocialMedia("abegail.d.b")
+            listOf(
+                SocialMedia(EMAIL, "borces.abegail.d@gmail.com"),
+                SocialMedia(FACEBOOK, "100006557435370"),
+                SocialMedia(TWITTER, "BORSATCHE"),
+                SocialMedia(INSTAGRAM, "abegail.d.b")
             )
         ),
         Researcher(
@@ -270,11 +282,11 @@ object ResearcherSource {
             "Researcher",
             "We should be the change that this world needs.",
             firebaseStorage.child("maria.jpeg"),
-            mapOf(
-                EMAIL to SocialMedia("isabelsouribio@gmail.com"),
-                FACEBOOK to SocialMedia("100003596902195", "siobe.mendes"),
-                TWITTER to SocialMedia("hiimsabss"),
-                INSTAGRAM to SocialMedia("siobelaaaaa")
+            listOf(
+                SocialMedia(EMAIL, "isabelsouribio@gmail.com"),
+                SocialMedia(FACEBOOK, "100003596902195"),
+                SocialMedia(TWITTER, "hiimsabss"),
+                SocialMedia(INSTAGRAM, "siobelaaaaa")
             )
         )
     )

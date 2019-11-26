@@ -315,7 +315,7 @@ android {
             signingConfig signingConfigs.release
 
             firebaseAppDistribution {
-                releaseNotes = "Release build ${mVersionName}\nVersion 1 released\nThis is the first stable release"
+                releaseNotes = "Release build ${mVersionName}\nVersion 1 released\nFix margin and add replaced logo"
                 groups = "researchers, developer"
             }
         }

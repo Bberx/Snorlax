@@ -212,5 +212,5 @@ data class Researcher(
     val role: String,
     val bio: String? = null,
     val displayImage: StorageReference? = null,
-    val socialMedia: Map<SocialMedia.SocialPlatform, SocialMedia>
+    val socialMedia: List<SocialMedia>
 )

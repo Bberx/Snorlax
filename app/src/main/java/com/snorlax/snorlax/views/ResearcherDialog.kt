@@ -249,7 +249,7 @@ class ResearcherDialog(context: Context, private val researcher: Researcher) : D
 
         buttonRecycler.layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
 //        buttonRecycler.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-        buttonRecycler.adapter = PlatformButtonAdaptor(researcher.socialMedia.toList())
+        buttonRecycler.adapter = PlatformButtonAdaptor(researcher.socialMedia)
 
         window!!.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
     }

@@ -207,7 +207,7 @@ package com.snorlax.snorlax.model
 
 import com.snorlax.snorlax.R
 
-data class SocialMedia(val link: String? = null, val secondaryLink: String? = null) {
+data class SocialMedia(val type: SocialPlatform, val link: String) {
     enum class SocialPlatform {
         EMAIL, FACEBOOK, INSTAGRAM, TWITTER;
 
