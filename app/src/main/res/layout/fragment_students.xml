@@ -32,6 +32,7 @@
         tools:listitem="@layout/item_student"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
+        style="@style/Widget.MaterialComponents.FloatingActionButton"
         android:id="@+id/btn_add_student"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

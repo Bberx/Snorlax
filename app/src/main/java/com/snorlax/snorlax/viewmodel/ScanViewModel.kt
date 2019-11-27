@@ -24,7 +24,7 @@ import android.provider.Settings
 import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ViewModel
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.DocumentReference
 import com.karumi.dexter.Dexter
@@ -35,7 +35,6 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.BasePermissionListener
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.data.cache.LocalCacheSource
-import com.snorlax.snorlax.data.camera.CameraSource
 import com.snorlax.snorlax.data.firebase.FirebaseFirestoreSource
 import com.snorlax.snorlax.model.Attendance
 import com.snorlax.snorlax.model.Student
@@ -45,19 +44,62 @@ import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import java.util.*
 
-class ScanViewModel(lifecycleOwner: LifecycleOwner) {
+class ScanViewModel : ViewModel() {
+
+//    private val disposable = CompositeDisposable()
+
     private val cacheSource = LocalCacheSource.getInstance()
-    private val cameraSource = CameraSource(lifecycleOwner)
+    //    private val cameraSource = CameraSource()
     private val firestore = FirebaseFirestoreSource.getInstance()
 
     val permissionObservable = PublishSubject.create<Boolean>()
 
-    fun startCamera(owner: LifecycleOwner) = cameraSource.startCamera(owner)
+//    fun startCamera(owner: LifecycleOwner) = cameraSource.startCamera(owner)
 //    fun getCameraPreview() = cameraSource.getPreviewObservable()
-    fun getBarcode() = cameraSource.getBarcodeObservable()
+
+
+//    val analyzerConfig = ImageAnalysisConfig.Builder().apply {
+//
+//        // In our analysis, we care more about the latest image than
+//        // analyzing *every* image
+//        setImageReaderMode(ImageAnalysis.ImageReaderMode.ACQUIRE_LATEST_IMAGE)
+//        setTargetAspectRatio(AspectRatio.RATIO_4_3)
+//
+////            setTargetResolution(Size(1920, 1080))
+//    }.build()
+//    val barcodeAnalyzer = ImageAnalysis(analyzerConfig)
+
+//    fun startCamera(lifecycleOwner: LifecycleOwner) {
+//        if (CameraX.isBound(barcodeAnalyzer)) {
+//            CameraX.unbind(barcodeAnalyzer)
+//            CameraX.bindToLifecycle(lifecycleOwner, barcodeAnalyzer)
+//        } else CameraX.bindToLifecycle(lifecycleOwner, barcodeAnalyzer)
+//    }
+//    fun getBarcode() : Flowable<FirebaseVisionBarcode> {
+//
+//        return Flowable.create({
+//            barcodeAnalyzer.setAnalyzer(Executor { command ->
+//                // Use a worker thread for image analysis to prevent glitches
+////                Handler(analyzerThread.looper).apply { post(command) }
+////                Completable
+////                    .fromRunnable(command)
+////                    .toFlowable<Unit>()
+////                    .onBackpressureDrop()
+////                    .subscribeOn(Schedulers.computation())
+////                    .doOnComplete { Log.d("Threading", " barcode ${Thread.currentThread().name}") }
+////                    .subscribe()
+//
+//                disposable.add(Flowable.fromCallable{command.run()}
+//                    .onBackpressureDrop()
+//                    .subscribeOn(Schedulers.computation())
+////                    .doOnComplete { Log.d("Threading", " barcode ${Thread.currentThread().name}") }
+//                    .subscribe())
+//
+//            }, BarcodeAnalyzer(it))
+//        }, BackpressureStrategy.DROP)
+//    }
 
     fun analyzeLRN(context: Context, lrn: String): Maybe<Student> {
-
         // Checks if LRN is valid
         if (lrn.length != 12) return Maybe.empty()
 
@@ -109,15 +151,17 @@ class ScanViewModel(lifecycleOwner: LifecycleOwner) {
 //    }
 
     fun getCurrentTime(): Date {
+
         return Calendar.getInstance().time
     }
 
-    fun getCurrentSection(context: Context): String {
+    private fun getCurrentSection(context: Context): String {
         return cacheSource.getUserCache(context)!!.section
     }
 
     fun getStudentDocumentReference(context: Context, lrn: String): DocumentReference =
         firestore.getDocumentReference(getCurrentSection(context), lrn)
+
 
     private inner class SnorlaxPermissionListener(private val fragment: Fragment, private val fromOnStart: Boolean) :
         BasePermissionListener() {

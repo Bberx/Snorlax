@@ -27,32 +27,30 @@ import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata
 import io.reactivex.FlowableEmitter
 
 
-class BarcodeAnalyzer(private val barcodeEmitter: FlowableEmitter<FirebaseVisionBarcode>) : ImageAnalysis.Analyzer {
+class BarcodeAnalyzer(private val barcodeEmitter: FlowableEmitter<FirebaseVisionBarcode>) :
+    ImageAnalysis.Analyzer {
+
+    private val options = FirebaseVisionBarcodeDetectorOptions.Builder()
+        .setBarcodeFormats(FirebaseVisionBarcode.FORMAT_CODE_39)
+        .build()
+
+    private val detector = FirebaseVision.getInstance().getVisionBarcodeDetector(options)
 
 
     override fun analyze(image: ImageProxy, rotationDegrees: Int) {
 
-            val options = FirebaseVisionBarcodeDetectorOptions.Builder()
-                .setBarcodeFormats(FirebaseVisionBarcode.FORMAT_CODE_39)
-                .build()
+        val barcodeImage =
+            FirebaseVisionImage.fromMediaImage(image.image!!, convertRotation(rotationDegrees))
 
-            val detector = FirebaseVision.getInstance().getVisionBarcodeDetector(options)
-
-            val barcodeImage =
-                FirebaseVisionImage.fromMediaImage(image.image!!, convertRotation(rotationDegrees))
-
-            detector.detectInImage(barcodeImage)
-                .addOnSuccessListener {
-                    for (barcode in it) {
-                        Log.d("BarcodeAnalysis", barcode.displayValue!!)
-                        barcodeEmitter.onNext(barcode)
-                    }
-                }.addOnFailureListener {
-                    barcodeEmitter.onError(it)
+        detector.detectInImage(barcodeImage)
+            .addOnSuccessListener {
+                for (barcode in it) {
+                    Log.d("BarcodeAnalysis", barcode.displayValue!!)
+                    barcodeEmitter.onNext(barcode)
                 }
-
-//            lastAnalyzedTimestamp = currentTimestamp
-//        }
+            }.addOnFailureListener {
+                barcodeEmitter.onError(it)
+            }
     }
 
     private fun convertRotation(degrees: Int): Int {

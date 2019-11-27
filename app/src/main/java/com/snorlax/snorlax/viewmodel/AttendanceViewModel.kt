@@ -16,23 +16,18 @@
 
 package com.snorlax.snorlax.viewmodel
 
-import android.content.Context
-import android.os.Parcel
+import android.app.Application
 import android.text.format.DateUtils
-import com.google.android.material.datepicker.CalendarConstraints
-import com.google.firebase.firestore.DocumentReference
+import androidx.lifecycle.AndroidViewModel
 import com.snorlax.snorlax.data.cache.LocalCacheSource
 import com.snorlax.snorlax.data.firebase.FirebaseFirestoreSource
-import com.snorlax.snorlax.model.Student
 import com.snorlax.snorlax.utils.countHowManyTime
 import com.snorlax.snorlax.utils.getTodayDate
 import com.snorlax.snorlax.utils.isNegative
-import io.reactivex.Single
-import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import java.util.*
 
-class AttendanceViewModel private constructor() {
+class AttendanceViewModel(application: Application) : AndroidViewModel(application) {
 
     // Initialize with current date
     private val currentCalendar = Calendar.getInstance()
@@ -43,55 +38,56 @@ class AttendanceViewModel private constructor() {
 
     val selectedTimeObservable = PublishSubject.create<Long>()
 
-    companion object {
-        private var instance: AttendanceViewModel? = null
-        fun getInstance() : AttendanceViewModel {
-            instance?.let { return it }
-            instance = AttendanceViewModel()
-            return getInstance()
-        }
-    }
+
+//    companion object {
+//        private var instance: AttendanceViewModel? = null
+//        fun getInstance() : AttendanceViewModel {
+//            instance?.let { return it }
+//            instance = AttendanceViewModel()
+//            return getInstance()
+//        }
+//    }
 
     // Only allow previous days
-    val bounds =
-        CalendarConstraints.Builder()
-            .setEnd(Calendar.getInstance().timeInMillis)
-            .setValidator(object : CalendarConstraints.DateValidator {
-                var date: Long = 0
-                override fun isValid(date: Long): Boolean {
-                    this.date = date
-                    return date <= Calendar.getInstance().timeInMillis
-                }
+//    val bounds =
+//        CalendarConstraints.Builder()
+//            .setEnd(Calendar.getInstance().timeInMillis)
+//            .setValidator(object : CalendarConstraints.DateValidator {
+//                var date: Long = 0
+//                override fun isValid(date: Long): Boolean {
+//                    this.date = date
+//                    return date <= Calendar.getInstance().timeInMillis
+//                }
+//
+//                override fun writeToParcel(dest: Parcel?, flags: Int) {
+//                    dest?.writeInt(if (date <= Calendar.getInstance().timeInMillis) 1 else 0)
+//                }
+//                override fun describeContents() = 0
+//            })
+//            .build()
 
-                override fun writeToParcel(dest: Parcel?, flags: Int) {
-                    dest?.writeInt(if (date <= Calendar.getInstance().timeInMillis) 1 else 0)
-                }
-                override fun describeContents() = 0
-            })
-            .build()
 
-
-
-//    fun getStudentFromLrn(context: Context, lrn: String) : Single<Student> {
+    //    fun getStudentFromLrn(context: Context, lrn: String) : Single<Student> {
 //        return cache.getUserCache(context).flatMap {admin ->
 //            firestore.getStudentByLrn(admin.section, lrn)
 //        }.toSingle()
 //    }
-fun getStudentDocumentReference(context: Context, lrn: String): DocumentReference =
-    firestore.getDocumentReference(getAdminSection(context), lrn)
+//    fun getStudentDocumentReference(context: Context, lrn: String): DocumentReference =
+//        firestore.getDocumentReference(getAdminSection(context), lrn)
 
 
-    fun getAttendance(context: Context, timestamp: Date) = firestore.getAttendanceQuery(getAdminSection(context), timestamp)
+    fun getAttendance(timestamp: Date) =
+        firestore.getAttendanceQuery(getAdminSection(), timestamp)
 
 
-    private fun getAdminSection(context: Context): String {
-        return cache.getUserCache(context)!!.section
+    private fun getAdminSection(): String {
+        return cache.getUserCache(getApplication())!!.section
     }
 
-    fun getStudentList(context: Context): Single<List<Student>> {
-        return firestore.getStudentList(getAdminSection(context))
-            .subscribeOn(Schedulers.io())
-    }
+//    fun getStudentList(context: Context): Single<List<Student>> {
+//        return firestore.getStudentList(getAdminSection(context))
+//            .subscribeOn(Schedulers.io())
+//    }
 
     fun getRelativeDateString(relative: Long): String {
         val relativeTime = getTodayDate().time - relative

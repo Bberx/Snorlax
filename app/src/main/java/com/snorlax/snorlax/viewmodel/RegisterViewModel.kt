@@ -17,6 +17,7 @@
 package com.snorlax.snorlax.viewmodel
 
 import android.content.Context
+import androidx.lifecycle.ViewModel
 import com.snorlax.snorlax.data.cache.LocalCacheSource
 import com.snorlax.snorlax.data.repositories.UserRepository
 import com.snorlax.snorlax.model.User
@@ -30,9 +31,9 @@ import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
 import java.util.*
 
-class RegisterViewModel(context: Context) {
+class RegisterViewModel : ViewModel() {
 
-    private val userRepository = UserRepository.getInstance(context)
+    private val userRepository = UserRepository.getInstance()
 
     private val localCacheSource: LocalCacheSource by lazy {
         LocalCacheSource.getInstance()
@@ -227,7 +228,7 @@ class RegisterViewModel(context: Context) {
         accType.trim().toLowerCase(Locale.ROOT)
     )
 
-    fun getCurrentUser(context: Context) = userRepository.currentUser(context)
+//    fun getCurrentUser(context: Context) = userRepository.currentUser(context)
 
     fun addUserToCache(context: Context, user: User) : Completable {
         return localCacheSource.addToCache(context, user)

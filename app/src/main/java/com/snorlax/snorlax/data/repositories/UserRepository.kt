@@ -29,7 +29,7 @@ import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 
-class UserRepository private constructor(context: Context) {
+class UserRepository private constructor() {
 
     //    companion object {
 //
@@ -44,7 +44,7 @@ class UserRepository private constructor(context: Context) {
 //        }
 //    }
     companion object {
-        fun getInstance(context: Context) = UserRepository(context)
+        fun getInstance() = UserRepository()
     }
 
 

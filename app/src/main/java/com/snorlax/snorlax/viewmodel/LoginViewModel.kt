@@ -18,6 +18,7 @@ package com.snorlax.snorlax.viewmodel
 
 
 import android.content.Context
+import androidx.lifecycle.ViewModel
 import com.snorlax.snorlax.data.cache.LocalCacheSource
 import com.snorlax.snorlax.data.firebase.FirebaseAuthSource
 import com.snorlax.snorlax.data.repositories.UserRepository
@@ -29,9 +30,9 @@ import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
 
-class LoginViewModel(context: Context) {
+class LoginViewModel : ViewModel() {
 
-    private val userRepository = UserRepository.getInstance(context)
+    private val userRepository = UserRepository.getInstance()
 
     private val firebaseAuth = FirebaseAuthSource.getInstance()
 

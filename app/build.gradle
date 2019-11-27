@@ -229,4 +229,13 @@ dependencies {
     // Custom tabs
     implementation 'androidx.browser:browser:1.0.0'
 
+    // Apache POI
+    implementation 'org.apache.poi:poi:4.1.1'
+
+    // Viewmodel
+    def lifecycle_version = "2.1.0"
+
+    // ViewModel and LiveData
+    implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
+
 }

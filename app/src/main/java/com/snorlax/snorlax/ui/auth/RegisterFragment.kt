@@ -22,6 +22,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.jakewharton.rxbinding3.view.clicks
@@ -50,10 +51,13 @@ import kotlinx.android.synthetic.main.fragment_register.view.*
  */
 class RegisterFragment : Fragment() {
 
-    private val viewModel: RegisterViewModel by lazy {
-        RegisterViewModel(context!!)
-    }
+    private lateinit var viewModel: RegisterViewModel
     private val disposables = CompositeDisposable()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewModel = ViewModelProviders.of(this)[RegisterViewModel::class.java]
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

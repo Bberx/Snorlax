@@ -18,11 +18,14 @@ package com.snorlax.snorlax.ui.home
 
 
 import android.os.Bundle
+import android.os.Parcel
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.utils.adapter.recyclerview.AttendanceAdaptor
@@ -40,7 +43,7 @@ import java.util.*
  */
 class AttendanceFragment : Fragment() {
 
-    private val viewModel = AttendanceViewModel.getInstance()
+    private lateinit var viewModel: AttendanceViewModel
 
     private val disposables = CompositeDisposable()
 
@@ -48,19 +51,44 @@ class AttendanceFragment : Fragment() {
 
     private val datePicker = MaterialDatePicker.Builder.datePicker()
         .setTitleText("Select which day…")
-        .setCalendarConstraints(viewModel.bounds)
+        .setCalendarConstraints(
+            CalendarConstraints.Builder()
+                .setEnd(Calendar.getInstance().timeInMillis)
+                .setValidator(object : CalendarConstraints.DateValidator {
+                    var date: Long = 0
+                    override fun isValid(date: Long): Boolean {
+                        this.date = date
+                        return date <= Calendar.getInstance().timeInMillis
+                    }
+
+                    override fun writeToParcel(dest: Parcel?, flags: Int) {
+                        dest?.writeInt(if (date <= Calendar.getInstance().timeInMillis) 1 else 0)
+                    }
+
+                    override fun describeContents() = 0
+                })
+                .build()
+        )
         .setTheme(R.style.ThemeOverlay_MaterialComponents_MaterialCalendar)
         .build()
 
 
 //    private val adapter = AttendanceAdaptor(this, SortedList(Attendance::class.java, callback))
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewModel = activity?.run {
+            ViewModelProviders.of(this)[AttendanceViewModel::class.java]
+        } ?: throw Exception("Invalid Activity")
+
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
 
+        // Inflate the layout for this fragment
         val rootView = inflater.inflate(R.layout.fragment_attendance, container, false)
 
         rootView.picker_container.setOnClickListener { showDatePickerDialog() }
@@ -85,11 +113,13 @@ class AttendanceFragment : Fragment() {
 
 
         val firebase = viewModel.selectedTimeObservable
-            .flatMap { viewModel.getAttendance(context!!, Date(it)) }
+            .flatMap { viewModel.getAttendance(Date(it)) }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { (attendance_list.adapter as AttendanceAdaptor).updateData(it) }
 
         disposables.addAll(firebase, relativeTime)
+
+
 
         return rootView
 

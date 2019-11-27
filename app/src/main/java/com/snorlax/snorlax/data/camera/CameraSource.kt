@@ -161,7 +161,7 @@ class CameraSource(lifecycleOwner: LifecycleOwner): LifecycleObserver {
 //    }
 
     companion object {
-        val analyzerConfig = ImageAnalysisConfig.Builder().apply {
+        private val analyzerConfig = ImageAnalysisConfig.Builder().apply {
 
             // In our analysis, we care more about the latest image than
             // analyzing *every* image

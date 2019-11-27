@@ -18,6 +18,7 @@ package com.snorlax.snorlax.viewmodel
 
 import android.content.Context
 import android.net.Uri
+import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.snorlax.snorlax.data.repositories.UserRepository
 import com.snorlax.snorlax.model.User
@@ -27,9 +28,9 @@ import io.reactivex.Completable
 import io.reactivex.disposables.CompositeDisposable
 import java.util.*
 
-class HomeActivityViewModel(context: Context) {
+class HomeActivityViewModel : ViewModel() {
 
-    private val userRepository: UserRepository by lazy { UserRepository.getInstance(context) }
+    private val userRepository: UserRepository by lazy { UserRepository.getInstance() }
 
     private val firebaseAuth: FirebaseAuth by lazy {
         FirebaseAuth.getInstance()

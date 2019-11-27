@@ -24,6 +24,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.commit
+import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.utils.exitApp
@@ -49,10 +50,13 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var drawerToggle: ActionBarDrawerToggle
 
 
-    private val homeActivityViewModel by lazy { HomeActivityViewModel(this) }
+    private lateinit var viewModel: HomeActivityViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        viewModel = ViewModelProviders.of(this)[HomeActivityViewModel::class.java]
+
         setContentView(R.layout.activity_home)
         setSupportActionBar(toolbar)
         drawerToggle = ActionBarDrawerToggle(
@@ -138,16 +142,18 @@ class HomeActivity : AppCompatActivity() {
 
 
         initObservables()
+
     }
 
     private fun initObservables() {
-        homeActivityViewModel.disposables.add(homeActivityViewModel.getUser(this)
+        viewModel.disposables.add(
+            viewModel.getUser(applicationContext)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe {
                 emailTextView.text = it.email
                 GlideApp.with(this)
-                    .load(homeActivityViewModel.getUserPhoto())
+                    .load(viewModel.getUserPhoto())
                     .placeholder(R.drawable.default_avatar)
 //                    .transition(DrawableTransitionOptions().crossFade())
 //                    .apply(RequestOptions().placeholder(R.drawable.default_avatar))
@@ -155,7 +161,7 @@ class HomeActivity : AppCompatActivity() {
 //                userIcon.setImageResource(R.mipmap.ic_launcher)
                 labelEmail.text = it.email
                 labelName.text = it.displayName
-                labelRole.text = homeActivityViewModel.getRole(it)
+                labelRole.text = viewModel.getRole(it)
             })
 
 //        btn_logout.clicks().subscribe(homeActivityViewModel.logoutObservable)
@@ -163,7 +169,7 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        homeActivityViewModel.clearDisposables()
+        viewModel.clearDisposables()
     }
 
     override fun onBackPressed() {
@@ -185,7 +191,7 @@ class HomeActivity : AppCompatActivity() {
             ) { dialog, _ ->
                                 setDialog(true)
 //                setProgressDialog()
-                homeActivityViewModel.logout()
+                viewModel.logout()
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe {

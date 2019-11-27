@@ -27,24 +27,29 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.camera.core.CameraX
-import androidx.camera.core.FlashMode
+import androidx.camera.core.*
 import androidx.camera.view.CameraView
 import androidx.core.content.getSystemService
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Timestamp
+import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode
 import com.snorlax.snorlax.R
+import com.snorlax.snorlax.data.barcode.BarcodeAnalyzer
 import com.snorlax.snorlax.model.Attendance
 import com.snorlax.snorlax.utils.adapter.recyclerview.StudentScannerAdaptor
 import com.snorlax.snorlax.viewmodel.ScanViewModel
+import io.reactivex.BackpressureStrategy
+import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.camera_placeholder.view.*
 import kotlinx.android.synthetic.main.fragment_scan.view.*
 import java.util.*
+import java.util.concurrent.Executor
 
 
 /**
@@ -52,9 +57,7 @@ import java.util.*
  */
 class ScanFragment : Fragment() {
 
-    private val viewModel: ScanViewModel by lazy {
-        ScanViewModel(this)
-    }
+    private lateinit var viewModel: ScanViewModel
 
     private val studentScannerAdaptor: StudentScannerAdaptor by lazy {
         StudentScannerAdaptor()
@@ -70,6 +73,13 @@ class ScanFragment : Fragment() {
         context!!.getSystemService<Vibrator>()!!
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewModel = activity?.run {
+            ViewModelProviders.of(this)[ScanViewModel::class.java]
+        } ?: throw Exception("Invalid Activity")
+
+    }
 
     private val disposables = CompositeDisposable()
 
@@ -95,6 +105,16 @@ class ScanFragment : Fragment() {
             this.setBackgroundResource(0)
         }, 0)
 
+        val analyzerConfig = ImageAnalysisConfig.Builder().apply {
+
+            // In our analysis, we care more about the latest image than
+            // analyzing *every* image
+            setImageReaderMode(ImageAnalysis.ImageReaderMode.ACQUIRE_LATEST_IMAGE)
+            setTargetAspectRatio(AspectRatio.RATIO_4_3)
+
+//            setTargetResolution(Size(1920, 1080))
+        }.build()
+        val barcodeAnalyzer = ImageAnalysis(analyzerConfig)
 
         // fixme remove me
 //        rootView.debug_save.setOnClickListener {
@@ -106,7 +126,11 @@ class ScanFragment : Fragment() {
 //            .observeOn(AndroidSchedulers.mainThread())
             .doAfterNext {
                 if (it) {
-                    viewModel.startCamera(this)
+                    if (CameraX.isBound(barcodeAnalyzer)) {
+                        CameraX.unbind(barcodeAnalyzer)
+                        CameraX.bindToLifecycle(this, barcodeAnalyzer)
+                    } else CameraX.bindToLifecycle(this, barcodeAnalyzer)
+//                    viewModel.startCamera(this)
                     testView.bindToLifecycle(this)
                 } else {
                     CameraX.unbindAll()
@@ -173,7 +197,28 @@ class ScanFragment : Fragment() {
         // TODO conflicts MVVM
 
         val barcode =
-            viewModel.getBarcode()
+//            viewModel.getBarcode()
+            Flowable.create<FirebaseVisionBarcode>({
+                barcodeAnalyzer.setAnalyzer(Executor { command ->
+                    // Use a worker thread for image analysis to prevent glitches
+//                    val analyzerThread = HandlerThread("BarcodeAnalyzer")
+//                Handler(analyzerThread.looper).apply { post(command) }
+//                Completable
+//                    .fromRunnable(command)
+//                    .toFlowable<Unit>()
+//                    .onBackpressureDrop()
+//                    .subscribeOn(Schedulers.computation())
+//                    .doOnComplete { Log.d("Threading", " barcode ${Thread.currentThread().name}") }
+//                    .subscribe()
+
+                    disposables.add(Flowable.fromCallable { command.run() }
+                        .onBackpressureDrop()
+                        .subscribeOn(Schedulers.computation())
+//                    .doOnComplete { Log.d("Threading", " barcode ${Thread.currentThread().name}") }
+                        .subscribe())
+
+                }, BarcodeAnalyzer(it))
+            }, BackpressureStrategy.DROP)
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .flatMapMaybe { viewModel.analyzeLRN(context!!, it.displayValue!!) }
                 .map { student ->
