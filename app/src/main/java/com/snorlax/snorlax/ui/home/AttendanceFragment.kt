@@ -101,7 +101,9 @@ class AttendanceFragment : Fragment() {
     }
 
     private fun showDatePickerDialog() {
-        datePicker.show(activity!!.supportFragmentManager, "DatePicker")
+        if (!datePicker.isVisible) {
+            datePicker.showNow(activity!!.supportFragmentManager, "DatePicker")
+        }
     }
 
     override fun onDestroy() {
