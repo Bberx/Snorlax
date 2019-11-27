@@ -16,7 +16,6 @@
 
 package com.snorlax.snorlax.utils.adapter.recyclerview
 
-import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
@@ -31,7 +30,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 
-class StudentScannerAdaptor(private val context: Context) :
+class StudentScannerAdaptor :
     RecyclerView.Adapter<StudentScannerAdaptor.StudentHolder>() {
 
     val studentList: ArrayList<Pair<Student, Long>> = ArrayList()

@@ -57,7 +57,7 @@ class ScanFragment : Fragment() {
     }
 
     private val studentScannerAdaptor: StudentScannerAdaptor by lazy {
-        StudentScannerAdaptor(context!!)
+        StudentScannerAdaptor()
     }
 
 //    private lateinit var cameraPlaceholderView: View
