@@ -16,6 +16,8 @@
 
 package com.snorlax.snorlax.model
 
+import java.util.*
+
 data class Student(
     val name: Map<String, String> = mapOf(FIRST_NAME_VAL to "", LAST_NAME_VAL to ""),
     val lrn: String = "",
@@ -25,4 +27,11 @@ data class Student(
         const val FIRST_NAME_VAL = "first"
         const val LAST_NAME_VAL = "last"
     }
+
+    val displayName =
+        "${name.getValue("last").toUpperCase(Locale.getDefault())}, ${name.getValue("first")}"
+
+//    fun getDisplayName() : String {
+//        return "${name.getValue("last").toUpperCase(Locale.getDefault())}, ${name.getValue("first")}"
+//    }
 }

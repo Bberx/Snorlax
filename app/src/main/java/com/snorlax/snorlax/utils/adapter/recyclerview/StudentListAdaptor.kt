@@ -32,7 +32,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.model.Student
-import com.snorlax.snorlax.utils.getDisplayName
 import com.snorlax.snorlax.utils.glide.GlideApp
 import com.snorlax.snorlax.utils.inflate
 import com.snorlax.snorlax.viewmodel.StudentsViewModel
@@ -69,7 +68,7 @@ class StudentListAdaptor(
 
         viewBinderHelper.bind(holder.swipeRevealLayout, model.lrn)
 
-        holder.displayName.text = model.getDisplayName()
+        holder.displayName.text = model.displayName
         holder.lrn.text = model.lrn
         GlideApp.with(activity)
             .load(R.drawable.default_avatar)  // TODO load from storage

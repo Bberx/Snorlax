@@ -86,8 +86,8 @@ class AttendanceAdaptor : RecyclerView.Adapter<AttendanceAdaptor.AttendanceHolde
 
             holder.studentTimeIn.text = clockFormat.format(currentAttendance.time_in.toDate())
             holder.studentLrn.text = student.lrn
-            holder.studentName.text =
-                "${student.name.getValue("first")} ${student.name.getValue("last")}"
+            holder.studentName.text = student.displayName
+//                "${student.name.getValue("last").toUpperCase(Locale.getDefault())}, ${student.name.getValue("first")}"
             GlideApp.with(holder.studentLogo)
                 .load(R.drawable.default_avatar)
                 .into(holder.studentLogo)

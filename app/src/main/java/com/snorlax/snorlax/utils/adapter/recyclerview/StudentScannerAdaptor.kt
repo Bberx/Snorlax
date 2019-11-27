@@ -23,7 +23,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.model.Student
-import com.snorlax.snorlax.utils.getDisplayName
 import com.snorlax.snorlax.utils.inflate
 import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.android.synthetic.main.item_student_scan.view.*
@@ -50,7 +49,7 @@ class StudentScannerAdaptor(private val context: Context) :
 
     override fun onBindViewHolder(holder: StudentHolder, position: Int) {
         val currentStudent = studentList[position]
-        holder.displayName.text = currentStudent.first.getDisplayName()
+        holder.displayName.text = currentStudent.first.displayName
         holder.lrn.text = currentStudent.first.lrn
         holder.timeIn.text = clockFormat.format(currentStudent.second)
         holder.image.setImageResource(R.mipmap.ic_launcher)

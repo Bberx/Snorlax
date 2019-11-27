@@ -16,12 +16,7 @@
 
 package com.snorlax.snorlax.utils
 
-import com.snorlax.snorlax.model.Student
 import java.util.*
-
-fun Student.getDisplayName() : String {
-    return "${this.name["first"]} ${this.name["last"]}"
-}
 
 fun String.capitalize(locale: Locale): String {
     if (isNotEmpty()) {
