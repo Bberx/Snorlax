@@ -28,8 +28,10 @@ data class Student(
         const val LAST_NAME_VAL = "last"
     }
 
-    val displayName =
-        "${name.getValue("last").toUpperCase(Locale.getDefault())}, ${name.getValue("first")}"
+    val displayName: String
+        get() = "${name.getValue(LAST_NAME_VAL).toUpperCase(Locale.getDefault())}, ${name.getValue(
+            FIRST_NAME_VAL
+        )}"
 
 //    fun getDisplayName() : String {
 //        return "${name.getValue("last").toUpperCase(Locale.getDefault())}, ${name.getValue("first")}"
