@@ -75,6 +75,9 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
 //    fun getStudentDocumentReference(context: Context, lrn: String): DocumentReference =
 //        firestore.getDocumentReference(getAdminSection(context), lrn)
 
+    fun exportAttendance() {
+
+    }
 
     fun getAttendance(timestamp: Date) =
         firestore.getAttendanceQuery(getAdminSection(), timestamp)

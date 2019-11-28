@@ -39,18 +39,20 @@ class BarcodeAnalyzer(private val barcodeEmitter: FlowableEmitter<FirebaseVision
 
     override fun analyze(image: ImageProxy, rotationDegrees: Int) {
 
-        val barcodeImage =
-            FirebaseVisionImage.fromMediaImage(image.image!!, convertRotation(rotationDegrees))
+        image.image?.let { frame ->
+            val barcodeImage =
+                FirebaseVisionImage.fromMediaImage(frame, convertRotation(rotationDegrees))
 
-        detector.detectInImage(barcodeImage)
-            .addOnSuccessListener {
-                for (barcode in it) {
-                    Log.d("BarcodeAnalysis", barcode.displayValue!!)
-                    barcodeEmitter.onNext(barcode)
+            detector.detectInImage(barcodeImage)
+                .addOnSuccessListener {
+                    for (barcode in it) {
+                        Log.d("BarcodeAnalysis", barcode.displayValue!!)
+                        barcodeEmitter.onNext(barcode)
+                    }
+                }.addOnFailureListener {
+                    barcodeEmitter.onError(it)
                 }
-            }.addOnFailureListener {
-                barcodeEmitter.onError(it)
-            }
+        }
     }
 
     private fun convertRotation(degrees: Int): Int {

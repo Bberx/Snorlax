@@ -114,7 +114,7 @@ android {
         debug {
             debuggable true
             firebaseAppDistribution {
-                releaseNotes = "Debug build ${mVersionName}\nAdd chrome custom tabs for smoother browsing experience"
+                releaseNotes = "Debug build ${mVersionName}\nMultiple changes:\nChange name format\nFix crash when double clicking date picker\netc. check github commit"
                 groups = "researchers, developer"
             }
         }
@@ -231,6 +231,7 @@ dependencies {
 
     // Apache POI
     implementation 'org.apache.poi:poi:4.1.1'
+    implementation 'org.apache.poi:poi-ooxml:4.1.1'
 
     // Viewmodel
     def lifecycle_version = "2.1.0"

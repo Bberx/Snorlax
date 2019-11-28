@@ -98,6 +98,11 @@ class AttendanceFragment : Fragment() {
             viewModel.selectedTimeObservable.onNext(it)
         }
 
+
+        rootView.btn_export.setOnClickListener {
+            viewModel.exportAttendance()
+        }
+
         rootView.attendance_list.adapter = AttendanceAdaptor()
 
         rootView.label_relative_time.text = viewModel.getRelativeDateString(getTodayDate().time)

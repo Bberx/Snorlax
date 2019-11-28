@@ -16,14 +16,15 @@
 
 package com.snorlax.snorlax.viewmodel
 
-import android.content.Context
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import com.snorlax.snorlax.data.cache.LocalCacheSource
 import com.snorlax.snorlax.data.firebase.FirebaseFirestoreSource
 import com.snorlax.snorlax.model.Student
 import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
 
-class StudentsViewModel {
+class StudentsViewModel(application: Application) : AndroidViewModel(application) {
 
 //    companion object {
 //        private var instance: StudentsViewModel? = null
@@ -43,23 +44,23 @@ class StudentsViewModel {
 
     val students = mutableListOf<Student>()
 
-    fun addStudent(context: Context, student: Student): Completable {
-        return firestore.addStudent(getCurrentSection(context), student)
+    fun addStudent(student: Student): Completable {
+        return firestore.addStudent(getCurrentSection(), student)
     }
 
-    fun getStudents(context: Context) = firestore.getStudentList(getCurrentSection(context)).subscribeOn(Schedulers.io())
+    fun getStudents() = firestore.getStudentList(getCurrentSection()).subscribeOn(Schedulers.io())
 
-    fun getStudentQuery(context: Context) = firestore.getStudentQuery(getCurrentSection(context))
+    fun getStudentQuery() = firestore.getStudentQuery(getCurrentSection())
 
-    fun getCurrentSection(context: Context) : String {
-        return localCacheSource.getUserCache(context)!!.section
+    fun getCurrentSection(): String {
+        return localCacheSource.getUserCache(getApplication())!!.section
     }
 
-    fun deleteStudent(context: Context, student: Student): Completable {
-        return firestore.deleteStudent(getCurrentSection(context), student)
+    fun deleteStudent(student: Student): Completable {
+        return firestore.deleteStudent(getCurrentSection(), student)
     }
 
-    fun canAddStudent(context: Context): Boolean {
-        return (localCacheSource.getUserCache(context)!!.accType.equals("teacher", true))
+    fun canAddStudent(): Boolean {
+        return (localCacheSource.getUserCache(getApplication())!!.accType.equals("teacher", true))
     }
 }

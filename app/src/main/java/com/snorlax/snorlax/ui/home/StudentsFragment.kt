@@ -24,6 +24,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -31,7 +32,10 @@ import com.google.android.material.snackbar.Snackbar
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.model.Student
 import com.snorlax.snorlax.utils.adapter.recyclerview.StudentListAdaptor
+import com.snorlax.snorlax.utils.callback.StudentActionListener
 import com.snorlax.snorlax.viewmodel.StudentsViewModel
+import io.reactivex.Completable
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.diag_add_student.*
@@ -41,14 +45,19 @@ import kotlinx.android.synthetic.main.fragment_students.*
 /**
  * A simple [Fragment] subclass.
  */
-class StudentsFragment : Fragment() {
+class StudentsFragment : Fragment(), StudentActionListener {
 
     // TODO get section of current user
 
-    private val studentsViewModel = StudentsViewModel()
+    private lateinit var viewModel: StudentsViewModel
 
     private val disposables = CompositeDisposable()
 
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewModel = ViewModelProviders.of(this)[StudentsViewModel::class.java]
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -66,7 +75,7 @@ class StudentsFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
 
 
-        if (studentsViewModel.canAddStudent(context!!)) {
+        if (viewModel.canAddStudent()) {
             btn_add_student.setOnClickListener {
                 showAddStudentDialog()
             }
@@ -78,7 +87,7 @@ class StudentsFragment : Fragment() {
 
 
         disposables.add(
-            studentsViewModel.getStudentQuery(context!!)
+            viewModel.getStudentQuery()
                 .subscribeOn(Schedulers.io())
                 .subscribe({
                     val recyclerOptions: FirestoreRecyclerOptions<Student> =
@@ -90,13 +99,108 @@ class StudentsFragment : Fragment() {
                     students_list.layoutManager = LinearLayoutManager(context!!)
                     students_list.adapter = StudentListAdaptor(
                         activity!!,
-                        !studentsViewModel.canAddStudent(context!!),
-                        recyclerOptions
+                        !viewModel.canAddStudent(),
+                        recyclerOptions,
+                        this
                     )
                 }, {
                     Toast.makeText(context!!, it.localizedMessage, Toast.LENGTH_LONG).show()
                 })
         )
+    }
+
+    override fun deleteStudent(student: Student) {
+        MaterialAlertDialogBuilder(activity)
+            .setTitle("Delete student")
+            .setIcon(R.drawable.ic_delete)
+            .setMessage("Are you sure you want to delete <b>${student.name["first"]} ${student.name["last"]}</b>? This action is irreversible. Retype your password to continue")
+            .setPositiveButton(android.R.string.yes) { _, _ ->
+                viewModel.deleteStudent(student)
+                    .subscribeOn(Schedulers.io())
+                    .subscribe({
+                        Snackbar.make(
+                            view!!,
+                            "Student deleted",
+                            Snackbar.LENGTH_SHORT
+                        )
+                            .show()
+                    }, {
+                        Snackbar.make(
+                            view!!,
+                            it.localizedMessage!!,
+                            Snackbar.LENGTH_SHORT
+                        )
+                            .show()
+                    })
+            }
+            .setNegativeButton(android.R.string.no, null)
+            .show()
+    }
+
+    override fun editStudent(
+        position: Int,
+        student: Student,
+        options: FirestoreRecyclerOptions<Student>
+    ) {
+        val alertDialog = MaterialAlertDialogBuilder(
+            activity,
+            R.style.ThemeOverlay_MaterialComponents_MaterialAlertDialog_Centered
+        )
+            .setTitle("Edit student")
+            .setIcon(R.drawable.ic_edit)
+            .setView(R.layout.diag_add_student)
+            .setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
+
+                val alert = (dialogInterface as AlertDialog)
+
+                if (alert.input_first_name.text!!.isNotEmpty() &&
+                    alert.input_last_name.text!!.isNotEmpty() /*&&
+                    alert.input_lrn.text!!.isNotEmpty()*/
+                ) {
+                    Completable.create { emitter ->
+                        options.snapshots.getSnapshot(position).reference.set(
+                            Student(
+                                mapOf(
+                                    "first" to alert.input_first_name.text.toString().trim(),
+                                    "last" to alert.input_last_name.text.toString().trim()
+                                ), alert.input_lrn.text.toString().trim()
+                            )
+                        ).addOnSuccessListener {
+                            emitter.onComplete()
+                        }.addOnFailureListener {
+                            emitter.onError(it)
+                        }
+                    }
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe({
+                            Snackbar.make(
+                                view!!,
+                                "Student edited",
+                                Snackbar.LENGTH_SHORT
+                            )
+                                .show()
+                        }, {
+                            Snackbar.make(
+                                view!!,
+                                it.localizedMessage!!,
+                                Snackbar.LENGTH_SHORT
+                            ).show()
+                        })
+                }
+
+            }
+            .setNegativeButton(android.R.string.no, null)
+            .create()
+
+        alertDialog.show()
+        alertDialog.input_first_name.setText(student.name["first"])
+        alertDialog.input_last_name.setText(student.name["last"])
+        alertDialog.input_lrn.setText(student.lrn)
+        alertDialog.input_lrn.isEnabled = false
+        alertDialog.text_layout_lrn.isEnabled = false
+
+
     }
 
     private fun showAddStudentDialog() {
@@ -114,7 +218,7 @@ class StudentsFragment : Fragment() {
                         Toast.makeText(activity, "Please enter a valid LRN", Toast.LENGTH_LONG)
                             .show()
                     } else {
-                        studentsViewModel.addStudent(context,
+                        viewModel.addStudent(
                             Student(
                                 mapOf(
                                     "first" to alertDialog.input_first_name.text.toString().trim(),

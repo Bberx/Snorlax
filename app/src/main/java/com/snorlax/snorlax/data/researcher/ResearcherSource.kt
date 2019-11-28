@@ -68,7 +68,7 @@ object ResearcherSource {
         Researcher(
             "Trisha Kryzyl E. Madriaga",
             "Researcher",
-            null,
+            "I like warm hugs",
             firebaseStorage.child("trisha.jpg"),
             listOf(
                 SocialMedia(EMAIL, "trshxkryzyl.ie@gmail.com"),
@@ -77,9 +77,9 @@ object ResearcherSource {
             )
         ),
         Researcher(
-            "Abegail Borces",
+            "Abegail D. Borces",
             "Researcher",
-            null,
+            "Life is short. If you fail then learn, stand and move on",
             firebaseStorage.child("abegail.jpg"),
             listOf(
                 SocialMedia(EMAIL, "borces.abegail.d@gmail.com"),
@@ -98,6 +98,18 @@ object ResearcherSource {
                 SocialMedia(FACEBOOK, "100003596902195"),
                 SocialMedia(TWITTER, "hiimsabss"),
                 SocialMedia(INSTAGRAM, "siobelaaaaa")
+            )
+        ),
+        Researcher(
+            "Daniela Julia L. Ranara",
+            "Researcher",
+            "Sic Parvis Magna: Greatness from small beginnings",
+            firebaseStorage.child("daniela.jpg"),
+            listOf(
+                SocialMedia(EMAIL, "juliaranara08@gmail.com"),
+                SocialMedia(FACEBOOK, "100001495348080"),
+                SocialMedia(TWITTER, "danielairvx"),
+                SocialMedia(INSTAGRAM, "danielantcx")
             )
         )
     )

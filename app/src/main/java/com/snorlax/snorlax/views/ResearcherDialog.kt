@@ -16,12 +16,12 @@
 
 package com.snorlax.snorlax.views
 
-import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.snorlax.snorlax.R
@@ -31,13 +31,11 @@ import com.snorlax.snorlax.utils.glide.GlideApp
 import kotlinx.android.synthetic.main.diag_researcher_layout.*
 
 
-class ResearcherDialog(context: Context, private val researcher: Researcher) : Dialog(context) {
+class ResearcherDialog(context: Context, private val researcher: Researcher) :
+    AlertDialog(context) {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
-
-
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         setContentView(R.layout.diag_researcher_layout)
 
@@ -62,6 +60,6 @@ class ResearcherDialog(context: Context, private val researcher: Researcher) : D
 //        buttonRecycler.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         buttonRecycler.adapter = PlatformButtonAdaptor(researcher.socialMedia)
 
-        window!!.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
     }
 }
