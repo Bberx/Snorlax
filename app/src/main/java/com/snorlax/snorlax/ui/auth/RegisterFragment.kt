@@ -30,12 +30,12 @@ import com.jakewharton.rxbinding3.widget.textChanges
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.utils.Constants.ACCOUNT_TYPES
 import com.snorlax.snorlax.utils.Constants.SECTION_LIST
-import com.snorlax.snorlax.utils.getErrorMessage
-import com.snorlax.snorlax.utils.getMessageItem
 import com.snorlax.snorlax.utils.startHomeActivity
 import com.snorlax.snorlax.utils.validator.FormResult
 import com.snorlax.snorlax.utils.validator.FormResult.Message.Item.*
 import com.snorlax.snorlax.utils.validator.FormValidator
+import com.snorlax.snorlax.utils.validator.getErrorMessage
+import com.snorlax.snorlax.utils.validator.getMessageItem
 import com.snorlax.snorlax.viewmodel.RegisterViewModel
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers

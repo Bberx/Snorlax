@@ -27,6 +27,7 @@ class StorageSource private constructor() {
 
     private val firestoreStorage = FirebaseStorage.getInstance().reference
 
-    val defaultAvatarURL = Uri.parse("https://firebasestorage.googleapis.com/v0/b/attendance-scanner-snorlax.appspot.com/o/users%2Fdefault%2Fdefault_avatar.jpg?alt=media&token=5002a14e-6efb-4f74-bd5b-e5e7ef022666")
+    val defaultAvatarURL: Uri =
+        Uri.parse("https://firebasestorage.googleapis.com/v0/b/attendance-scanner-snorlax.appspot.com/o/users%2Fdefault%2Fdefault_avatar.jpg?alt=media&token=5002a14e-6efb-4f74-bd5b-e5e7ef022666")
 
 }

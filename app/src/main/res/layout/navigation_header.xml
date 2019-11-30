@@ -29,8 +29,8 @@
         android:id="@+id/ic_user"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:src="@drawable/default_avatar"
-        tools:src="@drawable/default_avatar"
+        android:src="@drawable/img_avatar"
+        tools:src="@drawable/img_avatar"
         android:elevation="4dp"/>
 
     <TextView

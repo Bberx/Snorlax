@@ -19,6 +19,7 @@ package com.snorlax.snorlax.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.snorlax.snorlax.data.cache.LocalCacheSource
+import com.snorlax.snorlax.data.firebase.FirebaseAuthSource
 import com.snorlax.snorlax.data.firebase.FirebaseFirestoreSource
 import com.snorlax.snorlax.model.Student
 import io.reactivex.Completable
@@ -38,6 +39,8 @@ class StudentsViewModel(application: Application) : AndroidViewModel(application
 //        }
 //    }
 
+    private val firebaseAuthSource = FirebaseAuthSource.getInstance()
+
     private val localCacheSource = LocalCacheSource.getInstance()
 
     private val firestore = FirebaseFirestoreSource.getInstance()
@@ -46,6 +49,10 @@ class StudentsViewModel(application: Application) : AndroidViewModel(application
 
     fun addStudent(student: Student): Completable {
         return firestore.addStudent(getCurrentSection(), student)
+    }
+
+    fun reauth(password: String): Completable {
+        return firebaseAuthSource.reauth(password)
     }
 
     fun getStudents() = firestore.getStudentList(getCurrentSection()).subscribeOn(Schedulers.io())

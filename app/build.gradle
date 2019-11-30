@@ -86,6 +86,7 @@ android {
             applicationId "com.snorlax.snorlax" // 3: change to your package name
             versionCode versionProps['VERSION_NUMBER'].toInteger()
             versionName "${mVersionName}"
+            multiDexEnabled = true
         }
 
     } else {
@@ -114,7 +115,7 @@ android {
         debug {
             debuggable true
             firebaseAppDistribution {
-                releaseNotes = "Debug build ${mVersionName}\nMultiple changes:\nChange name format\nFix crash when double clicking date picker\netc. check github commit"
+                releaseNotes = "Debug build ${mVersionName}\nAdd hard student delete verification\nFix a bug where you can add student with a non-numeric lrn"
                 groups = "researchers, developer"
             }
         }
@@ -134,8 +135,8 @@ android {
 
 
     compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
     }
 
     kotlinOptions {
@@ -230,8 +231,8 @@ dependencies {
     implementation 'androidx.browser:browser:1.0.0'
 
     // Apache POI
-    implementation 'org.apache.poi:poi:4.1.1'
-    implementation 'org.apache.poi:poi-ooxml:4.1.1'
+    implementation 'org.apache.poi:poi:4.0.1'
+    implementation 'org.apache.poi:poi-ooxml:4.0.1'
 
     // Viewmodel
     def lifecycle_version = "2.1.0"

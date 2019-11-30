@@ -23,7 +23,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.snorlax.snorlax.data.repositories.UserRepository
 import com.snorlax.snorlax.model.User
 import com.snorlax.snorlax.utils.Constants.SECTION_LIST
-import com.snorlax.snorlax.utils.capitalize
+import com.snorlax.snorlax.utils.caps
 import io.reactivex.Completable
 import io.reactivex.disposables.CompositeDisposable
 import java.util.*
@@ -68,7 +68,7 @@ class HomeActivityViewModel : ViewModel() {
         val section = SECTION_LIST.getValue(user.section)
         builder.append("${section.grade_level}-${section.display_name} ")
 
-        builder.append("(${user.accType.capitalize(Locale.getDefault())})")
+        builder.append("(${user.accType.caps(Locale.getDefault())})")
 
         return builder.toString()
     }

@@ -82,7 +82,6 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
     fun getAttendance(timestamp: Date) =
         firestore.getAttendanceQuery(getAdminSection(), timestamp)
 
-
     private fun getAdminSection(): String {
         return cache.getUserCache(getApplication())!!.section
     }

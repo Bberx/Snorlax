@@ -212,8 +212,8 @@ class ScanFragment : Fragment() {
 //                    .subscribe()
 
                     disposables.add(Flowable.fromCallable { command.run() }
-                        .onBackpressureDrop()
                         .subscribeOn(Schedulers.computation())
+                        .onBackpressureDrop()
 //                    .doOnComplete { Log.d("Threading", " barcode ${Thread.currentThread().name}") }
                         .subscribe())
 
@@ -279,8 +279,8 @@ class ScanFragment : Fragment() {
 
     override fun onDestroy() {
 
-        super.onDestroy()
         disposables.dispose()
+        super.onDestroy()
     }
 
     override fun onStart() {

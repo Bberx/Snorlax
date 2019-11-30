@@ -16,6 +16,7 @@
 
 package com.snorlax.snorlax.data.firebase
 
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import io.reactivex.Completable
@@ -41,6 +42,20 @@ class FirebaseAuthSource private constructor() {
                 .addOnFailureListener { emitter.onError(it) }
         }
 
+    }
+
+    fun reauth(password: String): Completable {
+        return Completable.create { emitter ->
+            mAuth.currentUser?.let { user ->
+                val credential = EmailAuthProvider.getCredential(user.email!!, password)
+                user.reauthenticate(credential)
+                    .addOnSuccessListener { emitter.onComplete() }
+                    .addOnFailureListener { emitter.onError(it) }
+            } ?: run {
+                emitter.onError(Throwable("There is currently no logged in user"))
+            }
+
+        }
     }
 
     fun login(email: String, password: String): Single<FirebaseUser> =

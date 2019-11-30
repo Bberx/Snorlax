@@ -60,7 +60,7 @@ class StudentListAdaptor(
         holder.displayName.text = model.displayName
         holder.lrn.text = model.lrn
         GlideApp.with(activity)
-            .load(R.drawable.default_avatar)  // TODO load from storage
+            .load(R.drawable.img_avatar)  // TODO load from storage
             .into(holder.image)
         holder.swipeRevealLayout.setLockDrag(lock)
 

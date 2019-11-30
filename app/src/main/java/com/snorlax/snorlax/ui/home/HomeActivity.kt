@@ -27,6 +27,7 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.snorlax.snorlax.R
+import com.snorlax.snorlax.ui.home.attendance.AttendanceFragment
 import com.snorlax.snorlax.utils.exitApp
 import com.snorlax.snorlax.utils.glide.GlideApp
 import com.snorlax.snorlax.utils.startLoginActivity
@@ -102,7 +103,10 @@ class HomeActivity : AppCompatActivity() {
 //                        AttendanceFragment()
 //                    ).commit()
                     supportFragmentManager.commit {
-                        replace(R.id.fragment_container, AttendanceFragment())
+                        replace(
+                            R.id.fragment_container,
+                            AttendanceFragment()
+                        )
                     }
                 }
 
@@ -154,7 +158,7 @@ class HomeActivity : AppCompatActivity() {
                 emailTextView.text = it.email
                 GlideApp.with(this)
                     .load(viewModel.getUserPhoto())
-                    .placeholder(R.drawable.default_avatar)
+                    .placeholder(R.drawable.img_avatar)
 //                    .transition(DrawableTransitionOptions().crossFade())
 //                    .apply(RequestOptions().placeholder(R.drawable.default_avatar))
                     .into(userIcon)

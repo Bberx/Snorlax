@@ -18,7 +18,6 @@ package com.snorlax.snorlax.utils
 
 import java.util.*
 
-
 fun Long.isNegative(): Boolean {
     return (this < 0L)
 }
@@ -32,13 +31,13 @@ fun Long.addDate(howMuch: Int, unit: Long): Long {
 }
 
 fun getTodayDate(): Date {
-    val date = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-    date.set(Calendar.HOUR_OF_DAY, date.getActualMinimum(Calendar.HOUR_OF_DAY))
-    date.set(Calendar.MINUTE, date.getActualMinimum(Calendar.MINUTE))
-    date.set(Calendar.SECOND, date.getActualMinimum(Calendar.SECOND))
-    date.set(Calendar.MILLISECOND, date.getActualMinimum(Calendar.MILLISECOND))
+    val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+    calendar.set(Calendar.HOUR_OF_DAY, calendar.getActualMinimum(Calendar.HOUR_OF_DAY))
+    calendar.set(Calendar.MINUTE, calendar.getActualMinimum(Calendar.MINUTE))
+    calendar.set(Calendar.SECOND, calendar.getActualMinimum(Calendar.SECOND))
+    calendar.set(Calendar.MILLISECOND, calendar.getActualMinimum(Calendar.MILLISECOND))
 
-    return date.time
+    return calendar.time
 }
 
 fun getTommorowDate(date: Date): Date {
@@ -49,7 +48,16 @@ fun getTommorowDate(date: Date): Date {
     return today.time
 }
 
-fun Date.getDayTimeStamp() : Date {
-    this.time = (this.time /100_00) * 100_000
+fun Date.getDayTimeStamp(): Date {
+    this.time = (this.time / 100_00) * 100_000
     return this
 }
+
+fun timeToPosition(timeInMillis: Long): Int {
+    return (timeInMillis / 86_400_000).toInt() + 1
+}
+
+fun positionToTime(position: Int): Long {
+    return 86_400_000.toLong() * position.toLong()
+}
+

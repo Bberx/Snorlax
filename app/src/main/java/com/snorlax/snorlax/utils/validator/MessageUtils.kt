@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package com.snorlax.snorlax.utils
+package com.snorlax.snorlax.utils.validator
 
 import com.snorlax.snorlax.utils.validator.FormResult.Message.Error.*
 import com.snorlax.snorlax.utils.validator.FormResult.Message.Item

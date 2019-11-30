@@ -63,7 +63,6 @@ class FirebaseFirestoreSource private constructor() {
         private const val USER_DATA_NAME = "user"
 
     }
-
     fun getDocumentReference(section: String, lrn: String): DocumentReference {
         return sectionRef
             .document(section)
@@ -281,7 +280,7 @@ class FirebaseFirestoreSource private constructor() {
                             }
 
                             emitter.onNext(attendance)
-                        } ?: emitter.onNext(listOf())
+                        } ?: emitter.onNext(emptyList())
                     } ?: emitter.onNext(listOf())
                 }
             emitter.setCancellable { listener.remove() }

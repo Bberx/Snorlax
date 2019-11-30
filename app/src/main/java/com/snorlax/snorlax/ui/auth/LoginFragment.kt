@@ -31,12 +31,12 @@ import com.google.firebase.auth.FirebaseAuth
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.widget.textChanges
 import com.snorlax.snorlax.R
-import com.snorlax.snorlax.utils.getErrorMessage
-import com.snorlax.snorlax.utils.getMessageItem
 import com.snorlax.snorlax.utils.startHomeActivity
 import com.snorlax.snorlax.utils.validator.FormResult.Message.Item.EMAIL
 import com.snorlax.snorlax.utils.validator.FormResult.Message.Item.PASSWORD
 import com.snorlax.snorlax.utils.validator.FormValidator
+import com.snorlax.snorlax.utils.validator.getErrorMessage
+import com.snorlax.snorlax.utils.validator.getMessageItem
 import com.snorlax.snorlax.viewmodel.LoginViewModel
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -96,7 +96,7 @@ class LoginFragment : Fragment() {
 
     private fun showForgotDialog() {
         val forgotDialog = MaterialAlertDialogBuilder(
-            context!!,
+            context,
             R.style.ThemeOverlay_MaterialComponents_MaterialAlertDialog_Centered
         )
             .setIcon(R.drawable.ic_password_reset)
@@ -113,7 +113,7 @@ class LoginFragment : Fragment() {
             forgotDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
 
                 val textLayout = forgotDialog.text_layout_input_forgot_password
-                val loadingView = forgotDialog.forgot_password_loading
+                val loadingView = forgotDialog.reauth_password_loading
 
                 textLayout.error = null
                 loadingView.visibility = View.VISIBLE

@@ -16,7 +16,6 @@
 
 package com.snorlax.snorlax.utils.adapter.recyclerview
 
-import android.annotation.SuppressLint
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
@@ -76,7 +75,6 @@ class AttendanceAdaptor : RecyclerView.Adapter<AttendanceAdaptor.AttendanceHolde
 
     }
 
-    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: AttendanceHolder, position: Int) {
         val currentAttendance = mAttendance[position]
 
@@ -89,7 +87,7 @@ class AttendanceAdaptor : RecyclerView.Adapter<AttendanceAdaptor.AttendanceHolde
             holder.studentName.text = student.displayName
 //                "${student.name.getValue("last").toUpperCase(Locale.getDefault())}, ${student.name.getValue("first")}"
             GlideApp.with(holder.studentLogo)
-                .load(R.drawable.default_avatar)
+                .load(R.drawable.img_avatar)
                 .into(holder.studentLogo)
         }
     }

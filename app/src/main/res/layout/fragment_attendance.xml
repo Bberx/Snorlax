@@ -24,7 +24,7 @@
         android:id="@+id/layout_attendance"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.home.AttendanceFragment">
+        tools:context=".ui.home.attendance.AttendanceFragment">
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/picker_container"
@@ -73,19 +73,28 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/attendance_list"
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/attendance_pager"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_marginBottom="1dp"
-            android:fadingEdge="vertical"
-            android:fadingEdgeLength="16dp"
-            android:requiresFadingEdge="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/picker_container"
-            tools:listitem="@layout/item_student" />
+            app:layout_constraintTop_toBottomOf="@+id/picker_container" />
+
+        <!--        <androidx.recyclerview.widget.RecyclerView-->
+        <!--            android:id="@+id/attendance_list"-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_height="0dp"-->
+        <!--            android:layout_marginBottom="1dp"-->
+        <!--            android:fadingEdge="vertical"-->
+        <!--            android:fadingEdgeLength="16dp"-->
+        <!--            android:requiresFadingEdge="vertical"-->
+        <!--            app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent"-->
+        <!--            app:layout_constraintStart_toStartOf="parent"-->
+        <!--            app:layout_constraintTop_toBottomOf="@+id/picker_container"-->
+        <!--            tools:listitem="@layout/item_student" />-->
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

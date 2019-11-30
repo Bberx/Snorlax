@@ -41,7 +41,7 @@ class ResearcherDialog(context: Context, private val researcher: Researcher) :
 
         GlideApp.with(context)
             .load(researcher.displayImage)
-            .placeholder(R.drawable.default_avatar)
+            .placeholder(R.drawable.img_avatar)
 //            .transition(DrawableTransitionOptions.withCrossFade())
             .into(researcher_image)
 

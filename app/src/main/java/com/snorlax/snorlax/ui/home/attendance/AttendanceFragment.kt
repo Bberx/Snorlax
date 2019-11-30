@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package com.snorlax.snorlax.ui.home
+package com.snorlax.snorlax.ui.home.attendance
 
 
 import android.os.Bundle
@@ -24,12 +24,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.snorlax.snorlax.R
-import com.snorlax.snorlax.utils.adapter.recyclerview.AttendanceAdaptor
+import com.snorlax.snorlax.utils.adapter.viewpager.AttendancePageAdapter
 import com.snorlax.snorlax.utils.getTodayDate
+import com.snorlax.snorlax.utils.positionToTime
+import com.snorlax.snorlax.utils.timeToPosition
 import com.snorlax.snorlax.viewmodel.AttendanceViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -92,37 +94,51 @@ class AttendanceFragment : Fragment() {
         val rootView = inflater.inflate(R.layout.fragment_attendance, container, false)
 
         rootView.picker_container.setOnClickListener { showDatePickerDialog() }
-        rootView.attendance_list.layoutManager = LinearLayoutManager(context!!)
+
+
+//        rootView.attendance_list.layoutManager = LinearLayoutManager(context!!)
 
         datePicker.addOnPositiveButtonClickListener {
             viewModel.selectedTimeObservable.onNext(it)
         }
 
-
         rootView.btn_export.setOnClickListener {
             viewModel.exportAttendance()
         }
 
-        rootView.attendance_list.adapter = AttendanceAdaptor()
+//        rootView.attendance_list.adapter = AttendanceAdaptor()
 
         rootView.label_relative_time.text = viewModel.getRelativeDateString(getTodayDate().time)
         rootView.label_date.text = dateFormat.format(getTodayDate())
 
+        rootView.attendance_pager.registerOnPageChangeCallback(object :
+            ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                rootView.label_relative_time.text =
+                    viewModel.getRelativeDateString(positionToTime(position))
+                rootView.label_date.text = dateFormat.format(Date(positionToTime(position)))
+            }
+        })
+
         val relativeTime = viewModel.selectedTimeObservable
             .subscribeOn(AndroidSchedulers.mainThread())
-            .observeOn(AndroidSchedulers.mainThread())
             .subscribe {
-                rootView.label_relative_time.text = viewModel.getRelativeDateString(it)
-                rootView.label_date.text = dateFormat.format(Date(it))
+                //                rootView.label_relative_time.text = viewModel.getRelativeDateString(it)
+//                rootView.label_date.text = dateFormat.format(Date(it))
+                attendance_pager.setCurrentItem(timeToPosition(it) - 1, true)
             }
 
 
-        val firebase = viewModel.selectedTimeObservable
-            .flatMap { viewModel.getAttendance(Date(it)) }
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { (attendance_list.adapter as AttendanceAdaptor).updateData(it) }
+//        val firebase = viewModel.selectedTimeObservable
+////            .flatMap { viewModel.getAttendance(Date(it)) }
+//            .observeOn(AndroidSchedulers.mainThread())
+//            .subscribe {
+////                (attendance_list.adapter as AttendanceAdaptor).updateData(it)
+//                rootView.attendance_pager.setCurrentItem(timeToPosition(it), false)
+//            }
 
-        disposables.addAll(firebase, relativeTime)
+        disposables.addAll(relativeTime)
 
 
 
@@ -133,6 +149,8 @@ class AttendanceFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel.selectedTimeObservable.onNext(getTodayDate().time)
+        attendance_pager.adapter = AttendancePageAdapter(requireActivity(), viewModel)
+        attendance_pager.setCurrentItem(timeToPosition(getTodayDate().time), false)
     }
 
     private fun showDatePickerDialog() {

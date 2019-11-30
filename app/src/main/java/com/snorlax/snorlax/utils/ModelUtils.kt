@@ -18,7 +18,7 @@ package com.snorlax.snorlax.utils
 
 import java.util.*
 
-fun String.capitalize(locale: Locale): String {
+fun String.caps(locale: Locale = Locale.getDefault()): String {
     if (isNotEmpty()) {
         val firstChar = this[0]
         if (firstChar.isLowerCase()) {
@@ -27,9 +27,9 @@ fun String.capitalize(locale: Locale): String {
                 if (titleChar != firstChar.toUpperCase()) {
                     append(titleChar)
                 } else {
-                    append(this@capitalize.substring(0, 1).toUpperCase(locale))
+                    append(this@caps.substring(0, 1).toUpperCase(locale))
                 }
-                append(this@capitalize.substring(1))
+                append(this@caps.substring(1))
             }
         }
     }

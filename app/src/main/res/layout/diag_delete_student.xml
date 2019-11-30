@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright 2019 Oliver Rhyme G. Añasco
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,45 +14,45 @@
   ~    limitations under the License.
   -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/relativeLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:animateLayoutChanges="true"
     android:orientation="horizontal"
     android:paddingStart="20dp"
-    android:paddingTop="16dp"
+    android:paddingTop="4dp"
     android:paddingEnd="20dp">
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/text_layout_input_forgot_password"
+        android:id="@+id/text_layout_input_reauth_password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/label_email"
-        app:errorEnabled="true">
+        android:hint="@string/label_password"
+        app:endIconMode="password_toggle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/reauth_password_loading">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/input_forgot_password"
-            style="small"
+            android:id="@+id/input_reauth_password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textEmailAddress" />
+            android:inputType="textPassword" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
     <ProgressBar
         android:id="@+id/reauth_password_loading"
-        style="?android:attr/progressBarStyle"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_alignTop="@id/text_layout_input_forgot_password"
-        android:layout_alignEnd="@id/text_layout_input_forgot_password"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="false"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
+        style="@android:style/Widget.Material.ProgressBar.Horizontal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
         android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@+id/text_layout_input_reauth_password"
+        app:layout_constraintStart_toStartOf="@+id/text_layout_input_reauth_password"
+        app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible" />
 
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

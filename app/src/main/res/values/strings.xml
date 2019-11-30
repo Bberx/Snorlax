@@ -45,7 +45,7 @@
     <string name="label_section">Section</string>
     <string name="msg_camera_loading">Camera loading please wait…</string>
     <string name="msg_camera_no_permission">Please allow camera permission</string>
-    <string name="msg_allow_permission_in_settings">To use the scan functionality, allow camera permission to view the barcodes</string>
+    <string name="msg_allow_permission_in_settings">To use the scan functionality, allow camera permission to scan the barcodes</string>
     <string name="label_attendance_list">Attendance list:</string>
     <string name="act_edit">Edit</string>
     <string name="act_delete">Delete</string>
@@ -57,7 +57,7 @@
     <string name="label_reset_your_password">Reset your password</string>
     <string name="btn_send_password_reset_email">Send password reset email</string>
     <string name="btn_cancel">Cancel</string>
-    <string name="btn_ok">Ok</string>
+    <string name="btn_ok">OK</string>
     <string name="msg_password_reset_success">Success, check your email for instructions</string>
     <string name="err_msg_not_valid_email">Please enter a valid email</string>
     <string name="label_our_team">Our team</string>
@@ -67,4 +67,9 @@
     <string name="label_instagram">Instagram</string>
     <string name="label_special_thanks">Special thanks</string>
     <string name="msg_export">\"%1$s will create a new word document that contains the list of attendance. Please choose where to save the document.\"</string>
+    <string name="msg_delete_student"><![CDATA[Are you sure you want to <b>delete all the records of %s</b>? This action is irreversible. Please re-enter your password to continue.]]></string>
+    <string name="title_delete_student">Delete student</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

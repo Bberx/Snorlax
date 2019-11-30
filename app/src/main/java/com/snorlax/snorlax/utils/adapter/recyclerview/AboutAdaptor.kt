@@ -48,7 +48,7 @@ class AboutAdaptor(private val researcher: List<Researcher>) :
             .load(currentResearcher.displayImage)
 //            .apply(RequestOptions.bitmapTransform(CropCircleWithBorderTransformation()))
 //            .transition(DrawableTransitionOptions.withCrossFade())
-            .placeholder(R.drawable.default_avatar)
+            .placeholder(R.drawable.img_avatar)
             .into(holder.image)
 
 
