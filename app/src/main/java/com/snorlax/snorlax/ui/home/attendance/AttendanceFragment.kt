@@ -28,14 +28,13 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.snorlax.snorlax.R
+import com.snorlax.snorlax.utils.TimeUtils
+import com.snorlax.snorlax.utils.TimeUtils.getTodayDateUTC
+import com.snorlax.snorlax.utils.TimeUtils.timeToPosition
 import com.snorlax.snorlax.utils.adapter.viewpager.AttendancePageAdapter
-import com.snorlax.snorlax.utils.getTodayDate
-import com.snorlax.snorlax.utils.positionToTime
-import com.snorlax.snorlax.utils.timeToPosition
 import com.snorlax.snorlax.viewmodel.AttendanceViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import kotlinx.android.synthetic.main.fragment_attendance.*
 import kotlinx.android.synthetic.main.fragment_attendance.view.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -51,28 +50,33 @@ class AttendanceFragment : Fragment() {
 
     private val dateFormat = SimpleDateFormat("MMMM d, yyyy", Locale.getDefault())
 
-    private val datePicker = MaterialDatePicker.Builder.datePicker()
-        .setTitleText("Select which day…")
-        .setCalendarConstraints(
-            CalendarConstraints.Builder()
-                .setEnd(Calendar.getInstance().timeInMillis)
-                .setValidator(object : CalendarConstraints.DateValidator {
-                    var date: Long = 0
-                    override fun isValid(date: Long): Boolean {
-                        this.date = date
-                        return date <= Calendar.getInstance().timeInMillis
-                    }
-
-                    override fun writeToParcel(dest: Parcel?, flags: Int) {
-                        dest?.writeInt(if (date <= Calendar.getInstance().timeInMillis) 1 else 0)
-                    }
-
-                    override fun describeContents() = 0
-                })
-                .build()
-        )
-        .setTheme(R.style.ThemeOverlay_MaterialComponents_MaterialCalendar)
-        .build()
+//    private val datePicker: MaterialDatePicker<Long> by lazy {
+//        MaterialDatePicker.Builder.datePicker()
+//            .setTitleText(R.string.label_which_day)
+//            .setCalendarConstraints(
+//                CalendarConstraints.Builder()
+//                    .setOpenAt(getTodayDateUTC().time)
+//                    .setStart(0)
+//                    .setEnd(getTodayDateUTC().time)
+//                    .setValidator(object : CalendarConstraints.DateValidator {
+//                        var date: Long = 0
+//                        override fun isValid(date: Long): Boolean {
+//                            this.date = date
+//                            return date <= getTodayDateUTC().time && date >= 0
+//                        }
+//
+//                        override fun writeToParcel(dest: Parcel?, flags: Int) {
+//                            dest?.writeInt(if (date <= getTodayDateUTC().time) 1 else 0)
+//                        }
+//
+//                        override fun describeContents() = 0
+//                    })
+//                    .build()
+//            )
+//            .setTheme(R.style.ThemeOverlay_MaterialComponents_MaterialCalendar)
+//            .setSelection(viewModel.selectedTimeObservable.value)
+//            .build()
+//    }
 
 
 //    private val adapter = AttendanceAdaptor(this, SortedList(Attendance::class.java, callback))
@@ -82,7 +86,6 @@ class AttendanceFragment : Fragment() {
         viewModel = activity?.run {
             ViewModelProviders.of(this)[AttendanceViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
-
     }
 
     override fun onCreateView(
@@ -93,40 +96,69 @@ class AttendanceFragment : Fragment() {
         // Inflate the layout for this fragment
         val rootView = inflater.inflate(R.layout.fragment_attendance, container, false)
 
-        rootView.picker_container.setOnClickListener { showDatePickerDialog() }
 
+
+        rootView.picker_container.setOnClickListener {
+            val picker = MaterialDatePicker.Builder.datePicker()
+                .setTitleText(R.string.label_which_day)
+                .setCalendarConstraints(
+                    CalendarConstraints.Builder()
+                        .setOpenAt(
+                            when (viewModel.selectedTimeObservable.value) {
+                                null -> getTodayDateUTC().time
+                                else -> viewModel.selectedTimeObservable.value!!
+                            }
+                        )
+                        .setStart(0)
+                        .setEnd(getTodayDateUTC().time)
+                        .setValidator(object : CalendarConstraints.DateValidator {
+                            var date: Long = 0
+                            override fun isValid(date: Long): Boolean {
+                                this.date = date
+                                return date <= getTodayDateUTC().time && date >= 0
+                            }
+
+                            override fun writeToParcel(dest: Parcel, flags: Int) {
+                                dest.writeInt(if (date <= getTodayDateUTC().time) 1 else 0)
+                            }
+
+                            override fun describeContents() = 0
+                        })
+                        .build()
+                )
+                .setTheme(R.style.ThemeOverlay_MaterialComponents_MaterialCalendar)
+                .setSelection(viewModel.selectedTimeObservable.value)
+                .build()
+
+
+            picker.showNow(childFragmentManager, "DatePicker")
+            picker.addOnPositiveButtonClickListener { viewModel.selectedTimeObservable.onNext(it) }
+
+//            showDatePickerDialog()
+        }
 
 //        rootView.attendance_list.layoutManager = LinearLayoutManager(context!!)
 
-        datePicker.addOnPositiveButtonClickListener {
-            viewModel.selectedTimeObservable.onNext(it)
-        }
 
-        rootView.btn_export.setOnClickListener {
-            viewModel.exportAttendance()
-        }
+        rootView.btn_export.setOnClickListener { viewModel.exportAttendance() }
 
 //        rootView.attendance_list.adapter = AttendanceAdaptor()
 
-        rootView.label_relative_time.text = viewModel.getRelativeDateString(getTodayDate().time)
-        rootView.label_date.text = dateFormat.format(getTodayDate())
+        rootView.label_relative_time.text = viewModel.getRelativeDateString(getTodayDateUTC())
+        rootView.label_date.text = dateFormat.format(getTodayDateUTC())
 
-        rootView.attendance_pager.registerOnPageChangeCallback(object :
-            ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                super.onPageSelected(position)
-                rootView.label_relative_time.text =
-                    viewModel.getRelativeDateString(positionToTime(position))
-                rootView.label_date.text = dateFormat.format(Date(positionToTime(position)))
-            }
-        })
+        rootView.attendance_pager.adapter = AttendancePageAdapter(requireActivity(), viewModel)
 
+        rootView.attendance_pager.offscreenPageLimit = 1
         val relativeTime = viewModel.selectedTimeObservable
             .subscribeOn(AndroidSchedulers.mainThread())
             .subscribe {
                 //                rootView.label_relative_time.text = viewModel.getRelativeDateString(it)
 //                rootView.label_date.text = dateFormat.format(Date(it))
-                attendance_pager.setCurrentItem(timeToPosition(it) - 1, true)
+                rootView.attendance_pager.setCurrentItem(timeToPosition(it), true)
+                rootView.label_relative_time.text =
+                    viewModel.getRelativeDateString(Date(it))
+                rootView.label_date.text = dateFormat.format(Date(it))
             }
 
 
@@ -137,10 +169,26 @@ class AttendanceFragment : Fragment() {
 ////                (attendance_list.adapter as AttendanceAdaptor).updateData(it)
 //                rootView.attendance_pager.setCurrentItem(timeToPosition(it), false)
 //            }
+        rootView.attendance_pager.registerOnPageChangeCallback(object :
+            ViewPager2.OnPageChangeCallback() {
+            var previousItem = rootView.attendance_pager.currentItem
+            override fun onPageSelected(position: Int) {
+                if (previousItem != position) {
+                    viewModel.selectedTimeObservable.onNext(TimeUtils.positionToTime(position).time)
+                    previousItem = position
+                }
+            }
+
+        })
+
+//        val today = getTodayDateUTC().time
+//        rootView.attendance_pager.setCurrentItem(timeToPosition(today), false)
+//        rootView.label_relative_time.text =
+//            viewModel.getRelativeDateString(Date(today))
+//        rootView.label_date.text = dateFormat.format(Date(today))
+
 
         disposables.addAll(relativeTime)
-
-
 
         return rootView
 
@@ -148,16 +196,17 @@ class AttendanceFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel.selectedTimeObservable.onNext(getTodayDate().time)
-        attendance_pager.adapter = AttendancePageAdapter(requireActivity(), viewModel)
-        attendance_pager.setCurrentItem(timeToPosition(getTodayDate().time), false)
+
+        viewModel.selectedTimeObservable.onNext(getTodayDateUTC().time)
+
+//        attendance_pager.setCurrentItem(timeToPosition(getTodayDate().time), false)
     }
 
-    private fun showDatePickerDialog() {
-        if (!datePicker.isVisible) {
-            datePicker.showNow(activity!!.supportFragmentManager, "DatePicker")
-        }
-    }
+//    private fun showDatePickerDialog() {
+//        if (!datePicker.isVisible) {
+//            datePicker.showNow(childFragmentManager, "DatePicker")
+//        }
+//    }
 
     override fun onDestroy() {
         super.onDestroy()

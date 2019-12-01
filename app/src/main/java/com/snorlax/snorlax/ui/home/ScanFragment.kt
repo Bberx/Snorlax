@@ -93,7 +93,7 @@ class ScanFragment : Fragment() {
         val cameraPlaceholderView =
             inflater.inflate(R.layout.camera_placeholder, rootView.camera_frame, false)
 
-        val testView = CameraView(context!!).apply {
+        val cameraView = CameraView(context!!).apply {
             flash = FlashMode.OFF
             captureMode = CameraView.CaptureMode.IMAGE
             scaleType = CameraView.ScaleType.CENTER_CROP
@@ -131,7 +131,7 @@ class ScanFragment : Fragment() {
                         CameraX.bindToLifecycle(this, barcodeAnalyzer)
                     } else CameraX.bindToLifecycle(this, barcodeAnalyzer)
 //                    viewModel.startCamera(this)
-                    testView.bindToLifecycle(this)
+                    cameraView.bindToLifecycle(this)
                 } else {
                     CameraX.unbindAll()
                     rootView.camera_frame.removeAllViews()
@@ -155,7 +155,7 @@ class ScanFragment : Fragment() {
                     parent.setBackgroundResource(0)
                     parent.removeAllViews()
 
-                    parent.addView(testView, 0)
+                    parent.addView(cameraView, 0)
                 }
             }
 //            .flatMap { viewModel.getCameraPreview() }
@@ -220,7 +220,7 @@ class ScanFragment : Fragment() {
                 }, BarcodeAnalyzer(it))
             }, BackpressureStrategy.DROP)
                 .subscribeOn(AndroidSchedulers.mainThread())
-                .flatMapMaybe { viewModel.analyzeLRN(context!!, it.displayValue!!) }
+                .flatMapMaybe { viewModel.analyzeLRN(it.displayValue!!) }
                 .map { student ->
                     Log.d("Threading", "mapping ${Thread.currentThread().name}")
                     Pair(student !in studentScannerAdaptor.studentList.map { it.first }, student)
@@ -255,13 +255,13 @@ class ScanFragment : Fragment() {
             listOf(
                 Attendance(
                     Timestamp(Date(it.second)),
-                    viewModel.getStudentDocumentReference(context!!, it.first.lrn),
+                    viewModel.getStudentDocumentReference(it.first.lrn),
                     it.first.lrn
                 )
             )
         }
 
-        disposables.add(viewModel.addAttendance(context!!, attendanceEntry).subscribe({
+        disposables.add(viewModel.addAttendance(attendanceEntry).subscribe({
             Snackbar.make(view!!, "Success", Snackbar.LENGTH_LONG).show()
         }, {
             Snackbar.make(view!!, it.localizedMessage!!, Snackbar.LENGTH_LONG).show()

@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright 2019 Oliver Rhyme G. Añasco
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,19 +14,48 @@
   ~    limitations under the License.
   -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/attendance_list_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:gravity="center"
+    android:orientation="vertical"
     tools:context=".ui.home.attendance.AttendanceListFragment">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/attendance_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="1dp"
+        android:layout_height="0dp"
         android:fadingEdge="vertical"
         android:fadingEdgeLength="16dp"
         android:requiresFadingEdge="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         tools:listitem="@layout/item_student" />
-</FrameLayout>
+
+    <!--    <TextView-->
+    <!--        android:id="@+id/label_empty"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_gravity="center"-->
+    <!--        android:drawableTop="@drawable/img_empty_box"-->
+    <!--        android:drawablePadding="16dp"-->
+    <!--        android:fontFamily="@font/work_sans"-->
+    <!--        android:gravity="center_horizontal|center_vertical"-->
+    <!--        android:text="@string/msg_empty_list"-->
+    <!--        android:textColor="@android:color/primary_text_light"-->
+    <!--        android:textSize="16sp"-->
+    <!--        android:visibility="gone"-->
+    <!--        app:drawableTint="@color/colorPrimaryDark"-->
+    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--        app:layout_constraintEnd_toEndOf="parent"-->
+    <!--        app:layout_constraintStart_toStartOf="parent"-->
+    <!--        app:layout_constraintTop_toTopOf="parent"-->
+    <!--        tools:visibility="gone" />-->
+
+</androidx.constraintlayout.widget.ConstraintLayout>

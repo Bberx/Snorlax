@@ -16,9 +16,11 @@
 
 package com.snorlax.snorlax.utils.adapter.recyclerview
 
+import android.content.res.ColorStateList
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.model.Student
@@ -51,7 +53,11 @@ class StudentScannerAdaptor :
         holder.displayName.text = currentStudent.first.displayName
         holder.lrn.text = currentStudent.first.lrn
         holder.timeIn.text = clockFormat.format(currentStudent.second)
-        holder.image.setImageResource(R.mipmap.ic_launcher)
+        holder.image.apply {
+            setImageResource(R.drawable.img_avatar)
+            imageTintList =
+                ColorStateList.valueOf(ContextCompat.getColor(context, R.color.colorPrimaryDark))
+        }
 
     }
 

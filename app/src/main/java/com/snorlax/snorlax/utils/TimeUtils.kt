@@ -18,46 +18,61 @@ package com.snorlax.snorlax.utils
 
 import java.util.*
 
-fun Long.isNegative(): Boolean {
-    return (this < 0L)
-}
+object TimeUtils {
 
-fun Long.countHowManyTime(unit: Long): Pair<Int, Int> {
-    return Pair((this / unit).toInt(), (this % unit).toInt())
-}
-
-fun Long.addDate(howMuch: Int, unit: Long): Long {
-    return this + (howMuch * unit)
-}
-
-fun getTodayDate(): Date {
-    val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-    calendar.set(Calendar.HOUR_OF_DAY, calendar.getActualMinimum(Calendar.HOUR_OF_DAY))
-    calendar.set(Calendar.MINUTE, calendar.getActualMinimum(Calendar.MINUTE))
-    calendar.set(Calendar.SECOND, calendar.getActualMinimum(Calendar.SECOND))
-    calendar.set(Calendar.MILLISECOND, calendar.getActualMinimum(Calendar.MILLISECOND))
-
-    return calendar.time
-}
-
-fun getTommorowDate(date: Date): Date {
-    val today = Calendar.getInstance().apply {
-        this.time = date
+    fun getTodayDateUTC(): Date {
+        val rawCalendar = Calendar.getInstance()
+        val safe = getCalendar()
+        safe.set(
+            rawCalendar.get(Calendar.YEAR),
+            rawCalendar.get(Calendar.MONTH),
+            rawCalendar.get(Calendar.DAY_OF_MONTH)
+        )
+        return safe.time
     }
-    today.set(Calendar.SECOND, 86400)
-    return today.time
-}
 
-fun Date.getDayTimeStamp(): Date {
-    this.time = (this.time / 100_00) * 100_000
-    return this
-}
+//    fun getLocalTime(utcTime: Date) : Date {
+//
+//    }
 
-fun timeToPosition(timeInMillis: Long): Int {
-    return (timeInMillis / 86_400_000).toInt() + 1
-}
+    fun getTodayDateLocal(): Date {
+//            val calendar = Calendar.getInstance(TimeZone.getDefault())
+//
+//            calendar.set(Calendar.HOUR_OF_DAY, calendar.getActualMinimum(Calendar.HOUR_OF_DAY))
+//            calendar.set(Calendar.MINUTE, calendar.getActualMinimum(Calendar.MINUTE))
+//            calendar.set(Calendar.SECOND, calendar.getActualMinimum(Calendar.SECOND))
+//            calendar.set(Calendar.MILLISECOND, calendar.getActualMinimum(Calendar.MILLISECOND))
 
-fun positionToTime(position: Int): Long {
-    return 86_400_000.toLong() * position.toLong()
+        val raw = Calendar.getInstance()
+        raw.time = getTodayDateUTC()
+        return raw.time
+    }
+
+    private fun getCalendar(): Calendar {
+        val utc = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        utc.clear()
+        return utc
+    }
+
+//        fun getTommorowDate(date: Date): Date {
+//            val today = Calendar.getInstance().apply {
+//                this.time = date
+//            }
+//            today.set(Calendar.SECOND, 86400)
+//            return today.time
+//        }
+//
+//        fun Date.getDayTimeStamp(): Date {
+//            this.time = (this.time / 100_00) * 100_000
+//            return this
+//        }
+
+    fun timeToPosition(timeInMillis: Long): Int {
+        return (timeInMillis / 86_400_000).toInt()
+    }
+
+    fun positionToTime(position: Int): Date {
+        return Date(86_400_000 * position.toLong())
+    }
 }
 

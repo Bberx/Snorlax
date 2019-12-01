@@ -16,24 +16,24 @@
 
 package com.snorlax.snorlax.utils.adapter.viewpager
 
+
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.snorlax.snorlax.ui.home.attendance.AttendanceListFragment
-import com.snorlax.snorlax.utils.getTodayDate
-import com.snorlax.snorlax.utils.positionToTime
+import com.snorlax.snorlax.utils.TimeUtils.getTodayDateLocal
+import com.snorlax.snorlax.utils.TimeUtils.positionToTime
 import com.snorlax.snorlax.viewmodel.AttendanceViewModel
-import java.util.*
 
 class AttendancePageAdapter(
     fragmentActivity: FragmentActivity,
     private val viewModel: AttendanceViewModel
 ) :
     FragmentStateAdapter(fragmentActivity) {
-    override fun getItemCount() = (getTodayDate().time / 86_400_000).toInt() + 1
+    override fun getItemCount() = (getTodayDateLocal().time / 86_400_000).toInt() + 1
 
     override fun createFragment(position: Int): Fragment {
-        return AttendanceListFragment(viewModel.getAttendance(Date(positionToTime(position))))
+        return AttendanceListFragment(viewModel.getAttendance(positionToTime(position)))
     }
 
 }

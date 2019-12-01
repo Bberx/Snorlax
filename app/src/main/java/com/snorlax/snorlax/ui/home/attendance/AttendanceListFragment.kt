@@ -28,6 +28,7 @@ import com.snorlax.snorlax.model.Attendance
 import com.snorlax.snorlax.utils.adapter.recyclerview.AttendanceAdaptor
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_attendance_list.view.*
 
 /**
@@ -50,8 +51,10 @@ class AttendanceListFragment(private val attendance: Observable<List<Attendance>
     ): View? {
         val rootView = inflater.inflate(R.layout.fragment_attendance_list, container, false)
 
+        val adapter = AttendanceAdaptor()
+
         rootView.attendance_list.layoutManager = LinearLayoutManager(context!!)
-        rootView.attendance_list.adapter = AttendanceAdaptor()
+        rootView.attendance_list.adapter = adapter
 
 //        val firebase = viewModel.selectedTimeObservable
 //            .flatMap { viewModel.getAttendance(Date(it)) }
@@ -61,8 +64,17 @@ class AttendanceListFragment(private val attendance: Observable<List<Attendance>
 ////                rootView.attendance_pager.currentItem = timeToPosition(it)
 //            }
 
-        val attendanceDisposable = attendance.subscribe {
-            (rootView.attendance_list.adapter as AttendanceAdaptor).updateData(it)
+        val attendanceDisposable = attendance
+            .subscribeOn(Schedulers.io())
+            .subscribe {
+                adapter.updateData(it)
+//            if (it.isEmpty()) {
+//                rootView.attendance_list.visibility = View.GONE
+////                rootView.label_empty.visibility = View.VISIBLE
+//            } else {
+//                rootView.attendance_list.visibility = View.VISIBLE
+//                rootView.label_empty.visibility = View.GONE
+//            }
         }
 
         disposables.add(attendanceDisposable)

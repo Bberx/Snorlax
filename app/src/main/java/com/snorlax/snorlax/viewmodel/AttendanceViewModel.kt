@@ -21,10 +21,8 @@ import android.text.format.DateUtils
 import androidx.lifecycle.AndroidViewModel
 import com.snorlax.snorlax.data.cache.LocalCacheSource
 import com.snorlax.snorlax.data.firebase.FirebaseFirestoreSource
-import com.snorlax.snorlax.utils.countHowManyTime
-import com.snorlax.snorlax.utils.getTodayDate
-import com.snorlax.snorlax.utils.isNegative
-import io.reactivex.subjects.PublishSubject
+import com.snorlax.snorlax.utils.TimeUtils.getTodayDateLocal
+import io.reactivex.subjects.BehaviorSubject
 import java.util.*
 
 class AttendanceViewModel(application: Application) : AndroidViewModel(application) {
@@ -36,7 +34,7 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
 
     private val firestore = FirebaseFirestoreSource.getInstance()
 
-    val selectedTimeObservable = PublishSubject.create<Long>()
+    val selectedTimeObservable = BehaviorSubject.create<Long>()
 
 
 //    companion object {
@@ -91,49 +89,30 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
 //            .subscribeOn(Schedulers.io())
 //    }
 
-    fun getRelativeDateString(relative: Long): String {
-        val relativeTime = getTodayDate().time - relative
+    fun getRelativeDateString(relative: Date): String {
+        val relativeTime = getTodayDateLocal().time - relative.time
 
-        currentCalendar.timeInMillis = relative
+        currentCalendar.timeInMillis = relative.time
 
         if (!relativeTime.isNegative()) {
             // Past
             when (val howManyDays = relativeTime.countHowManyTime(DateUtils.DAY_IN_MILLIS).first) {
                 0 -> return "Today, ${dayOfWeek().toLowerCase(Locale.getDefault())}…" // Today
-                1 -> {
-                    return "${dayOfWeek()}, yesterday…"
-                } // Today
-                in 2..6 -> {
-                    return "${dayOfWeek()}, $howManyDays days ago…"
-                }
-                7 -> {
-                    return "Last ${dayOfWeek().toLowerCase(Locale.getDefault())}⁠…"
-                }
+                1 -> return "${dayOfWeek()}, yesterday…" // Today
+                in 2..6 -> return "${dayOfWeek()}, $howManyDays days ago…"
+                7 -> return "Last ${dayOfWeek().toLowerCase(Locale.getDefault())}⁠…"
                 in 8..Int.MAX_VALUE -> {
-                    when (val howManyWeeks =
+                    return when (val howManyWeeks =
                         relativeTime.countHowManyTime(DateUtils.WEEK_IN_MILLIS).first) {
-                        1 -> {
-                            return "${dayOfWeek()}, last week…"
-                        }
-                        in 2..3 -> {
-
-                            return "${dayOfWeek()}, $howManyWeeks weeks ago…"
-                        }
-                        4 -> {
-                            return "${dayOfWeek()}, last month…"
-                        }
-                        else -> {
-                            return "${dayOfWeek()},"
-                        }
+                        1 -> "${dayOfWeek()}, last week…"
+                        in 2..3 -> "${dayOfWeek()}, $howManyWeeks weeks ago…"
+                        4 -> "${dayOfWeek()}, last month…"
+                        else -> "${dayOfWeek()},"
                     }
                 }
-                else -> {
-                    return ""
-                }
+                else -> return ""
             }
-        } else {
-            return ""
-        }
+        } else return ""
     }
 
     private fun dayOfWeek(): String = when (currentCalendar.get(Calendar.DAY_OF_WEEK)) {
@@ -145,5 +124,13 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
         Calendar.FRIDAY -> "Friday"
         Calendar.SATURDAY -> "Saturday"
         else -> ""
+    }
+
+    private fun Long.isNegative(): Boolean {
+        return (this < 0L)
+    }
+
+    private fun Long.countHowManyTime(unit: Long): Pair<Int, Int> {
+        return Pair((this / unit).toInt(), (this % unit).toInt())
     }
 }

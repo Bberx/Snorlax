@@ -34,69 +34,57 @@ import java.util.*
 
 class AttendanceAdaptor : RecyclerView.Adapter<AttendanceAdaptor.AttendanceHolder>() {
 
+    companion object {
+        private const val ITEM_EMPTY = 1
+        private const val ITEM_DEFAULT = 2
+    }
+
     private val mAttendance: SortedList<Attendance> =
         SortedList(Attendance::class.java, object : SortedList.Callback<Attendance>() {
-            override fun areItemsTheSame(item1: Attendance?, item2: Attendance?): Boolean {
-                return item1?.lrn == item2?.lrn
-            }
+            override fun areItemsTheSame(item1: Attendance?, item2: Attendance?) =
+                item1?.lrn == item2?.lrn
 
-            override fun onMoved(fromPosition: Int, toPosition: Int) {
+            override fun onMoved(fromPosition: Int, toPosition: Int) =
                 notifyItemMoved(fromPosition, toPosition)
-            }
 
-            override fun onChanged(position: Int, count: Int) {
+            override fun onChanged(position: Int, count: Int) =
                 notifyItemRangeChanged(position, count)
-            }
 
-            override fun onInserted(position: Int, count: Int) {
+            override fun onInserted(position: Int, count: Int) =
                 notifyItemRangeInserted(position, count)
-            }
 
-            override fun onRemoved(position: Int, count: Int) {
+            override fun onRemoved(position: Int, count: Int) =
                 notifyItemRangeRemoved(position, count)
-            }
 
-            override fun compare(o1: Attendance?, o2: Attendance?): Int {
-                return o1!!.time_in.compareTo(o2!!.time_in)
-            }
+            override fun compare(o1: Attendance?, o2: Attendance?) =
+                o1!!.time_in.compareTo(o2!!.time_in)
 
-            override fun areContentsTheSame(oldItem: Attendance?, newItem: Attendance?): Boolean {
-                return ((oldItem!!.lrn == newItem!!.lrn) && (oldItem.reference == newItem.reference) && (oldItem.time_in == newItem.time_in))
-            }
-
-        }
-        )
+            override fun areContentsTheSame(oldItem: Attendance?, newItem: Attendance?) =
+                (oldItem!!.lrn == newItem!!.lrn) && (oldItem.reference == newItem.reference) && (oldItem.time_in == newItem.time_in)
+        })
 
     private val clockFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
 
-    fun updateData(attendance: List<Attendance>) {
+    fun updateData(attendance: List<Attendance>) = mAttendance.replaceAll(attendance)
 
-        mAttendance.replaceAll(attendance)
-
+    override fun getItemCount(): Int {
+//        return if (mAttendance.size() == 0) 1
+//        else mAttendance.size()
+        return mAttendance.size()
     }
-
-    override fun onBindViewHolder(holder: AttendanceHolder, position: Int) {
-        val currentAttendance = mAttendance[position]
-
-        currentAttendance.reference.get(Source.CACHE).addOnSuccessListener {
-
-            val student = it.toObject(Student::class.java)!!
-
-            holder.studentTimeIn.text = clockFormat.format(currentAttendance.time_in.toDate())
-            holder.studentLrn.text = student.lrn
-            holder.studentName.text = student.displayName
-//                "${student.name.getValue("last").toUpperCase(Locale.getDefault())}, ${student.name.getValue("first")}"
-            GlideApp.with(holder.studentLogo)
-                .load(R.drawable.img_avatar)
-                .into(holder.studentLogo)
-        }
-    }
-
-    override fun getItemCount() = mAttendance.size()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AttendanceHolder {
+//        return if (viewType == ITEM_EMPTY) {
+//            val inflatedView = parent.inflate(R.layout.label_empty_list)
+//            EmptyHolder(inflatedView)
+//        } else {
         val inflatedView = parent.inflate(R.layout.item_attendance)
         return AttendanceHolder(inflatedView)
+//        }
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return if (mAttendance.size() == 0) ITEM_EMPTY else ITEM_DEFAULT
     }
 
     inner class AttendanceHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -104,5 +92,30 @@ class AttendanceAdaptor : RecyclerView.Adapter<AttendanceAdaptor.AttendanceHolde
         val studentName: TextView = itemView.student_displayName
         val studentLrn: TextView = itemView.student_lrn
         val studentTimeIn: TextView = itemView.label_time_in
+    }
+
+//    inner class EmptyHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
+
+    override fun onBindViewHolder(holder: AttendanceHolder, position: Int) {
+
+//        if (getItemViewType(position) != ITEM_EMPTY) {
+//
+//            holder as AttendanceHolder
+
+        val currentAttendance = mAttendance[position]
+
+        currentAttendance.reference.get(Source.DEFAULT).addOnSuccessListener {
+
+            val student = it.toObject(Student::class.java)!!
+
+            holder.studentTimeIn.text = clockFormat.format(currentAttendance.time_in.toDate())
+            holder.studentLrn.text = student.lrn
+            holder.studentName.text = student.displayName
+
+            GlideApp.with(holder.studentLogo)
+                .load(R.drawable.img_avatar)
+                .into(holder.studentLogo)
+//            }
+        }
     }
 }

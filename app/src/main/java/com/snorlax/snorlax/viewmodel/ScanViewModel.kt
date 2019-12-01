@@ -17,6 +17,7 @@
 package com.snorlax.snorlax.viewmodel
 
 import android.Manifest
+import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -24,7 +25,7 @@ import android.provider.Settings
 import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.DocumentReference
 import com.karumi.dexter.Dexter
@@ -44,7 +45,7 @@ import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import java.util.*
 
-class ScanViewModel : ViewModel() {
+class ScanViewModel(application: Application) : AndroidViewModel(application) {
 
 //    private val disposable = CompositeDisposable()
 
@@ -99,11 +100,11 @@ class ScanViewModel : ViewModel() {
 //        }, BackpressureStrategy.DROP)
 //    }
 
-    fun analyzeLRN(context: Context, lrn: String): Maybe<Student> {
+    fun analyzeLRN(lrn: String): Maybe<Student> {
         // Checks if LRN is valid
         if (lrn.length != 12) return Maybe.empty()
 
-        return firestore.getStudentList(cacheSource.getUserCache(context)!!.section)
+        return firestore.getStudentList(cacheSource.getUserCache(getApplication())!!.section)
             .subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
             .flatMapMaybe { studentList ->
@@ -140,8 +141,8 @@ class ScanViewModel : ViewModel() {
             .check()
     }
 
-    fun addAttendance(context: Context, attendanceList: List<Attendance>): Completable {
-        return firestore.addAttendance(getCurrentSection(context), attendanceList)
+    fun addAttendance(attendanceList: List<Attendance>): Completable {
+        return firestore.addAttendance(getCurrentSection(), attendanceList)
     }
 
 //    fun getStudentRef(context: Context, student: Student): Single<DocumentReference> {
@@ -155,12 +156,12 @@ class ScanViewModel : ViewModel() {
         return Calendar.getInstance().time
     }
 
-    private fun getCurrentSection(context: Context): String {
-        return cacheSource.getUserCache(context)!!.section
+    private fun getCurrentSection(): String {
+        return cacheSource.getUserCache(getApplication())!!.section
     }
 
-    fun getStudentDocumentReference(context: Context, lrn: String): DocumentReference =
-        firestore.getDocumentReference(getCurrentSection(context), lrn)
+    fun getStudentDocumentReference(lrn: String): DocumentReference =
+        firestore.getDocumentReference(getCurrentSection(), lrn)
 
 
     private inner class SnorlaxPermissionListener(private val fragment: Fragment, private val fromOnStart: Boolean) :

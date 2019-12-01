@@ -115,7 +115,7 @@ android {
         debug {
             debuggable true
             firebaseAppDistribution {
-                releaseNotes = "Debug build ${mVersionName}\nAdd hard student delete verification\nFix a bug where you can add student with a non-numeric lrn"
+                releaseNotes = "Debug build ${mVersionName}\nIMPORTANT! Fix bug where beabot cannot detect the right time when the current time is onwards 8am"
                 groups = "researchers, developer"
             }
         }

@@ -22,7 +22,7 @@ import com.google.firebase.firestore.*
 import com.snorlax.snorlax.model.Attendance
 import com.snorlax.snorlax.model.Student
 import com.snorlax.snorlax.model.User
-import com.snorlax.snorlax.utils.getTodayDate
+import com.snorlax.snorlax.utils.TimeUtils.getTodayDateUTC
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -235,7 +235,7 @@ class FirebaseFirestoreSource private constructor() {
             val tempMap: MutableMap<String, Attendance> = mutableMapOf()
             val reference = sectionRef.document(section)
                 .collection(ATTENDANCE_DATA_NAME)
-                .document(getTodayDate().time.toString())
+                .document(getTodayDateUTC().time.toString())
 
             return Completable.create { emitter ->
                 firestoreDB.runTransaction {
