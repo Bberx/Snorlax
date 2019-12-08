@@ -115,7 +115,7 @@ android {
         debug {
             debuggable true
             firebaseAppDistribution {
-                releaseNotes = "Debug build ${mVersionName}\nIMPORTANT! Fix bug where beabot cannot detect the right time when the current time is onwards 8am"
+                releaseNotes = "Debug build ${mVersionName}\nNow forces phone to use automatic time for more accurate time keeping"
                 groups = "researchers, developer"
             }
         }
@@ -133,6 +133,16 @@ android {
         }
     }
 
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/ASL2.0'
+    }
 
     compileOptions {
         sourceCompatibility 1.8
@@ -207,7 +217,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.6'
 
     // Dexter permission
-    implementation 'com.karumi:dexter:6.0.0'
+    implementation 'com.karumi:dexter:6.0.1'
 
     // (Recommended) Add Analytics
     implementation 'com.google.firebase:firebase-analytics:17.2.1'
@@ -225,19 +235,33 @@ dependencies {
     implementation "androidx.camera:camera-view:1.0.0-alpha03"
 
     //Leak canary
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.0-beta-5'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.0'
 
     // Custom tabs
     implementation 'androidx.browser:browser:1.0.0'
 
     // Apache POI
-    implementation 'org.apache.poi:poi:4.0.1'
-    implementation 'org.apache.poi:poi-ooxml:4.0.1'
+//    implementation 'org.apache.poi:poi:4.0.1'
+//    implementation 'org.apache.poi:poi-ooxml:4.0.1'
+//    implementation 'org.apache.poi:poi-ooxml-schemas:4.0.1'
+//    implementation 'javax.xml.stream:stax-api:1.0-2'
+//    implementation 'org.apache.xmlbeans:xmlbeans:3.1.0'
+//    implementation group: 'dom4j', name: 'dom4j', version: '1.6.1'
+//
+//    // open office
+//    implementation group: 'org.openoffice', name: 'jurt', version: '4.1.2'
+
+//    implementation 'com.github.Bberx:poi-android:4.1.1'
+//    implementation 'com.github.Bberx.poi-android:proguard:4.1.1'
+//    compileOnly 'org.apache.poi:poi-ooxml:4.1.1'
+
+//    implementation 'com.github.Bberx:poi-android:4.1.1'
 
     // Viewmodel
     def lifecycle_version = "2.1.0"
 
     // ViewModel and LiveData
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
+    implementation files('/home/bberx/AndroidStudioProjects/Snorlax/poishadow/build/libs/poishadow-all.jar')
 
 }

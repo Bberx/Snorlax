@@ -75,4 +75,9 @@
     <string name="accs_empty_list">Empty list</string>
     <string name="msg_empty_list">It seems empty here...</string>
     <string name="label_which_day">Select which day…</string>
+    <string name="msg_enable_automatic_time">Enable automatic time and time zone settings to continue</string>
+    <string name="msg_attendance_saved">Attendance saved in %s</string>
+    <string name="err_file_not_found">Failed, output file is not found</string>
+    <string name="err_ioexception">Failed IOException, %s</string>
+    <string name="err_unknown">Failed unknown error, %s</string>
 </resources>

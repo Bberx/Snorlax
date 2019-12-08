@@ -17,11 +17,13 @@
 package com.snorlax.snorlax.ui.home
 
 
+import android.content.Intent
 import android.content.res.TypedArray
 import android.os.Build
 import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -125,7 +127,7 @@ class ScanFragment : Fragment() {
             .subscribeOn(Schedulers.io())
 //            .observeOn(AndroidSchedulers.mainThread())
             .doAfterNext {
-                if (it) {
+                if (it && viewModel.isAutoTimeEnabled()) {
                     if (CameraX.isBound(barcodeAnalyzer)) {
                         CameraX.unbind(barcodeAnalyzer)
                         CameraX.bindToLifecycle(this, barcodeAnalyzer)
@@ -135,17 +137,28 @@ class ScanFragment : Fragment() {
                 } else {
                     CameraX.unbindAll()
                     rootView.camera_frame.removeAllViews()
-                    rootView.camera_frame.setOnClickListener {
-                        viewModel.requestPermission(this, false)
-                    }
+
                     val attrs = intArrayOf(R.attr.selectableItemBackground)
                     val typedArray: TypedArray = activity!!.obtainStyledAttributes(attrs)
                     val backgroundResource = typedArray.getResourceId(0, 0)
                     typedArray.recycle()
                     rootView.camera_frame.setBackgroundResource(backgroundResource)
-                    rootView.camera_frame.addView(cameraPlaceholderView.apply {
-                        this.error_message.text = getString(R.string.msg_camera_no_permission)
-                    })
+
+                    if (!viewModel.isAutoTimeEnabled()) {
+                        rootView.camera_frame.addView(cameraPlaceholderView.apply {
+                            this.error_message.text = getString(R.string.msg_enable_automatic_time)
+                            rootView.camera_frame.setOnClickListener {
+                                startActivityForResult(Intent(Settings.ACTION_DATE_SETTINGS), 69)
+                            }
+                        })
+                    } else {
+                        rootView.camera_frame.addView(cameraPlaceholderView.apply {
+                            this.error_message.text = getString(R.string.msg_camera_no_permission)
+                            rootView.camera_frame.setOnClickListener {
+                                viewModel.requestPermission(this@ScanFragment, false)
+                            }
+                        })
+                    }
                 }
             }
             .subscribe {
@@ -276,7 +289,6 @@ class ScanFragment : Fragment() {
             vibrator.vibrate(pattern, -1)
         }
     }
-
     override fun onDestroy() {
 
         disposables.dispose()

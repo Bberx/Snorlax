@@ -17,8 +17,12 @@
 package com.snorlax.snorlax.ui.home.attendance
 
 
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Parcel
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,15 +31,20 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.snackbar.Snackbar
 import com.snorlax.snorlax.R
-import com.snorlax.snorlax.utils.TimeUtils
+import com.snorlax.snorlax.utils.Constants
 import com.snorlax.snorlax.utils.TimeUtils.getTodayDateUTC
+import com.snorlax.snorlax.utils.TimeUtils.positionToTime
 import com.snorlax.snorlax.utils.TimeUtils.timeToPosition
 import com.snorlax.snorlax.utils.adapter.viewpager.AttendancePageAdapter
 import com.snorlax.snorlax.viewmodel.AttendanceViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_attendance.view.*
+import java.io.FileNotFoundException
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -44,11 +53,19 @@ import java.util.*
  */
 class AttendanceFragment : Fragment() {
 
+    companion object {
+
+        private const val TAG = "AttendanceFragment"
+        private const val REQUEST_CREATE_DOCX = 5
+    }
+
     private lateinit var viewModel: AttendanceViewModel
 
     private val disposables = CompositeDisposable()
 
     private val dateFormat = SimpleDateFormat("MMMM d, yyyy", Locale.getDefault())
+
+    private val fileNameDateFormat = SimpleDateFormat("MMMM_d_yyyy", Locale.getDefault())
 
 //    private val datePicker: MaterialDatePicker<Long> by lazy {
 //        MaterialDatePicker.Builder.datePicker()
@@ -140,7 +157,20 @@ class AttendanceFragment : Fragment() {
 //        rootView.attendance_list.layoutManager = LinearLayoutManager(context!!)
 
 
-        rootView.btn_export.setOnClickListener { viewModel.exportAttendance() }
+        rootView.btn_export.setOnClickListener {
+            val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                val selectedDate = positionToTime(rootView.attendance_pager.currentItem)
+                val fileName =
+                    "Attendance-${Constants.SECTION_LIST.getValue(viewModel.getAdminSection()).display_name}-${fileNameDateFormat.format(
+                        selectedDate
+                    )}.docx"
+
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                putExtra(Intent.EXTRA_TITLE, fileName)
+            }
+            startActivityForResult(intent, REQUEST_CREATE_DOCX)
+        }
 
 //        rootView.attendance_list.adapter = AttendanceAdaptor()
 
@@ -174,7 +204,7 @@ class AttendanceFragment : Fragment() {
             var previousItem = rootView.attendance_pager.currentItem
             override fun onPageSelected(position: Int) {
                 if (previousItem != position) {
-                    viewModel.selectedTimeObservable.onNext(TimeUtils.positionToTime(position).time)
+                    viewModel.selectedTimeObservable.onNext(positionToTime(position).time)
                     previousItem = position
                 }
             }
@@ -192,6 +222,55 @@ class AttendanceFragment : Fragment() {
 
         return rootView
 
+    }
+
+    private fun saveAttendance(outputLocation: Uri) {
+        val saveAttendance = viewModel.exportAttendance(outputLocation)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                showResult(getString(R.string.msg_attendance_saved, outputLocation.path))
+            }, {
+                when (it) {
+                    is FileNotFoundException -> {
+                        showResult(getString(R.string.err_file_not_found))
+                        Log.d(TAG, it.message!!)
+                    }
+                    is IOException -> {
+                        showResult(getString(R.string.err_ioexception, it.localizedMessage))
+                        Log.d(TAG, it.message!!)
+                    }
+                    else -> {
+                        showResult(getString(R.string.err_unknown, it.localizedMessage))
+                        Log.d(TAG, it.message!!)
+                    }
+                }
+                if (viewModel.isEmpty(outputLocation)) viewModel.deleteFile(outputLocation)
+            })
+
+        disposables.add(saveAttendance)
+
+    }
+
+    private fun showResult(message: String) {
+        view?.let {
+            Snackbar.make(it, message, Snackbar.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when (requestCode) {
+            REQUEST_CREATE_DOCX -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    data?.data?.let {
+                        saveAttendance(it)
+                    }
+                } else if (resultCode == Activity.RESULT_CANCELED) {
+                    Log.d(TAG, "Canceled")
+                }
+            }
+        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -212,5 +291,4 @@ class AttendanceFragment : Fragment() {
         super.onDestroy()
         disposables.dispose()
     }
-
 }

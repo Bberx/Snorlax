@@ -17,12 +17,19 @@
 package com.snorlax.snorlax.viewmodel
 
 import android.app.Application
+import android.net.Uri
+import android.provider.DocumentsContract
 import android.text.format.DateUtils
 import androidx.lifecycle.AndroidViewModel
+import com.snorlax.snorlax.BeabotApp
 import com.snorlax.snorlax.data.cache.LocalCacheSource
+import com.snorlax.snorlax.data.files.FileSource
 import com.snorlax.snorlax.data.firebase.FirebaseFirestoreSource
 import com.snorlax.snorlax.utils.TimeUtils.getTodayDateLocal
+import io.reactivex.Completable
 import io.reactivex.subjects.BehaviorSubject
+import java.io.FileNotFoundException
+import java.io.IOException
 import java.util.*
 
 class AttendanceViewModel(application: Application) : AndroidViewModel(application) {
@@ -33,6 +40,8 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
     private val cache = LocalCacheSource.getInstance()
 
     private val firestore = FirebaseFirestoreSource.getInstance()
+
+    private val fileSource = FileSource.getInstance()
 
     val selectedTimeObservable = BehaviorSubject.create<Long>()
 
@@ -73,14 +82,50 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
 //    fun getStudentDocumentReference(context: Context, lrn: String): DocumentReference =
 //        firestore.getDocumentReference(getAdminSection(context), lrn)
 
-    fun exportAttendance() {
+    fun deleteFile(location: Uri) {
+        DocumentsContract.deleteDocument(getApplication<BeabotApp>().contentResolver, location)
+//        getApplication<Application>().contentResolver.delete(location, null, null)
+    }
 
+    fun isEmpty(document: Uri) = fileSource.isFileEmpty(getApplication(), document)
+
+    fun exportAttendance(document: Uri): Completable {
+        return Completable.create { emitter ->
+            try {
+                val template =
+                    fileSource.getTemplateDocument(getApplication<BeabotApp>().resources.assets)
+
+                val fileOutputStream = fileSource.getFileOutputStream(
+                    getApplication<BeabotApp>().contentResolver,
+                    document
+                )
+
+//                template.write(fileOutputStream)
+//                template.close()
+                fileOutputStream.use { stream ->
+                    template.use {
+                        it?.write(stream)
+                    }
+                }
+
+
+
+                fileOutputStream?.close()
+
+                emitter.onComplete()
+
+            } catch (fileNotFound: FileNotFoundException) {
+                emitter.onError(fileNotFound)
+            } catch (ioException: IOException) {
+                emitter.onError(ioException)
+            }
+        }
     }
 
     fun getAttendance(timestamp: Date) =
         firestore.getAttendanceQuery(getAdminSection(), timestamp)
 
-    private fun getAdminSection(): String {
+    fun getAdminSection(): String {
         return cache.getUserCache(getApplication())!!.section
     }
 

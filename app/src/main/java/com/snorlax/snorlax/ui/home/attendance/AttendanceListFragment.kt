@@ -45,6 +45,7 @@ class AttendanceListFragment(private val attendance: Observable<List<Attendance>
 ////        viewModel = ViewModelProviders.of(parentFragment!!)[AttendanceViewModel::class.java]
 //    }
 
+    // TODO show an empty layout when there is no data
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -53,7 +54,7 @@ class AttendanceListFragment(private val attendance: Observable<List<Attendance>
 
         val adapter = AttendanceAdaptor()
 
-        rootView.attendance_list.layoutManager = LinearLayoutManager(context!!)
+        rootView.attendance_list.layoutManager = LinearLayoutManager(requireContext())
         rootView.attendance_list.adapter = adapter
 
 //        val firebase = viewModel.selectedTimeObservable
@@ -75,7 +76,7 @@ class AttendanceListFragment(private val attendance: Observable<List<Attendance>
 //                rootView.attendance_list.visibility = View.VISIBLE
 //                rootView.label_empty.visibility = View.GONE
 //            }
-        }
+            }
 
         disposables.add(attendanceDisposable)
 

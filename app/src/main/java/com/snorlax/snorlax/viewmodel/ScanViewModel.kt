@@ -34,6 +34,7 @@ import com.karumi.dexter.listener.PermissionDeniedResponse
 import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.BasePermissionListener
+import com.snorlax.snorlax.BeabotApp
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.data.cache.LocalCacheSource
 import com.snorlax.snorlax.data.firebase.FirebaseFirestoreSource
@@ -151,6 +152,19 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
 //        }
 //    }
 
+    fun isAutoTimeEnabled(): Boolean {
+        val autoTime = Settings.Global.getInt(
+            getApplication<BeabotApp>().contentResolver,
+            Settings.Global.AUTO_TIME, 0
+        )
+        val autoTimeZone = Settings.Global.getInt(
+            getApplication<BeabotApp>().contentResolver,
+            Settings.Global.AUTO_TIME_ZONE, 0
+        )
+
+        return (autoTime == 1 && autoTimeZone == 1)
+    }
+
     fun getCurrentTime(): Date {
 
         return Calendar.getInstance().time
@@ -164,7 +178,10 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
         firestore.getDocumentReference(getCurrentSection(), lrn)
 
 
-    private inner class SnorlaxPermissionListener(private val fragment: Fragment, private val fromOnStart: Boolean) :
+    private inner class SnorlaxPermissionListener(
+        private val fragment: Fragment,
+        private val fromOnStart: Boolean
+    ) :
         BasePermissionListener() {
 
         override fun onPermissionGranted(response: PermissionGrantedResponse?) {
