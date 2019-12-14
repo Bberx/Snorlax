@@ -45,7 +45,7 @@ class FileSource private constructor() {
 
 
     @Throws(FileNotFoundException::class)
-    fun getFileOutputStream(contentResolver: ContentResolver, document: Uri): FileOutputStream? {
+    fun getFileOutputStream(contentResolver: ContentResolver, document: Uri): FileOutputStream {
 
 //            contentResolver.openFileDescriptor(document, "rw")?.run {
 //                val fileDescriptor = this.fileDescriptor
@@ -55,12 +55,10 @@ class FileSource private constructor() {
     }
 
     @Throws(IOException::class)
-    fun getTemplateDocument(assets: AssetManager): XWPFDocument? {
+    fun getTemplateDocument(assets: AssetManager): XWPFDocument {
         ZipSecureFile.setMinInflateRatio(0.0)
-        var template: XWPFDocument? = null
-        assets.open("AttendanceSheetTemplate.docx").use {
-            template = XWPFDocument(it)
-        }
+        lateinit var template: XWPFDocument
+        assets.open("AttendanceSheetTemplate.docx").use { template = XWPFDocument(it) }
         return template
     }
 }

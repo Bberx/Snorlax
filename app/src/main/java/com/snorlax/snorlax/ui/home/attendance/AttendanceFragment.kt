@@ -34,6 +34,7 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.utils.Constants
+import com.snorlax.snorlax.utils.TimeUtils.getMonthDate
 import com.snorlax.snorlax.utils.TimeUtils.getTodayDateUTC
 import com.snorlax.snorlax.utils.TimeUtils.positionToTime
 import com.snorlax.snorlax.utils.TimeUtils.timeToPosition
@@ -225,11 +226,19 @@ class AttendanceFragment : Fragment() {
     }
 
     private fun saveAttendance(outputLocation: Uri) {
-        val saveAttendance = viewModel.exportAttendance(outputLocation)
+        val saveAttendance = viewModel.processAttendance(
+            outputLocation,
+            getMonthDate(Date(viewModel.selectedTimeObservable.value!!))
+        )
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
-                showResult(getString(R.string.msg_attendance_saved, outputLocation.path))
+                showResult(
+                    getString(
+                        R.string.msg_attendance_saved,
+                        outputLocation.lastPathSegment?.substringAfter(':')
+                    )
+                )
             }, {
                 when (it) {
                     is FileNotFoundException -> {
@@ -240,9 +249,12 @@ class AttendanceFragment : Fragment() {
                         showResult(getString(R.string.err_ioexception, it.localizedMessage))
                         Log.d(TAG, it.message!!)
                     }
+                    is NoSuchElementException -> {
+                        showResult(getString(R.string.err_unknown_section))
+                    }
                     else -> {
                         showResult(getString(R.string.err_unknown, it.localizedMessage))
-                        Log.d(TAG, it.message!!)
+//                        Log.d(TAG, it.message!!)
                     }
                 }
                 if (viewModel.isEmpty(outputLocation)) viewModel.deleteFile(outputLocation)

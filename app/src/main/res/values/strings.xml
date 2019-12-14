@@ -69,15 +69,13 @@
     <string name="msg_export">\"%1$s will create a new word document that contains the list of attendance. Please choose where to save the document.\"</string>
     <string name="msg_delete_student"><![CDATA[Are you sure you want to <b>delete all the records of %s</b>? This action is irreversible. Please re-enter your password to continue.]]></string>
     <string name="title_delete_student">Delete student</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="accs_empty_list">Empty list</string>
-    <string name="msg_empty_list">It seems empty here...</string>
+    <string name="msg_empty_list">It seems empty here…</string>
     <string name="label_which_day">Select which day…</string>
     <string name="msg_enable_automatic_time">Enable automatic time and time zone settings to continue</string>
-    <string name="msg_attendance_saved">Attendance saved in %s</string>
+    <string name="msg_attendance_saved">Attendance saved as %s</string>
     <string name="err_file_not_found">Failed, output file is not found</string>
     <string name="err_ioexception">Failed IOException, %s</string>
     <string name="err_unknown">Failed unknown error, %s</string>
+    <string name="err_unknown_section">Error, unknown section. Please sign out and login again</string>
 </resources>

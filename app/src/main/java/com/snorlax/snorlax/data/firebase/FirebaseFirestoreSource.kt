@@ -49,10 +49,7 @@ class FirebaseFirestoreSource private constructor() {
         private var instance: FirebaseFirestoreSource? = null
 
         fun getInstance(): FirebaseFirestoreSource {
-            instance?.let {
-                return it
-            }
-
+            instance?.let { return it }
             instance = FirebaseFirestoreSource()
             return getInstance()
         }
@@ -99,7 +96,7 @@ class FirebaseFirestoreSource private constructor() {
     fun getStudentList(section: String): Single<List<Student>> {
         return Single.create { emitter ->
             Log.d("Threading", "get student list ${Thread.currentThread().name}")
-            sectionRef
+            val listenerRegistration = sectionRef
                 .document(section)
                 .collection(STUDENTS_DATA_NAME)
                 .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
@@ -112,14 +109,17 @@ class FirebaseFirestoreSource private constructor() {
                     for (document in querySnapshot!!) {
                         students.add(document.toObject(Student::class.java))
                     }
-                    if (students.isEmpty()) emitter.onSuccess(listOf())
+                    if (students.isEmpty()) emitter.onSuccess(emptyList())
                     else {
                         students.sortBy {
-                            it.name.getValue("last")[0]
+                            it.name.getValue(Student.LAST_NAME_VAL)
                         }
                         emitter.onSuccess(students)
                     }
                 }
+            emitter.setCancellable {
+                listenerRegistration.remove()
+            }
         }
     }
 

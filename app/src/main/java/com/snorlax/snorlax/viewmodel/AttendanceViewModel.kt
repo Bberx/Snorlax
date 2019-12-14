@@ -25,9 +25,14 @@ import com.snorlax.snorlax.BeabotApp
 import com.snorlax.snorlax.data.cache.LocalCacheSource
 import com.snorlax.snorlax.data.files.FileSource
 import com.snorlax.snorlax.data.firebase.FirebaseFirestoreSource
+import com.snorlax.snorlax.utils.Constants
 import com.snorlax.snorlax.utils.TimeUtils.getTodayDateLocal
+import com.snorlax.snorlax.utils.processor.WordProcessor
 import io.reactivex.Completable
+import io.reactivex.Single
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
+import org.apache.poi.xwpf.usermodel.XWPFDocument
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.util.*
@@ -83,43 +88,69 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
 //        firestore.getDocumentReference(getAdminSection(context), lrn)
 
     fun deleteFile(location: Uri) {
-        DocumentsContract.deleteDocument(getApplication<BeabotApp>().contentResolver, location)
+        if (!DocumentsContract.deleteDocument(
+                getApplication<BeabotApp>().contentResolver,
+                location
+            )
+        ) {
+            deleteFile(location)
+        }
+
 //        getApplication<Application>().contentResolver.delete(location, null, null)
     }
 
     fun isEmpty(document: Uri) = fileSource.isFileEmpty(getApplication(), document)
 
-    fun exportAttendance(document: Uri): Completable {
-        return Completable.create { emitter ->
+    private fun saveAttendance(document: XWPFDocument, outputLocation: Uri) =
+        Completable.create { emitter ->
             try {
-                val template =
-                    fileSource.getTemplateDocument(getApplication<BeabotApp>().resources.assets)
-
                 val fileOutputStream = fileSource.getFileOutputStream(
                     getApplication<BeabotApp>().contentResolver,
-                    document
+                    outputLocation
                 )
-
-//                template.write(fileOutputStream)
-//                template.close()
                 fileOutputStream.use { stream ->
-                    template.use {
-                        it?.write(stream)
+                    document.use {
+                        it.write(stream)
                     }
                 }
-
-
-
-                fileOutputStream?.close()
-
                 emitter.onComplete()
-
             } catch (fileNotFound: FileNotFoundException) {
                 emitter.onError(fileNotFound)
             } catch (ioException: IOException) {
                 emitter.onError(ioException)
             }
-        }
+
+        }.subscribeOn(Schedulers.io())
+
+    fun processAttendance(outputLocation: Uri, month: Date): Completable {
+        return firestore.getStudentList(getAdminSection()).flatMap { studentList ->
+            Single.create<XWPFDocument> { emitter ->
+                try {
+                    val template =
+                        fileSource.getTemplateDocument(getApplication<BeabotApp>().resources.assets)
+
+
+                    val wordProcessor = WordProcessor(studentList, template)
+
+                    // Populate header
+                    wordProcessor.populateHeader(
+                        Constants.SECTION_LIST.getValue(getAdminSection()),
+                        month
+                    )
+
+                    // TODO fix testing
+                    // Populate table
+                    wordProcessor.populateTable(emptyList())
+
+
+                    emitter.onSuccess(wordProcessor.document)
+                } catch (ioException: IOException) {
+                    emitter.onError(ioException)
+                } catch (error: Exception) {
+                    emitter.onError(error)
+                }
+            }
+        }.flatMapCompletable { saveAttendance(it, outputLocation) }.subscribeOn(Schedulers.io())
     }
 
     fun getAttendance(timestamp: Date) =
@@ -178,4 +209,5 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
     private fun Long.countHowManyTime(unit: Long): Pair<Int, Int> {
         return Pair((this / unit).toInt(), (this % unit).toInt())
     }
+
 }

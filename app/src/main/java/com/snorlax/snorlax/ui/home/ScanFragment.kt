@@ -79,7 +79,7 @@ class ScanFragment : Fragment() {
         super.onCreate(savedInstanceState)
         viewModel = activity?.run {
             ViewModelProviders.of(this)[ScanViewModel::class.java]
-        } ?: throw Exception("Invalid Activity")
+        } ?: throw RuntimeException("Invalid Activity")
 
     }
 
@@ -223,7 +223,6 @@ class ScanFragment : Fragment() {
 //                    .subscribeOn(Schedulers.computation())
 //                    .doOnComplete { Log.d("Threading", " barcode ${Thread.currentThread().name}") }
 //                    .subscribe()
-
                     disposables.add(Flowable.fromCallable { command.run() }
                         .subscribeOn(Schedulers.computation())
                         .onBackpressureDrop()

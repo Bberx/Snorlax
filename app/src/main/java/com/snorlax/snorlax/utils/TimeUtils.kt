@@ -35,6 +35,18 @@ object TimeUtils {
 //
 //    }
 
+    fun getMonthDate(date: Date): Date {
+        val raw = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        raw.time = date
+        val safe = getCalendar()
+        safe.run {
+            set(Calendar.YEAR, raw.get(Calendar.YEAR))
+            set(Calendar.MONTH, raw.get(Calendar.MONTH))
+        }
+        return safe.time
+
+    }
+
     fun getTodayDateLocal(): Date {
 //            val calendar = Calendar.getInstance(TimeZone.getDefault())
 //

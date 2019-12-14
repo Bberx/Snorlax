@@ -253,12 +253,18 @@ dependencies {
 
 //    implementation 'com.github.Bberx:poi-android:4.1.1'
 //    implementation 'com.github.Bberx.poi-android:proguard:4.1.1'
-//    compileOnly 'org.apache.poi:poi-ooxml:4.1.1'
+//    compileOnly 'org.apache.poi:poi-ooxml:3.17'
 
 //    implementation 'com.github.Bberx:poi-android:4.1.1'
 
     // Viewmodel
     def lifecycle_version = "2.1.0"
+
+    // Dagger
+    api 'com.google.dagger:dagger:2.25.2'
+    kapt 'com.google.dagger:dagger-compiler:2.25.2'
+    api 'com.google.dagger:dagger-android:2.25.2'
+    kapt 'com.google.dagger:dagger-android-processor:2.25.2'
 
     // ViewModel and LiveData
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
