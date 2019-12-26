@@ -76,6 +76,7 @@ class WordProcessor(private val document: XWPFDocument, private val month: Date)
                 header.insertNewRun(2).setText(" ")
             } catch (error: Exception) {
                 emitter.onError(error)
+
             }
             emitter.onComplete()
         }.subscribeOn(Schedulers.io())
