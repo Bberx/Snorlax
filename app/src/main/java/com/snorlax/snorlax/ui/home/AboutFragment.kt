@@ -66,11 +66,11 @@ class AboutFragment : Fragment() {
         rootView.btn_github.setOnClickListener {
             if (packageName == null) {
                 Intent(Intent.ACTION_VIEW, Uri.parse(GITHUB_URL)).apply {
-                    context!!.startActivity(this)
+                    requireContext().startActivity(this)
                 }
             } else {
                 tabIntent.intent.setPackage(packageName)
-                tabIntent.launchUrl(context, Uri.parse(GITHUB_URL))
+                tabIntent.launchUrl(context!!, Uri.parse(GITHUB_URL))
             }
 
 

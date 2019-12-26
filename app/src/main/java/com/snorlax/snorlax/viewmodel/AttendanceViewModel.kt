@@ -25,22 +25,23 @@ import com.snorlax.snorlax.BeabotApp
 import com.snorlax.snorlax.data.cache.LocalCacheSource
 import com.snorlax.snorlax.data.files.FileSource
 import com.snorlax.snorlax.data.firebase.FirebaseFirestoreSource
+import com.snorlax.snorlax.model.Student
 import com.snorlax.snorlax.utils.Constants
 import com.snorlax.snorlax.utils.TimeUtils.getTodayDateLocal
 import com.snorlax.snorlax.utils.processor.WordProcessor
 import io.reactivex.Completable
 import io.reactivex.Single
+import io.reactivex.SingleEmitter
+import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import org.apache.poi.xwpf.usermodel.XWPFDocument
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.lang.Exception
 import java.util.*
 
 class AttendanceViewModel(application: Application) : AndroidViewModel(application) {
-
-    // Initialize with current date
-    private val currentCalendar = Calendar.getInstance()
 
     private val cache = LocalCacheSource.getInstance()
 
@@ -89,23 +90,18 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
 
     fun deleteFile(location: Uri) {
         if (!DocumentsContract.deleteDocument(
-                getApplication<BeabotApp>().contentResolver,
+                getApplication<Application>().contentResolver,
                 location
             )
-        ) {
-            deleteFile(location)
-        }
-
-//        getApplication<Application>().contentResolver.delete(location, null, null)
+        ) deleteFile(location)
     }
 
     fun isEmpty(document: Uri) = fileSource.isFileEmpty(getApplication(), document)
 
     private fun saveAttendance(document: XWPFDocument, outputLocation: Uri) =
-        Completable.create { emitter ->
-            try {
-                val fileOutputStream = fileSource.getFileOutputStream(
-                    getApplication<BeabotApp>().contentResolver,
+        Completable.fromAction {
+            val fileOutputStream = fileSource.getFileOutputStream(
+                    getApplication<Application>().contentResolver,
                     outputLocation
                 )
                 fileOutputStream.use { stream ->
@@ -113,101 +109,84 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
                         it.write(stream)
                     }
                 }
-                emitter.onComplete()
-            } catch (fileNotFound: FileNotFoundException) {
-                emitter.onError(fileNotFound)
-            } catch (ioException: IOException) {
-                emitter.onError(ioException)
-            }
-
         }.subscribeOn(Schedulers.io())
 
+
     fun processAttendance(outputLocation: Uri, month: Date): Completable {
-        return firestore.getStudentList(getAdminSection()).flatMap { studentList ->
-            Single.create<XWPFDocument> { emitter ->
-                try {
-                    val template =
-                        fileSource.getTemplateDocument(getApplication<BeabotApp>().resources.assets)
-
-
-                    val wordProcessor = WordProcessor(studentList, template)
-
-                    // Populate header
-                    wordProcessor.populateHeader(
-                        Constants.SECTION_LIST.getValue(getAdminSection()),
-                        month
-                    )
-
-                    // TODO fix testing
-                    // Populate table
-                    wordProcessor.populateTable(emptyList())
-
-
-                    emitter.onSuccess(wordProcessor.document)
-                } catch (ioException: IOException) {
-                    emitter.onError(ioException)
-                } catch (error: Exception) {
-                    emitter.onError(error)
-                }
-            }
-        }.flatMapCompletable { saveAttendance(it, outputLocation) }.subscribeOn(Schedulers.io())
+        return firestore.getStudentList(getSection()).flatMap { students ->
+            WordProcessor(
+                fileSource.getTemplateDocument(getApplication<Application>().resources.assets),
+                month
+            ).processTable(
+                Constants.SECTION_LIST.getValue(getSection()),
+                students,
+                emptyList() // TODO
+            )
+        }.flatMapCompletable { saveAttendance(it, outputLocation) }
     }
 
     fun getAttendance(timestamp: Date) =
-        firestore.getAttendanceQuery(getAdminSection(), timestamp)
+        firestore.getAttendanceQuery(getSection(), timestamp)
 
-    fun getAdminSection(): String {
+    fun getSection(): String {
         return cache.getUserCache(getApplication())!!.section
     }
-
-//    fun getStudentList(context: Context): Single<List<Student>> {
-//        return firestore.getStudentList(getAdminSection(context))
-//            .subscribeOn(Schedulers.io())
-//    }
 
     fun getRelativeDateString(relative: Date): String {
         val relativeTime = getTodayDateLocal().time - relative.time
 
-        currentCalendar.timeInMillis = relative.time
+        val currentCalendar = GregorianCalendar.getInstance().apply {
+            time = relative
+        }
 
-        if (!relativeTime.isNegative()) {
+        val dayOfWeek = when (currentCalendar.get(Calendar.DAY_OF_WEEK)) {
+            Calendar.SUNDAY -> "Sunday"
+            Calendar.MONDAY -> "Monday"
+            Calendar.TUESDAY -> "Tuesday"
+            Calendar.WEDNESDAY -> "Wednesday"
+            Calendar.THURSDAY -> "Thursday"
+            Calendar.FRIDAY -> "Friday"
+            Calendar.SATURDAY -> "Saturday"
+            else -> ""
+        }
+
+        if (relativeTime >= 0) {
+            fun Long.countHowManyTime(unit: Long) = (this / unit).toInt()
             // Past
-            when (val howManyDays = relativeTime.countHowManyTime(DateUtils.DAY_IN_MILLIS).first) {
-                0 -> return "Today, ${dayOfWeek().toLowerCase(Locale.getDefault())}…" // Today
-                1 -> return "${dayOfWeek()}, yesterday…" // Today
-                in 2..6 -> return "${dayOfWeek()}, $howManyDays days ago…"
-                7 -> return "Last ${dayOfWeek().toLowerCase(Locale.getDefault())}⁠…"
+            when (val howManyDays = relativeTime.countHowManyTime(DateUtils.DAY_IN_MILLIS)) {
+                0 -> return "Today, ${dayOfWeek.toLowerCase(Locale.getDefault())}…" // Today
+                1 -> return "$dayOfWeek, yesterday…" // Today
+                in 2..6 -> return "$dayOfWeek, $howManyDays days ago…"
+                7 -> return "Last ${dayOfWeek.toLowerCase(Locale.getDefault())}⁠…"
                 in 8..Int.MAX_VALUE -> {
                     return when (val howManyWeeks =
-                        relativeTime.countHowManyTime(DateUtils.WEEK_IN_MILLIS).first) {
-                        1 -> "${dayOfWeek()}, last week…"
-                        in 2..3 -> "${dayOfWeek()}, $howManyWeeks weeks ago…"
-                        4 -> "${dayOfWeek()}, last month…"
-                        else -> "${dayOfWeek()},"
+                        relativeTime.countHowManyTime(DateUtils.WEEK_IN_MILLIS)) {
+                        1 -> "$dayOfWeek, last week…"
+                        in 2..3 -> "$dayOfWeek, $howManyWeeks weeks ago…"
+                        4 -> "$dayOfWeek, last month…"
+                        else -> "$dayOfWeek,"
                     }
                 }
-                else -> return ""
+                else -> return dayOfWeek
             }
-        } else return ""
+        } else return dayOfWeek
     }
 
-    private fun dayOfWeek(): String = when (currentCalendar.get(Calendar.DAY_OF_WEEK)) {
-        Calendar.SUNDAY -> "Sunday"
-        Calendar.MONDAY -> "Monday"
-        Calendar.TUESDAY -> "Tuesday"
-        Calendar.WEDNESDAY -> "Wednesday"
-        Calendar.THURSDAY -> "Thursday"
-        Calendar.FRIDAY -> "Friday"
-        Calendar.SATURDAY -> "Saturday"
-        else -> ""
-    }
+//    private fun dayOfWeek(): String = when (currentCalendar.get(Calendar.DAY_OF_WEEK)) {
+//        Calendar.SUNDAY -> "Sunday"
+//        Calendar.MONDAY -> "Monday"
+//        Calendar.TUESDAY -> "Tuesday"
+//        Calendar.WEDNESDAY -> "Wednesday"
+//        Calendar.THURSDAY -> "Thursday"
+//        Calendar.FRIDAY -> "Friday"
+//        Calendar.SATURDAY -> "Saturday"
+//        else -> ""
+//    }
 
-    private fun Long.isNegative(): Boolean {
-        return (this < 0L)
-    }
+//    private fun Long.isNegative(): Boolean {
+//        return (this < 0L)
+//    }
 
-    private fun Long.countHowManyTime(unit: Long): Pair<Int, Int> {
-        return Pair((this / unit).toInt(), (this % unit).toInt())
-    }
+//    private fun Long.countHowManyTime(unit: Long) = (this / unit).toInt()
 
 }

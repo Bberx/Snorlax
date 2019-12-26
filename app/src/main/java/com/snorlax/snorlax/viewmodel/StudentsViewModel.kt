@@ -45,7 +45,6 @@ class StudentsViewModel(application: Application) : AndroidViewModel(application
 
     private val firestore = FirebaseFirestoreSource.getInstance()
 
-    val students = mutableListOf<Student>()
 
     fun addStudent(student: Student): Completable {
         return firestore.addStudent(getCurrentSection(), student)
@@ -55,11 +54,11 @@ class StudentsViewModel(application: Application) : AndroidViewModel(application
         return firebaseAuthSource.reauth(password)
     }
 
-    fun getStudents() = firestore.getStudentList(getCurrentSection()).subscribeOn(Schedulers.io())
+//    fun getStudentList() = firestore.getStudentList(getCurrentSection()).subscribeOn(Schedulers.io())
 
     fun getStudentQuery() = firestore.getStudentQuery(getCurrentSection())
 
-    fun getCurrentSection(): String {
+    private fun getCurrentSection(): String {
         return localCacheSource.getUserCache(getApplication())!!.section
     }
 

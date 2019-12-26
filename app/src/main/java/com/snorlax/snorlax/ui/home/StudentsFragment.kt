@@ -26,7 +26,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.text.isDigitsOnly
 import androidx.fragment.app.Fragment
@@ -55,7 +54,7 @@ import kotlinx.android.synthetic.main.fragment_students.*
  * A simple [Fragment] subclass.
  */
 
-class StudentsFragment : Fragment(), StudentActionListener {
+class StudentsFragment : Fragment() {
 
     // TODO get section of current user
 
@@ -70,53 +69,173 @@ class StudentsFragment : Fragment(), StudentActionListener {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val rootView = inflater.inflate(R.layout.fragment_students, container, false)
 
 
-        return rootView
+        return inflater.inflate(R.layout.fragment_students, container, false)
     }
 
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
+        val studentActionListener = object : StudentActionListener {
+            override fun editStudent(
+                position: Int,
+                student: Student,
+                options: FirestoreRecyclerOptions<Student>
+            ) {
+                val alertDialog = MaterialAlertDialogBuilder(
+                    context,
+                    R.style.ThemeOverlay_MaterialComponents_MaterialAlertDialog_Centered
+                )
+                    .setTitle("Edit student")
+                    .setIcon(R.drawable.ic_edit)
+                    .setView(R.layout.diag_add_student)
+                    .setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
 
-        if (viewModel.canAddStudent()) {
-            btn_add_student.setOnClickListener {
-                showAddStudentDialog()
+                        val alert = (dialogInterface as AlertDialog)
+
+                        if (alert.input_first_name.text!!.isNotEmpty() &&
+                            alert.input_last_name.text!!.isNotEmpty() &&
+                            alert.input_lrn.text!!.isNotEmpty()
+                        ) {
+                            Completable.create { emitter ->
+                                options.snapshots.getSnapshot(position).reference.set(
+                                    Student(
+                                        mapOf(
+                                            Student.FIRST_NAME_VAL to alert.input_first_name.text.toString().trim(),
+                                            Student.LAST_NAME_VAL to alert.input_last_name.text.toString().trim()
+                                        ), alert.input_lrn.text.toString().trim()
+                                    )
+                                ).addOnSuccessListener {
+                                    emitter.onComplete()
+                                }.addOnFailureListener {
+                                    emitter.onError(it)
+                                }
+                            }
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe({
+                                    Snackbar.make(
+                                        view!!,
+                                        "Student edited",
+                                        Snackbar.LENGTH_SHORT
+                                    )
+                                        .show()
+                                }, {
+                                    Snackbar.make(
+                                        view!!,
+                                        it.localizedMessage!!,
+                                        Snackbar.LENGTH_SHORT
+                                    ).show()
+                                })
+                        }
+
+                    }
+                    .setNegativeButton(android.R.string.no, null)
+                    .create()
+
+                alertDialog.show()
+                alertDialog.input_first_name.setText(student.name[Student.FIRST_NAME_VAL])
+                alertDialog.input_last_name.setText(student.name[Student.LAST_NAME_VAL])
+                alertDialog.input_lrn.setText(student.lrn)
+                alertDialog.input_lrn.isEnabled = false
+                alertDialog.text_layout_lrn.isEnabled = false
             }
-            //            layout_reveal.setLockDrag(false)
 
-        } else {
-            btn_add_student.visibility = View.GONE
+            override fun deleteStudent(student: Student) {
+                val deleteDialog = MaterialAlertDialogBuilder(
+                    context,
+                    R.style.ThemeOverlay_MaterialComponents_MaterialAlertDialog_Centered
+                )
+                    .setTitle(getString(R.string.title_delete_student))
+                    .setIcon(R.drawable.ic_delete)
+                    .setMessage(
+                        getSpannedText(
+                            getString(
+                                R.string.msg_delete_student,
+                                "${student.name[Student.FIRST_NAME_VAL]} ${student.name[Student.LAST_NAME_VAL]}"
+                            )
+                        )
+                    )
+                    .setView(R.layout.diag_delete_student)
+                    .setPositiveButton(R.string.btn_ok, null)
+                    .setNegativeButton(android.R.string.no, null)
+                    .create()
+
+                deleteDialog.setOnShowListener { dialog ->
+                    deleteDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                        val textLayout = deleteDialog.text_layout_input_reauth_password
+                        val loadingView = deleteDialog.reauth_password_loading
+
+                        textLayout.error = null
+                        loadingView.visibility = View.VISIBLE
+
+                        viewModel.reauth(deleteDialog.input_reauth_password.text.toString())
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe({
+                                loadingView.visibility = View.GONE
+                                viewModel.deleteStudent(student)
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe({
+                                        dialog.dismiss()
+                                        Snackbar.make(
+                                            view!!,
+                                            "Student deleted",
+                                            Snackbar.LENGTH_SHORT
+                                        ).show()
+                                    }, {
+                                        dialog.dismiss()
+                                        Snackbar.make(
+                                            view!!,
+                                            "${it.localizedMessage} Please try again",
+                                            Snackbar.LENGTH_SHORT
+                                        ).show()
+                                    })
+                            }, {
+                                loadingView.visibility = View.GONE
+                                if (it is FirebaseAuthException) {
+                                    it.let {
+                                        Log.d("ErrorCode", it.errorCode)
+                                    }
+                                }
+                                textLayout.error = it.localizedMessage!!
+                            })
+                    }
+
+                }
+                deleteDialog.setCanceledOnTouchOutside(false)
+                deleteDialog.show()
+            }
         }
 
+        if (viewModel.canAddStudent()) btn_add_student.setOnClickListener { showAddStudentDialog() }
+        else btn_add_student.visibility = View.GONE
 
-        disposables.add(
-            viewModel.getStudentQuery()
-                .subscribeOn(Schedulers.io())
-                .subscribe({
-                    val recyclerOptions: FirestoreRecyclerOptions<Student> =
-                        FirestoreRecyclerOptions.Builder<Student>()
-                            .setLifecycleOwner(this)
-                            .setQuery(it, Student::class.java)
-                            .build()
 
-                    students_list.layoutManager = LinearLayoutManager(context!!)
-                    students_list.adapter = StudentListAdaptor(
-                        activity!!,
-                        !viewModel.canAddStudent(),
-                        recyclerOptions,
-                        this
-                    )
-                }, {
-                    Toast.makeText(context!!, it.localizedMessage, Toast.LENGTH_LONG).show()
-                })
-        )
+        val recyclerOptions: FirestoreRecyclerOptions<Student> =
+            FirestoreRecyclerOptions.Builder<Student>()
+                .setLifecycleOwner(this)
+                .setQuery(viewModel.getStudentQuery(), Student::class.java)
+                .build()
+
+        students_list.layoutManager = LinearLayoutManager(context!!)
+        students_list.adapter =
+            StudentListAdaptor(
+                activity!!,
+                !viewModel.canAddStudent(),
+                recyclerOptions,
+                studentActionListener
+            )
+
+
     }
 
     private fun getSpannedText(text: String): Spanned {
@@ -127,167 +246,167 @@ class StudentsFragment : Fragment(), StudentActionListener {
         }
     }
 
-    override fun deleteStudent(student: Student) {
-        val deleteDialog = MaterialAlertDialogBuilder(
-            context,
-            R.style.ThemeOverlay_MaterialComponents_MaterialAlertDialog_Centered
-        )
-            .setTitle(getString(R.string.title_delete_student))
-            .setIcon(R.drawable.ic_delete)
-            .setMessage(
-                getSpannedText(
-                    getString(
-                        R.string.msg_delete_student,
-                        "${student.name[Student.FIRST_NAME_VAL]} ${student.name[Student.LAST_NAME_VAL]}"
-                    )
-                )
-            )
-            .setView(R.layout.diag_delete_student)
-//            .setPositiveButton(android.R.string.yes) { dialogInterface, _ ->
+//    override fun deleteStudent(student: Student) {
+//        val deleteDialog = MaterialAlertDialogBuilder(
+//            context,
+//            R.style.ThemeOverlay_MaterialComponents_MaterialAlertDialog_Centered
+//        )
+//            .setTitle(getString(R.string.title_delete_student))
+//            .setIcon(R.drawable.ic_delete)
+//            .setMessage(
+//                getSpannedText(
+//                    getString(
+//                        R.string.msg_delete_student,
+//                        "${student.name[Student.FIRST_NAME_VAL]} ${student.name[Student.LAST_NAME_VAL]}"
+//                    )
+//                )
+//            )
+//            .setView(R.layout.diag_delete_student)
+////            .setPositiveButton(android.R.string.yes) { dialogInterface, _ ->
+////
+////                val alert = (dialogInterface as AlertDialog)
+////
+////
+////                viewModel.deleteStudent(student)
+////                    .subscribeOn(Schedulers.io())
+////                    .subscribe({
+////                        Snackbar.make(
+////                            view!!,
+////                            "Student deleted",
+////                            Snackbar.LENGTH_SHORT
+////                        )
+////                            .show()
+////                    }, {
+////                        Snackbar.make(
+////                            view!!,
+////                            it.localizedMessage!!,
+////                            Snackbar.LENGTH_SHORT
+////                        )
+////                            .show()
+////                    })
+////            }
+//            .setPositiveButton(R.string.btn_ok, null)
+//            .setNegativeButton(android.R.string.no, null)
+//            .create()
+//
+//        deleteDialog.setOnShowListener { dialog ->
+//
+//            deleteDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+//                val textLayout = deleteDialog.text_layout_input_reauth_password
+//                val loadingView = deleteDialog.reauth_password_loading
+//
+//                textLayout.error = null
+//                loadingView.visibility = View.VISIBLE
+//
+//                viewModel.reauth(deleteDialog.input_reauth_password.text.toString())
+//                    .subscribeOn(Schedulers.io())
+//                    .observeOn(AndroidSchedulers.mainThread())
+//                    .subscribe({
+//                        loadingView.visibility = View.GONE
+//                        viewModel.deleteStudent(student)
+//                            .subscribeOn(Schedulers.io())
+//                            .observeOn(AndroidSchedulers.mainThread())
+//                            .subscribe({
+//                                dialog.dismiss()
+//                                Snackbar.make(
+//                                    view!!,
+//                                    "Student deleted",
+//                                    Snackbar.LENGTH_SHORT
+//                                ).show()
+//                            }, {
+//                                dialog.dismiss()
+//                                Snackbar.make(
+//                                    view!!,
+//                                    "${it.localizedMessage} Please try again",
+//                                    Snackbar.LENGTH_SHORT
+//                                ).show()
+//                            })
+//                    }, {
+//                        loadingView.visibility = View.GONE
+//                        if (it is FirebaseAuthException) {
+//                            it.let {
+//                                Log.d("ErrorCode", it.errorCode)
+//                            }
+//                        }
+////                        if (it is IllegalArgumentException) {
+////                            textLayout.error = getString(R.string.err_msg_not_valid_email)
+////                        } else {
+//                        textLayout.error = it.localizedMessage!!
+////                        }
+//                    })
+//            }
+//
+//        }
+//
+//        deleteDialog.setCanceledOnTouchOutside(false)
+//        deleteDialog.show()
+//    }
+
+//    override fun editStudent(
+//        position: Int,
+//        student: Student,
+//        options: FirestoreRecyclerOptions<Student>
+//    ) {
+//        val alertDialog = MaterialAlertDialogBuilder(
+//            context,
+//            R.style.ThemeOverlay_MaterialComponents_MaterialAlertDialog_Centered
+//        )
+//            .setTitle("Edit student")
+//            .setIcon(R.drawable.ic_edit)
+//            .setView(R.layout.diag_add_student)
+//            .setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
 //
 //                val alert = (dialogInterface as AlertDialog)
 //
-//
-//                viewModel.deleteStudent(student)
-//                    .subscribeOn(Schedulers.io())
-//                    .subscribe({
-//                        Snackbar.make(
-//                            view!!,
-//                            "Student deleted",
-//                            Snackbar.LENGTH_SHORT
-//                        )
-//                            .show()
-//                    }, {
-//                        Snackbar.make(
-//                            view!!,
-//                            it.localizedMessage!!,
-//                            Snackbar.LENGTH_SHORT
-//                        )
-//                            .show()
-//                    })
-//            }
-            .setPositiveButton(R.string.btn_ok, null)
-            .setNegativeButton(android.R.string.no, null)
-            .create()
-
-        deleteDialog.setOnShowListener { dialog ->
-
-            deleteDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                val textLayout = deleteDialog.text_layout_input_reauth_password
-                val loadingView = deleteDialog.reauth_password_loading
-
-                textLayout.error = null
-                loadingView.visibility = View.VISIBLE
-
-                viewModel.reauth(deleteDialog.input_reauth_password.text.toString())
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe({
-                        loadingView.visibility = View.GONE
-                        viewModel.deleteStudent(student)
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe({
-                                dialog.dismiss()
-                                Snackbar.make(
-                                    view!!,
-                                    "Student deleted",
-                                    Snackbar.LENGTH_SHORT
-                                ).show()
-                            }, {
-                                dialog.dismiss()
-                                Snackbar.make(
-                                    view!!,
-                                    "${it.localizedMessage} Please try again",
-                                    Snackbar.LENGTH_SHORT
-                                ).show()
-                            })
-                    }, {
-                        loadingView.visibility = View.GONE
-                        if (it is FirebaseAuthException) {
-                            it.let {
-                                Log.d("ErrorCode", it.errorCode)
-                            }
-                        }
-//                        if (it is IllegalArgumentException) {
-//                            textLayout.error = getString(R.string.err_msg_not_valid_email)
-//                        } else {
-                        textLayout.error = it.localizedMessage!!
+//                if (alert.input_first_name.text!!.isNotEmpty() &&
+//                    alert.input_last_name.text!!.isNotEmpty() &&
+//                    alert.input_lrn.text!!.isNotEmpty()
+//                ) {
+//                    Completable.create { emitter ->
+//                        options.snapshots.getSnapshot(position).reference.set(
+//                            Student(
+//                                mapOf(
+//                                    Student.FIRST_NAME_VAL to alert.input_first_name.text.toString().trim(),
+//                                    Student.LAST_NAME_VAL to alert.input_last_name.text.toString().trim()
+//                                ), alert.input_lrn.text.toString().trim()
+//                            )
+//                        ).addOnSuccessListener {
+//                            emitter.onComplete()
+//                        }.addOnFailureListener {
+//                            emitter.onError(it)
 //                        }
-                    })
-            }
-
-        }
-
-        deleteDialog.setCanceledOnTouchOutside(false)
-        deleteDialog.show()
-    }
-
-    override fun editStudent(
-        position: Int,
-        student: Student,
-        options: FirestoreRecyclerOptions<Student>
-    ) {
-        val alertDialog = MaterialAlertDialogBuilder(
-            context,
-            R.style.ThemeOverlay_MaterialComponents_MaterialAlertDialog_Centered
-        )
-            .setTitle("Edit student")
-            .setIcon(R.drawable.ic_edit)
-            .setView(R.layout.diag_add_student)
-            .setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
-
-                val alert = (dialogInterface as AlertDialog)
-
-                if (alert.input_first_name.text!!.isNotEmpty() &&
-                    alert.input_last_name.text!!.isNotEmpty() &&
-                    alert.input_lrn.text!!.isNotEmpty()
-                ) {
-                    Completable.create { emitter ->
-                        options.snapshots.getSnapshot(position).reference.set(
-                            Student(
-                                mapOf(
-                                    Student.FIRST_NAME_VAL to alert.input_first_name.text.toString().trim(),
-                                    Student.LAST_NAME_VAL to alert.input_last_name.text.toString().trim()
-                                ), alert.input_lrn.text.toString().trim()
-                            )
-                        ).addOnSuccessListener {
-                            emitter.onComplete()
-                        }.addOnFailureListener {
-                            emitter.onError(it)
-                        }
-                    }
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe({
-                            Snackbar.make(
-                                view!!,
-                                "Student edited",
-                                Snackbar.LENGTH_SHORT
-                            )
-                                .show()
-                        }, {
-                            Snackbar.make(
-                                view!!,
-                                it.localizedMessage!!,
-                                Snackbar.LENGTH_SHORT
-                            ).show()
-                        })
-                }
-
-            }
-            .setNegativeButton(android.R.string.no, null)
-            .create()
-
-        alertDialog.show()
-        alertDialog.input_first_name.setText(student.name[Student.FIRST_NAME_VAL])
-        alertDialog.input_last_name.setText(student.name[Student.LAST_NAME_VAL])
-        alertDialog.input_lrn.setText(student.lrn)
-        alertDialog.input_lrn.isEnabled = false
-        alertDialog.text_layout_lrn.isEnabled = false
-
-
-    }
+//                    }
+//                        .subscribeOn(Schedulers.io())
+//                        .observeOn(AndroidSchedulers.mainThread())
+//                        .subscribe({
+//                            Snackbar.make(
+//                                view!!,
+//                                "Student edited",
+//                                Snackbar.LENGTH_SHORT
+//                            )
+//                                .show()
+//                        }, {
+//                            Snackbar.make(
+//                                view!!,
+//                                it.localizedMessage!!,
+//                                Snackbar.LENGTH_SHORT
+//                            ).show()
+//                        })
+//                }
+//
+//            }
+//            .setNegativeButton(android.R.string.no, null)
+//            .create()
+//
+//        alertDialog.show()
+//        alertDialog.input_first_name.setText(student.name[Student.FIRST_NAME_VAL])
+//        alertDialog.input_last_name.setText(student.name[Student.LAST_NAME_VAL])
+//        alertDialog.input_lrn.setText(student.lrn)
+//        alertDialog.input_lrn.isEnabled = false
+//        alertDialog.text_layout_lrn.isEnabled = false
+//
+//
+//    }
 
     private fun showAddStudentDialog() {
         val addStudentAlertDialog = MaterialAlertDialogBuilder(
@@ -354,7 +473,7 @@ class StudentsFragment : Fragment(), StudentActionListener {
                     if (firstNameInput.text!!.isNotEmpty() &&
                         lastNameInput.text!!.isNotEmpty() &&
                         lrnInput.text!!.length == 12 && lrnInput.text.toString().isDigitsOnly()
-                ) {
+                    ) {
 //                    if (lrnInput.text!!.length != 12 || !lrnInput.text.toString().isDigitsOnly()) {
 ////                        Toast.makeText(activity, "Please enter a valid LRN", Toast.LENGTH_LONG)
 ////                            .show()
@@ -388,7 +507,7 @@ class StudentsFragment : Fragment(), StudentActionListener {
                         }
                         if (lastNameInput.text.isNullOrBlank()) {
                             lastNameLayout.error = "Please enter a valid first name"
-                    }
+                        }
                         if (lrnInput.text!!.length != 12 || !lrnInput.text.toString().isDigitsOnly()) {
 //                        Toast.makeText(activity, "Please enter a valid LRN", Toast.LENGTH_LONG)
 //                            .show()

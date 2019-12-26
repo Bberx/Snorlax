@@ -21,7 +21,7 @@ import java.util.*
 object TimeUtils {
 
     fun getTodayDateUTC(): Date {
-        val rawCalendar = Calendar.getInstance()
+        val rawCalendar = GregorianCalendar.getInstance()
         val safe = getCalendar()
         safe.set(
             rawCalendar.get(Calendar.YEAR),
@@ -36,7 +36,7 @@ object TimeUtils {
 //    }
 
     fun getMonthDate(date: Date): Date {
-        val raw = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        val raw = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"))
         raw.time = date
         val safe = getCalendar()
         safe.run {
@@ -55,13 +55,13 @@ object TimeUtils {
 //            calendar.set(Calendar.SECOND, calendar.getActualMinimum(Calendar.SECOND))
 //            calendar.set(Calendar.MILLISECOND, calendar.getActualMinimum(Calendar.MILLISECOND))
 
-        val raw = Calendar.getInstance()
+        val raw = GregorianCalendar.getInstance()
         raw.time = getTodayDateUTC()
         return raw.time
     }
 
     private fun getCalendar(): Calendar {
-        val utc = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        val utc = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"))
         utc.clear()
         return utc
     }

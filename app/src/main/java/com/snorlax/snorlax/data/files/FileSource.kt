@@ -21,11 +21,13 @@ import android.content.ContentResolver
 import android.content.res.AssetManager
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
+import com.snorlax.snorlax.utils.exception.TemplateNotFoundException
 import org.apache.poi.openxml4j.util.ZipSecureFile
 import org.apache.poi.xwpf.usermodel.XWPFDocument
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
+import java.lang.Exception
 
 class FileSource private constructor() {
 
@@ -39,26 +41,25 @@ class FileSource private constructor() {
         }
     }
 
-    fun isFileEmpty(app: Application, document: Uri): Boolean {
-        return DocumentFile.fromSingleUri(app, document)!!.length() == 0L
-    }
+    fun isFileEmpty(app: Application, document: Uri) =
+        DocumentFile.fromSingleUri(app, document)!!.length() == 0L
 
 
     @Throws(FileNotFoundException::class)
-    fun getFileOutputStream(contentResolver: ContentResolver, document: Uri): FileOutputStream {
+    fun getFileOutputStream(contentResolver: ContentResolver, document: Uri): FileOutputStream =
+        contentResolver.openOutputStream(document) as FileOutputStream
 
-//            contentResolver.openFileDescriptor(document, "rw")?.run {
-//                val fileDescriptor = this.fileDescriptor
-//                return FileOutputStream(fileDescriptor)
-//            }
-        return contentResolver.openOutputStream(document) as FileOutputStream
-    }
 
-    @Throws(IOException::class)
+    @Throws(TemplateNotFoundException::class)
     fun getTemplateDocument(assets: AssetManager): XWPFDocument {
         ZipSecureFile.setMinInflateRatio(0.0)
-        lateinit var template: XWPFDocument
-        assets.open("AttendanceSheetTemplate.docx").use { template = XWPFDocument(it) }
-        return template
+        var template: XWPFDocument? = null
+        try {
+            assets.open("template/AttendanceSheetTemplate.docx").use { template = XWPFDocument(it) }
+        } catch (error: IOException) {
+            throw TemplateNotFoundException()
+        }
+        return template ?: throw TemplateNotFoundException()
     }
 }
+

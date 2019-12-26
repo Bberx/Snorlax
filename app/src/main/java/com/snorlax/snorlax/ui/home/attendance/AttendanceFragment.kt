@@ -28,6 +28,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
+import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -39,10 +40,12 @@ import com.snorlax.snorlax.utils.TimeUtils.getTodayDateUTC
 import com.snorlax.snorlax.utils.TimeUtils.positionToTime
 import com.snorlax.snorlax.utils.TimeUtils.timeToPosition
 import com.snorlax.snorlax.utils.adapter.viewpager.AttendancePageAdapter
+import com.snorlax.snorlax.utils.exception.TemplateNotFoundException
 import com.snorlax.snorlax.viewmodel.AttendanceViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import kotlinx.android.synthetic.main.fragment_attendance.*
 import kotlinx.android.synthetic.main.fragment_attendance.view.*
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -110,23 +113,15 @@ class AttendanceFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
         // Inflate the layout for this fragment
         val rootView = inflater.inflate(R.layout.fragment_attendance, container, false)
-
-
 
         rootView.picker_container.setOnClickListener {
             val picker = MaterialDatePicker.Builder.datePicker()
                 .setTitleText(R.string.label_which_day)
                 .setCalendarConstraints(
                     CalendarConstraints.Builder()
-                        .setOpenAt(
-                            when (viewModel.selectedTimeObservable.value) {
-                                null -> getTodayDateUTC().time
-                                else -> viewModel.selectedTimeObservable.value!!
-                            }
-                        )
+                        .setOpenAt(viewModel.selectedTimeObservable.value ?: getTodayDateUTC().time)
                         .setStart(0)
                         .setEnd(getTodayDateUTC().time)
                         .setValidator(object : CalendarConstraints.DateValidator {
@@ -162,7 +157,7 @@ class AttendanceFragment : Fragment() {
             val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                 val selectedDate = positionToTime(rootView.attendance_pager.currentItem)
                 val fileName =
-                    "Attendance-${Constants.SECTION_LIST.getValue(viewModel.getAdminSection()).display_name}-${fileNameDateFormat.format(
+                    "Attendance-${Constants.SECTION_LIST.getValue(viewModel.getSection()).display_name}-${fileNameDateFormat.format(
                         selectedDate
                     )}.docx"
 
@@ -233,29 +228,35 @@ class AttendanceFragment : Fragment() {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
+                btn_export.setImageDrawable(context?.getDrawable(R.drawable.ic_save))
                 showResult(
                     getString(
                         R.string.msg_attendance_saved,
-                        outputLocation.lastPathSegment?.substringAfter(':')
+                        outputLocation.lastPathSegment
                     )
                 )
             }, {
+                btn_export.setImageDrawable(context?.getDrawable(R.drawable.ic_save))
                 when (it) {
-                    is FileNotFoundException -> {
-                        showResult(getString(R.string.err_file_not_found))
-                        Log.d(TAG, it.message!!)
-                    }
-                    is IOException -> {
-                        showResult(getString(R.string.err_ioexception, it.localizedMessage))
-                        Log.d(TAG, it.message!!)
-                    }
-                    is NoSuchElementException -> {
-                        showResult(getString(R.string.err_unknown_section))
-                    }
-                    else -> {
-                        showResult(getString(R.string.err_unknown, it.localizedMessage))
-//                        Log.d(TAG, it.message!!)
-                    }
+                    is TemplateNotFoundException -> showResult(getString(R.string.err_template_not_found))
+
+                    is FileNotFoundException -> showResult(getString(R.string.err_file_not_found))
+
+                    is IOException -> showResult(
+                        getString(
+                            R.string.err_ioexception,
+                            it.localizedMessage ?: "unknown error occurred."
+                        )
+                    )
+
+                    is NoSuchElementException -> showResult(getString(R.string.err_unknown_section))
+
+                    else -> showResult(
+                        getString(
+                            R.string.err_unknown,
+                            it.localizedMessage ?: "no error message."
+                        )
+                    )
                 }
                 if (viewModel.isEmpty(outputLocation)) viewModel.deleteFile(outputLocation)
             })
@@ -275,6 +276,9 @@ class AttendanceFragment : Fragment() {
         when (requestCode) {
             REQUEST_CREATE_DOCX -> {
                 if (resultCode == Activity.RESULT_OK) {
+                    val loading = CircularProgressDrawable(requireContext())
+                    btn_export.
+                    btn_export.setImageDrawable(loading)
                     data?.data?.let {
                         saveAttendance(it)
                     }

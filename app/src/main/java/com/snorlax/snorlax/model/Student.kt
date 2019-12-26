@@ -27,6 +27,7 @@ data class Student(
     companion object {
         const val FIRST_NAME_VAL = "first"
         const val LAST_NAME_VAL = "last"
+        const val NAME_VAL = "name"
     }
 
     val displayName: String

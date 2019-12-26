@@ -75,7 +75,8 @@
     <string name="msg_enable_automatic_time">Enable automatic time and time zone settings to continue</string>
     <string name="msg_attendance_saved">Attendance saved as %s</string>
     <string name="err_file_not_found">Failed, output file is not found</string>
-    <string name="err_ioexception">Failed IOException, %s</string>
+    <string name="err_ioexception">Error creating document, %s</string>
     <string name="err_unknown">Failed unknown error, %s</string>
     <string name="err_unknown_section">Error, unknown section. Please sign out and login again</string>
+    <string name="err_template_not_found">Document template not found, please reinstall app.</string>
 </resources>

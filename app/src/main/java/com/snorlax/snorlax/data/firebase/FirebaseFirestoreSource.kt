@@ -26,6 +26,7 @@ import com.snorlax.snorlax.utils.TimeUtils.getTodayDateUTC
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
+import io.reactivex.SingleEmitter
 import io.reactivex.schedulers.Schedulers
 import java.util.*
 
@@ -60,6 +61,7 @@ class FirebaseFirestoreSource private constructor() {
         private const val USER_DATA_NAME = "user"
 
     }
+
     fun getDocumentReference(section: String, lrn: String): DocumentReference {
         return sectionRef
             .document(section)
@@ -94,52 +96,64 @@ class FirebaseFirestoreSource private constructor() {
     }
 
     fun getStudentList(section: String): Single<List<Student>> {
-        return Single.create { emitter ->
-            Log.d("Threading", "get student list ${Thread.currentThread().name}")
-            val listenerRegistration = sectionRef
-                .document(section)
-                .collection(STUDENTS_DATA_NAME)
-                .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-                    firebaseFirestoreException?.let {
-                        emitter.onError(it)
-                        return@addSnapshotListener
-                    }
-                    val students = arrayListOf<Student>()
-
-                    for (document in querySnapshot!!) {
-                        students.add(document.toObject(Student::class.java))
-                    }
-                    if (students.isEmpty()) emitter.onSuccess(emptyList())
-                    else {
-                        students.sortBy {
-                            it.name.getValue(Student.LAST_NAME_VAL)
-                        }
-                        emitter.onSuccess(students)
-                    }
-                }
-            emitter.setCancellable {
-                listenerRegistration.remove()
-            }
+        return Single.create { emitter: SingleEmitter<List<Student>> ->
+            //            Log.d("Threading", "get student list ${Thread.currentThread().name}")
+//            val listenerRegistration = sectionRef
+//                .document(section)
+//                .collection(STUDENTS_DATA_NAME)
+//                .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+//                    firebaseFirestoreException?.let {
+//                        emitter.onError(it)
+//                        return@addSnapshotListener
+//                    }
+//                    val students = arrayListOf<Student>()
+//
+//                    for (document in querySnapshot!!) {
+//                        students.add(document.toObject(Student::class.java))
+//                    }
+//                    if (students.isEmpty()) emitter.onSuccess(emptyList())
+//                    else {
+//                        students.sortBy {
+//                            it.name.getValue(Student.LAST_NAME_VAL)
+//                        }
+//                        emitter.onSuccess(students)
+//                    }
+//                }
+//            emitter.setCancellable {
+//                listenerRegistration.remove()
+//            }
+            getStudentQuery(section).get()
+                .addOnSuccessListener {
+                    emitter.onSuccess(it.documents.map { documentSnapshot ->
+                        documentSnapshot.toObject(Student::class.java)!!
+                    })
+                }.addOnFailureListener { emitter.onError(it) }
         }
     }
 
 
-    fun getStudentQuery(section: String): Single<Query> {
-        return Single.create<Query> { emitter ->
-            val listener = sectionRef
-                .document(section)
-                .collection(STUDENTS_DATA_NAME)
-                .orderBy(FieldPath.of("name", "last"), Query.Direction.ASCENDING)
-                .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-                    firebaseFirestoreException?.let {
-                        emitter.onError(it)
-                    }
-                    emitter.onSuccess(querySnapshot!!.query)
-                }
-            emitter.setCancellable {
-                listener.remove()
-            }
-        }
+    fun getStudentQuery(section: String): Query {
+//        return Single.create<Query> { emitter ->
+//            val listener = sectionRef
+//                .document(section)
+//                .collection(STUDENTS_DATA_NAME)
+//                .orderBy(FieldPath.of(Student.NAME_VAL, Student.LAST_NAME_VAL), Query.Direction.ASCENDING)
+//                .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+//                    firebaseFirestoreException?.let {
+//                        emitter.onError(it)
+//                    }
+//                    emitter.onSuccess(querySnapshot!!.query)
+//                }
+//            emitter.setCancellable {
+//                listener.remove()
+//            }
+//        }
+        return sectionRef.document(section)
+            .collection(STUDENTS_DATA_NAME)
+            .orderBy(
+                FieldPath.of(Student.NAME_VAL, Student.LAST_NAME_VAL),
+                Query.Direction.ASCENDING
+            )
 
     }
 
