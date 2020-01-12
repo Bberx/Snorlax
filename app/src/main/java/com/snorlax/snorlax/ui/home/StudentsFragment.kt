@@ -176,7 +176,7 @@ class StudentsFragment : Fragment() {
                         textLayout.error = null
                         loadingView.visibility = View.VISIBLE
 
-                        viewModel.reauth(deleteDialog.input_reauth_password.text.toString())
+                        viewModel.reAuth(deleteDialog.input_reauth_password.text.toString())
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe({

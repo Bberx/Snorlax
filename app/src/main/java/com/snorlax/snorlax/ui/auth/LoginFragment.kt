@@ -107,7 +107,7 @@ class LoginFragment : Fragment() {
             .setNegativeButton(getString(R.string.btn_cancel), null)
             .create()
 
-        forgotDialog.setOnShowListener {dialog ->
+        forgotDialog.setOnShowListener { dialog ->
 
 
             forgotDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
@@ -160,12 +160,12 @@ class LoginFragment : Fragment() {
                         viewModel.login(
                             input_email.text.toString(),
                             input_password.text.toString()
-                        ).flatMapCompletable {
-                            viewModel.addUserToCache(context!!, it) // TODO add exception class
-                        }.subscribeOn(Schedulers.io())
+                        )
+//                            .flatMapCompletable { viewModel.addUserToCache(context!!, it) }
+                            .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe({
-                                activity!!.startHomeActivity()
+                                requireActivity().startHomeActivity()
                             }, {
                                 FirebaseAuth.getInstance().apply {
                                     currentUser?.let {

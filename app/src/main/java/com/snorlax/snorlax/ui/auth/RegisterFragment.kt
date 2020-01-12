@@ -133,17 +133,17 @@ class RegisterFragment : Fragment() {
                             input_last_name.text.toString(),
                             input_section.text.toString(),
                             input_account_type.text.toString()
-                        ).flatMapCompletable {
-                            viewModel.addUserToCache(context!!, it)
-                        }.subscribeOn(Schedulers.io())
+                        )
+//                            .flatMapCompletable {
+//                            viewModel.addUserToCache(context!!, it)
+//                        }
+                            .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe({
-                                activity!!.startHomeActivity()
+                                requireActivity().startHomeActivity()
                             }, {
                                 FirebaseAuth.getInstance().apply {
-                                    currentUser?.let {
-                                        signOut()
-                                    }
+                                    currentUser?.let { signOut() }
                                 }
                                 btn_register.revertAnimation()
                                 it.message?.let { message ->

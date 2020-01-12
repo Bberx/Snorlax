@@ -36,8 +36,6 @@ class HomeActivityViewModel : ViewModel() {
         FirebaseAuth.getInstance()
     }
 
-    val disposables = CompositeDisposable()
-
 //    companion object {
 //        private var instance: HomeActivityViewModel? = null
 //
@@ -50,13 +48,13 @@ class HomeActivityViewModel : ViewModel() {
 //        }
 //    }
 
-    fun logout(): Completable {
+    fun logout() {
         userRepository.logout()
-        return Completable.create { emitter ->
-            firebaseAuth.addAuthStateListener {
-                if (it.currentUser == null) emitter.onComplete()
-            }
-        }
+//        return Completable.create { emitter ->
+//            firebaseAuth.addAuthStateListener {
+//                if (it.currentUser == null) emitter.onComplete()
+//            }
+//        }
     }
 
 
@@ -77,11 +75,6 @@ class HomeActivityViewModel : ViewModel() {
         return firebaseAuth.currentUser!!.photoUrl!!
     }
 
-
-    fun clearDisposables() {
-        userRepository.clearDisposables()
-        disposables.clear()
-    }
 
 
 }

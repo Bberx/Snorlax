@@ -23,7 +23,6 @@ import com.snorlax.snorlax.data.firebase.FirebaseAuthSource
 import com.snorlax.snorlax.data.firebase.FirebaseFirestoreSource
 import com.snorlax.snorlax.model.Student
 import io.reactivex.Completable
-import io.reactivex.schedulers.Schedulers
 
 class StudentsViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -50,8 +49,8 @@ class StudentsViewModel(application: Application) : AndroidViewModel(application
         return firestore.addStudent(getCurrentSection(), student)
     }
 
-    fun reauth(password: String): Completable {
-        return firebaseAuthSource.reauth(password)
+    fun reAuth(password: String): Completable {
+        return firebaseAuthSource.reAuth(password)
     }
 
 //    fun getStudentList() = firestore.getStudentList(getCurrentSection()).subscribeOn(Schedulers.io())

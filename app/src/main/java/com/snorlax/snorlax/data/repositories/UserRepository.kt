@@ -48,7 +48,6 @@ class UserRepository private constructor() {
     }
 
 
-
     private val disposables = CompositeDisposable()
 
     private val firebase: FirebaseAuthSource by lazy {
@@ -69,11 +68,9 @@ class UserRepository private constructor() {
     }
 
     // TODO handle firebase logic here
-    fun login(email: String, password: String): Single<User> {
-        return firebase.login(email, password)
-            .flatMap { firestore.getAdmin(it.uid) }
-            .subscribeOn(Schedulers.io())
-    }
+    fun login(email: String, password: String) = firebase.login(email, password)
+        .flatMap { firestore.getAdmin(it.uid) }
+        .subscribeOn(Schedulers.io())
 
     fun register(
         email: String,

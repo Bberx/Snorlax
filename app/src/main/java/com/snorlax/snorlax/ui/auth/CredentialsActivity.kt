@@ -22,17 +22,28 @@ import androidx.fragment.app.FragmentPagerAdapter
 import com.google.firebase.auth.FirebaseAuth
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.data.cache.LocalCacheSource
+import com.snorlax.snorlax.data.firebase.FirebaseAuthSource
 import com.snorlax.snorlax.utils.adapter.framepager.AuthenticationPageAdapter
 import com.snorlax.snorlax.utils.startHomeActivity
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_credentials.*
 
 
 class CredentialsActivity : AppCompatActivity() {
 
+    private val disposables = CompositeDisposable()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        
 
+        disposables.add(FirebaseAuthSource.getInstance().loggedOut()
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
+            .subscribe {
+                if (it == false) startHomeActivity()
+            }
+        )
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_credentials)
@@ -48,10 +59,12 @@ class CredentialsActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        FirebaseAuth.getInstance().currentUser?.let {
-            LocalCacheSource.getInstance().getUserCache(this)?.let {
-                startHomeActivity()
-            } ?: FirebaseAuth.getInstance().signOut()
-        }
+
+//        FirebaseAuth.getInstance().currentUser?.let {
+//            LocalCacheSource.getInstance().getUserCache(this)?.let {
+//                startHomeActivity()
+//            } ?: FirebaseAuth.getInstance().signOut()
+//        }
+
     }
 }

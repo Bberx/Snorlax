@@ -25,15 +25,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProviders
+import com.bumptech.glide.Glide
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.snorlax.snorlax.R
+import com.snorlax.snorlax.data.firebase.FirebaseAuthSource
 import com.snorlax.snorlax.ui.home.attendance.AttendanceFragment
 import com.snorlax.snorlax.utils.exitApp
-import com.snorlax.snorlax.utils.glide.GlideApp
 import com.snorlax.snorlax.utils.startLoginActivity
 import com.snorlax.snorlax.viewmodel.HomeActivityViewModel
 import de.hdodenhof.circleimageview.CircleImageView
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.diag_loading.*
@@ -52,6 +54,8 @@ class HomeActivity : AppCompatActivity() {
 
 
     private lateinit var viewModel: HomeActivityViewModel
+
+    private val disposables = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -150,13 +154,13 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun initObservables() {
-        viewModel.disposables.add(
+        disposables.add(
             viewModel.getUser(applicationContext)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe {
                 emailTextView.text = it.email
-                GlideApp.with(this)
+                Glide.with(this)
                     .load(viewModel.getUserPhoto())
                     .placeholder(R.drawable.img_avatar)
 //                    .transition(DrawableTransitionOptions().crossFade())
@@ -168,12 +172,18 @@ class HomeActivity : AppCompatActivity() {
                 labelRole.text = viewModel.getRole(it)
             })
 
+        disposables.add(
+            FirebaseAuthSource.getInstance().loggedOut().subscribe {
+                if (it == true) startLoginActivity()
+            }
+        )
+
 //        btn_logout.clicks().subscribe(homeActivityViewModel.logoutObservable)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        viewModel.clearDisposables()
+        disposables.dispose()
     }
 
     override fun onBackPressed() {
@@ -192,15 +202,16 @@ class HomeActivity : AppCompatActivity() {
             setMessage("Are you sure you want to logout?")
             setPositiveButton(
                 "Yes"
-            ) { dialog, _ ->
+            ) { _, _ ->
                                 setDialog(true)
-//                setProgressDialog()
                 viewModel.logout()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe {
-                        startLoginActivity()
-                    }
+//                setProgressDialog()
+//                viewModel.logout()
+//                    .subscribeOn(Schedulers.io())
+//                    .observeOn(AndroidSchedulers.mainThread())
+//                    .subscribe {
+//                        startLoginActivity()
+//                    }
             }
             setIcon(R.drawable.ic_logout)
             setNegativeButton("No", null)

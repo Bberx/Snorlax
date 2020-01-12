@@ -16,8 +16,9 @@
 
 package com.snorlax.snorlax.viewmodel
 
+import android.app.Application
 import android.content.Context
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import com.snorlax.snorlax.data.cache.LocalCacheSource
 import com.snorlax.snorlax.data.repositories.UserRepository
 import com.snorlax.snorlax.model.User
@@ -31,7 +32,7 @@ import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
 import java.util.*
 
-class RegisterViewModel : ViewModel() {
+class RegisterViewModel(application: Application) : AndroidViewModel(application) {
 
     private val userRepository = UserRepository.getInstance()
 
@@ -220,19 +221,23 @@ class RegisterViewModel : ViewModel() {
         lastName: String,
         section: String,
         accType: String
-    ) = userRepository.register(
-        email.trim(),
-        password,
-        "${firstName.trim()} ${lastName.trim()}",
-        getSectionCode(section).trim(),
-        accType.trim().toLowerCase(Locale.ROOT)
-    )
+    ): Completable {
+        return userRepository.register(
+            email.trim(),
+            password,
+            "${firstName.trim()} ${lastName.trim()}",
+            getSectionCode(section).trim(),
+            accType.trim().toLowerCase(Locale.ROOT)
+        ).flatMapCompletable {
+            localCacheSource.addToCache(getApplication(), it)
+        }
+    }
 
 //    fun getCurrentUser(context: Context) = userRepository.currentUser(context)
 
-    fun addUserToCache(context: Context, user: User) : Completable {
-        return localCacheSource.addToCache(context, user)
-    }
+//    fun addUserToCache(context: Context, user: User) : Completable {
+//        return localCacheSource.addToCache(context, user)
+//    }
 
     fun clearDisposable() {
         userRepository.clearDisposables()

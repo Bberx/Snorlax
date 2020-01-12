@@ -17,7 +17,6 @@
 package com.snorlax.snorlax
 
 import android.app.Application
-
 class BeabotApp : Application() {
     override fun onCreate() {
         super.onCreate()
