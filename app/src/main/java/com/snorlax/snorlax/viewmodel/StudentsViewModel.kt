@@ -40,7 +40,7 @@ class StudentsViewModel(application: Application) : AndroidViewModel(application
 
     private val firebaseAuthSource = FirebaseAuthSource.getInstance()
 
-    private val localCacheSource = LocalCacheSource.getInstance()
+    private val localCacheSource = LocalCacheSource.getInstance(application)
 
     private val firestore = FirebaseFirestoreSource.getInstance()
 
@@ -58,7 +58,7 @@ class StudentsViewModel(application: Application) : AndroidViewModel(application
     fun getStudentQuery() = firestore.getStudentQuery(getCurrentSection())
 
     private fun getCurrentSection(): String {
-        return localCacheSource.getUserCache(getApplication())!!.section
+        return localCacheSource.getUserCache()!!.section
     }
 
     fun deleteStudent(student: Student): Completable {
@@ -66,6 +66,6 @@ class StudentsViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun canAddStudent(): Boolean {
-        return (localCacheSource.getUserCache(getApplication())!!.accType.equals("teacher", true))
+        return (localCacheSource.getUserCache()!!.accType.equals("teacher", true))
     }
 }

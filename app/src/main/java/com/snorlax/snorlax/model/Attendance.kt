@@ -22,8 +22,14 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ServerTimestamp
 import java.util.*
 
+//data class Attendance(
+//    @ServerTimestamp val time_in: Timestamp = Timestamp(Date().apply { time = 0 }),
+//    val reference: DocumentReference = FirebaseFirestore.getInstance().document(""),
+//    val lrn: String
+//)
+
 data class Attendance(
     @ServerTimestamp val time_in: Timestamp = Timestamp(Date().apply { time = 0 }),
-    val reference: DocumentReference = FirebaseFirestore.getInstance().document(""),
+    val student: Student = Student(),
     val lrn: String
 )

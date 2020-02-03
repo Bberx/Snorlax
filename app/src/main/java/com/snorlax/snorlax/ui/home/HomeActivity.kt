@@ -19,16 +19,17 @@ package com.snorlax.snorlax.ui.home
 
 import android.app.Dialog
 import android.os.Bundle
+import android.view.Window
 import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.commit
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import com.snorlax.snorlax.R
-import com.snorlax.snorlax.data.firebase.FirebaseAuthSource
 import com.snorlax.snorlax.ui.home.attendance.AttendanceFragment
 import com.snorlax.snorlax.utils.exitApp
 import com.snorlax.snorlax.utils.startLoginActivity
@@ -60,7 +61,7 @@ class HomeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel = ViewModelProviders.of(this)[HomeActivityViewModel::class.java]
+        viewModel = ViewModelProvider(this)[HomeActivityViewModel::class.java]
 
         setContentView(R.layout.activity_home)
         setSupportActionBar(toolbar)
@@ -155,28 +156,30 @@ class HomeActivity : AppCompatActivity() {
 
     private fun initObservables() {
         disposables.add(
-            viewModel.getUser(applicationContext)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                emailTextView.text = it.email
-                Glide.with(this)
-                    .load(viewModel.getUserPhoto())
-                    .placeholder(R.drawable.img_avatar)
+            viewModel.getUser()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+                    emailTextView.text = it.email
+                    Glide.with(this)
+                        .load(viewModel.getUserPhoto())
+                        .placeholder(R.drawable.img_avatar)
 //                    .transition(DrawableTransitionOptions().crossFade())
 //                    .apply(RequestOptions().placeholder(R.drawable.default_avatar))
-                    .into(userIcon)
+                        .into(userIcon)
 //                userIcon.setImageResource(R.mipmap.ic_launcher)
-                labelEmail.text = it.email
-                labelName.text = it.displayName
-                labelRole.text = viewModel.getRole(it)
-            })
+                    labelEmail.text = it.email
+                    labelName.text = it.displayName
+                    labelRole.text = viewModel.getRole(it)
+                })
 
-        disposables.add(
-            FirebaseAuthSource.getInstance().loggedOut().subscribe {
-                if (it == true) startLoginActivity()
-            }
-        )
+//        disposables.add(
+//            FirebaseAuthSource.getInstance().loggedOut().subscribe {
+//                if (it == true) {
+//                    startLoginActivity()
+//                }
+//            }
+//        )
 
 //        btn_logout.clicks().subscribe(homeActivityViewModel.logoutObservable)
     }
@@ -203,8 +206,17 @@ class HomeActivity : AppCompatActivity() {
             setPositiveButton(
                 "Yes"
             ) { _, _ ->
-                                setDialog(true)
-                viewModel.logout()
+                setDialog(true)
+                viewModel.logout().subscribe({
+                    startLoginActivity()
+                }, {
+                    setDialog(false)
+                    Snackbar.make(
+                        home_layout,
+                        it.localizedMessage ?: "Logout failed",
+                        Snackbar.LENGTH_LONG
+                    ).show()
+                })
 //                setProgressDialog()
 //                viewModel.logout()
 //                    .subscribeOn(Schedulers.io())
@@ -219,17 +231,32 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun setDialog(show: Boolean) {
-        val builder = MaterialAlertDialogBuilder(this)
-            .setCancelable(false)
+        val diag = object : Dialog(this) {
+            override fun onCreate(savedInstanceState: Bundle?) {
+                super.onCreate(savedInstanceState)
+                requestWindowFeature(Window.FEATURE_NO_TITLE)
+                setContentView(R.layout.diag_loading)
+                loading_message.text = getString(R.string.label_logging_out)
+            }
+        }
 
-        builder.setView(R.layout.diag_loading)
-        val dialog: Dialog = builder.create()
-        dialog.setCanceledOnTouchOutside(false)
         if (show) {
-            dialog.show()
-            dialog.loading_message.text = getString(R.string.label_logging_out)
-//            dialog.window!!.setLayout(dialog.loading_container.width, ViewGroup.LayoutParams.WRAP_CONTENT)
-        } else dialog.dismiss()
+            diag.show()
+        } else diag.dismiss()
+//        val builder = MaterialAlertDialogBuilder(this).setCancelable(false)
+//        builder.setView(R.layout.diag_loading)
+//        val dialog: Dialog = builder.create()
+//
+//        val window = dialog.window
+//        window?.setLayout(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT)
+//        window?.setGravity(Gravity.CENTER)
+//
+//        dialog.setCanceledOnTouchOutside(false)
+//        if (show) {
+//            dialog.show()
+//            dialog.loading_message.text = getString(R.string.label_logging_out)
+////            dialog.window!!.setLayout(dialog.loading_container.width, ViewGroup.LayoutParams.WRAP_CONTENT)
+//        } else dialog.dismiss()
     }
 
 
@@ -241,7 +268,7 @@ class HomeActivity : AppCompatActivity() {
                 "Yes"
             ) { dialog, _ ->
 
-//                val homeIntent =
+                //                val homeIntent =
 //                    Intent(Intent.ACTION_MAIN)
 //                homeIntent.addCategory(Intent.CATEGORY_HOME)
 //                homeIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP

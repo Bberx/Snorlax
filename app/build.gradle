@@ -44,80 +44,85 @@ android {
     buildToolsVersion "29.0.2"
 
 
-    def versionPropsFile = file('version.properties')
-    def valueRelease = 0
-    def valueDebug = 0
-    Properties versionProps = new Properties()
-    if (!versionPropsFile.exists()) {
-        versionProps['VERSION_PATCH'] = "0"
-        versionProps['VERSION_NUMBER'] = "0"
-        versionProps['VERSION_BUILD'] = "-1"
-        // I set it to minus one so the first build is 0 which isn't super important.
-        versionProps.store(versionPropsFile.newWriter(), null)
-    }
-
-    def runTasks = gradle.startParameter.taskNames
-    if (':app:assembleRelease' in runTasks) {
-        valueRelease = 1
-    }
-    if (':app:assembleDebug' in runTasks) {
-        valueDebug = 1
-    }
-
-    def mVersionName = ""
-    def mFileName = ""
-
-    if (versionPropsFile.canRead()) {
-        versionProps.load(new FileInputStream(versionPropsFile))
-
-        versionProps['DEBUG_VERSION'] = (versionProps['DEBUG_VERSION'].toInteger() + valueDebug).toString()
-        versionProps['VERSION_PATCH'] = (versionProps['VERSION_PATCH'].toInteger() + valueRelease).toString()
-        versionProps['VERSION_NUMBER'] = (versionProps['VERSION_NUMBER'].toInteger() + valueRelease).toString()
-        versionProps['VERSION_BUILD'] = (versionProps['VERSION_BUILD'].toInteger() + 1).toString()
-
-        versionProps.store(versionPropsFile.newWriter(), null)
-
-        mVersionName = "v1.${versionProps['VERSION_PATCH']}.${versionProps['DEBUG_VERSION']}_${versionProps['VERSION_BUILD']}"
-        mFileName = "Snorlax-${mVersionName}.apk"
-
-        defaultConfig {
-            minSdkVersion 21
-            targetSdkVersion 29
-            applicationId "com.snorlax.snorlax" // 3: change to your package name
-            versionCode versionProps['VERSION_NUMBER'].toInteger()
-            versionName "${mVersionName}"
-            multiDexEnabled = true
-        }
-
-    } else {
-        throw new FileNotFoundException("Could not read version.properties!")
-    }
-
-    if (':app:assembleRelease' in runTasks) {
-        android.applicationVariants.all { variant ->
-            variant.outputs.all { output ->
-                if (output.outputFile != null && output.outputFile.name.endsWith('.apk')) {
-                    outputFileName = mFileName
-                }
-            }
-        }
-    }
-
-//    defaultConfig {
-//        applicationId "com.snorlax.snorlax"
-//        minSdkVersion 21
-//        targetSdkVersion 29
-//        versionCode 1
-//        versionName "1.0"
-//        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+//    def versionPropsFile = file('version.properties')
+//    def valueRelease = 0
+//    def valueDebug = 0
+//    Properties versionProps = new Properties()
+//    if (!versionPropsFile.exists()) {
+//        versionProps['VERSION_PATCH'] = "0"
+//        versionProps['VERSION_NUMBER'] = "0"
+//        versionProps['VERSION_BUILD'] = "-1"
+//        // I set it to minus one so the first build is 0 which isn't super important.
+//        versionProps.store(versionPropsFile.newWriter(), null)
 //    }
+//
+//    def runTasks = gradle.startParameter.taskNames
+//    if (':app:assembleRelease' in runTasks) {
+//        valueRelease = 1
+//    }
+//    if (':app:assembleDebug' in runTasks) {
+//        valueDebug = 1
+//    }
+//
+//    def mVersionName = ""
+//    def mFileName = ""
+//
+//    if (versionPropsFile.canRead()) {
+//        versionProps.load(new FileInputStream(versionPropsFile))
+//
+//        versionProps['DEBUG_VERSION'] = (versionProps['DEBUG_VERSION'].toInteger() + valueDebug).toString()
+//        versionProps['VERSION_PATCH'] = (versionProps['VERSION_PATCH'].toInteger() + valueRelease).toString()
+//        versionProps['VERSION_NUMBER'] = (versionProps['VERSION_NUMBER'].toInteger() + valueRelease).toString()
+//        versionProps['VERSION_BUILD'] = (versionProps['VERSION_BUILD'].toInteger() + 1).toString()
+//
+//        versionProps.store(versionPropsFile.newWriter(), null)
+//
+//        mVersionName = "v1.${versionProps['VERSION_PATCH']}.${versionProps['VERSION_BUILD']}"
+//        mFileName = "Snorlax-${mVersionName}.apk"
+//
+//        defaultConfig {
+//            minSdkVersion 21
+//            targetSdkVersion 29
+//            applicationId "com.snorlax.snorlax" // 3: change to your package name
+//            versionCode versionProps['VERSION_NUMBER'].toInteger()
+//            versionName "${mVersionName}"
+//            multiDexEnabled = true
+//        }
+//
+//    } else {
+//        throw new FileNotFoundException("Could not read version.properties!")
+//    }
+
+//    if (':app:assembleRelease' in runTasks) {
+//        android.applicationVariants.all { variant ->
+//            variant.outputs.all { output ->
+//                if (output.outputFile != null && output.outputFile.name.endsWith('.apk')) {
+//                    outputFileName = mFileName
+//                }
+//            }
+//        }
+//    }
+
+    defaultConfig {
+        applicationId "com.snorlax.snorlax"
+        minSdkVersion 21
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled = true
+    }
     buildTypes {
         debug {
+            ext.enableCrashlytics = false
+            ext.alwaysUpdateBuildId = false
             debuggable true
             firebaseAppDistribution {
-                releaseNotes = "Debug build ${mVersionName}\nNow forces phone to use automatic time for more accurate time keeping"
+                releaseNotes = "Debug build\nNow forces phone to use automatic time for more accurate time keeping"
                 groups = "researchers, developer"
             }
+//            manifestPlaceholders = [crashlyticsCollectionEnabled:"false"]
+
         }
         release {
             shrinkResources true
@@ -125,9 +130,9 @@ android {
             proguardFiles 'proguard-rules.pro', getDefaultProguardFile('proguard-android-optimize.txt')
             renderscriptOptimLevel = 3
             signingConfig signingConfigs.release
-
+//            manifestPlaceholders = [crashlyticsCollectionEnabled:"true"]
             firebaseAppDistribution {
-                releaseNotes = "Release build ${mVersionName}\nVersion 1 released\nFix margin and add replaced logo"
+                releaseNotes = "Release build\nVersion 1 released\nFix margin and add replaced logo"
                 groups = "researchers, developer"
             }
         }
@@ -220,22 +225,22 @@ dependencies {
     implementation 'com.karumi:dexter:6.0.1'
 
     // (Recommended) Add Analytics
-    implementation 'com.google.firebase:firebase-analytics:17.2.1'
+    implementation 'com.google.firebase:firebase-analytics:17.2.2'
 
-    // Add dependency
-    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
+    // Crashlytics
+    releaseImplementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
 
     implementation 'com.chauthai.swipereveallayout:swipe-reveal-layout:1.4.1'
 
     // KTX
     implementation 'androidx.core:core-ktx:1.1.0'
-    implementation 'androidx.fragment:fragment-ktx:1.1.0'
+    implementation 'androidx.fragment:fragment-ktx:1.2.0'
 
     // CameraX View
     implementation "androidx.camera:camera-view:1.0.0-alpha03"
 
     //Leak canary
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.0'
+//    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.0'
 
     // Custom tabs
     implementation 'androidx.browser:browser:1.2.0'
@@ -258,7 +263,7 @@ dependencies {
 //    implementation 'com.github.Bberx:poi-android:4.1.1'
 
     // Viewmodel
-    def lifecycle_version = "2.1.0"
+    def lifecycle_version = "2.2.0"
 
     // Dagger
     api 'com.google.dagger:dagger:2.25.2'

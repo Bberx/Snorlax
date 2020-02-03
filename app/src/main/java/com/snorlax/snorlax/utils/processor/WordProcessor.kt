@@ -19,11 +19,17 @@ package com.snorlax.snorlax.utils.processor
 import com.snorlax.snorlax.model.Attendance
 import com.snorlax.snorlax.model.Section
 import com.snorlax.snorlax.model.Student
+import com.snorlax.snorlax.utils.TimeUtils
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
-import org.apache.poi.xwpf.usermodel.UnderlinePatterns
-import org.apache.poi.xwpf.usermodel.XWPFDocument
+import org.apache.poi.xwpf.usermodel.*
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPPr
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STJc
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STLineSpacingRule
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTblWidth
+import java.lang.NullPointerException
+import java.math.BigInteger
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -31,9 +37,13 @@ import java.util.*
 class WordProcessor(private val document: XWPFDocument, private val month: Date) {
 
     private val numOfDays: Int by lazy {
-        GregorianCalendar(TimeZone.getTimeZone("UTC"))
-            .apply { time = month }
-            .getActualMaximum(Calendar.DAY_OF_MONTH)
+        TimeUtils.numOfDays(month)
+    }
+
+    private val table = document.tables.first()
+
+    private fun setSingleLineSpacing(para: XWPFParagraph) {
+        para.ctp.pPr = table.rows[0].getCell(0).paragraphs[0].ctp.pPr
     }
 
     // Entry point
@@ -57,28 +67,22 @@ class WordProcessor(private val document: XWPFDocument, private val month: Date)
     }
 
     private fun populateHeader(section: Section): Completable {
-        return Completable.create { emitter ->
-            try {
-                val header = document.paragraphs[0]
+        return Completable.fromAction {
+            val header = document.paragraphs[0]
 
-                val gradeField = header.runs[1]!!
-                val dateField = header.runs[3]!!
+            val gradeField = header.runs[1]!!
+            val dateField = header.runs[3]!!
 
-                gradeField.setText("${section.grade_level}-${section.display_name}", 0)
-                dateField.setText(
-                    SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(month),
-                    0
-                )
+            gradeField.setText("${section.grade_level}-${section.display_name}", 0)
+            dateField.setText(
+                SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(month),
+                0
+            )
 
-                gradeField.underline = UnderlinePatterns.SINGLE
-                dateField.underline = UnderlinePatterns.SINGLE
+            gradeField.underline = UnderlinePatterns.SINGLE
+            dateField.underline = UnderlinePatterns.SINGLE
 
-                header.insertNewRun(2).setText(" ")
-            } catch (error: Exception) {
-                emitter.onError(error)
-
-            }
-            emitter.onComplete()
+            header.insertNewRun(2).setText(" ")
         }.subscribeOn(Schedulers.io())
     }
 
@@ -86,26 +90,98 @@ class WordProcessor(private val document: XWPFDocument, private val month: Date)
     // 2. Correct number of days
     // TODO
     private fun formatTable(numberOfStudents: Int): Completable {
+        return Completable.fromAction {
+            repeat(numOfDays) {
+                val day = it + 1
+                val cell = table.rows[0].addNewTableCell()
 
-        return Completable.complete()
+                cell.paragraphs[0].createRun().run {
+                    fontFamily = "Arial"
+                    fontSize = 10
+                    isBold = true
+                    setText(day.toString())
+                }
+                setSingleLineSpacing(cell.paragraphs[0])
+                cell.paragraphs[0].ctp.pPr.jc = cell.paragraphs[0].ctp.pPr.addNewJc()
+                cell.paragraphs[0].ctp.pPr.jc.`val` = STJc.CENTER
+            }
+
+            repeat(numberOfStudents) {
+                table.createRow()
+            }
+        }
     }
 
     // After formatTable
     // TODO
     private fun populateTable(students: List<Student>, attendance: List<Attendance>): Completable {
-        val table = document.tables[0]
+//        return Completable.complete()
 
 
+        return Completable.fromAction {
+            students.forEachIndexed { index, student ->
+                val row = table.rows[index + 1]
+                val cell = row.getCell(0)
 
-        return Completable.complete()
-//        return Completable.error(Throwable("Test"))
+                setSingleLineSpacing(cell.paragraphs[0])
+
+                cell.paragraphs[0].createRun().run {
+                    fontFamily = "Arial"
+                    fontSize = 10
+                    setText(student.displayName)
+                }
+
+                val studentAttendance = attendance.filter {
+                    student == it.student
+                }
+
+
+                // Fill each day with "A" first
+                repeat(numOfDays) {
+                    setSingleLineSpacing(row.getCell(it + 1).paragraphs[0])
+                    val cell = row.getCell(it + 1)
+
+                    cell.paragraphs[0].createRun().run {
+                        fontFamily = "Arial"
+                        fontSize = 10
+                        setText("A")
+                    }
+
+                    cell.paragraphs[0].ctp.pPr.jc = cell.paragraphs[0].ctp.pPr.addNewJc()
+                    cell.paragraphs[0].ctp.pPr.jc.`val` = STJc.CENTER
+                }
+
+                studentAttendance.forEach {
+                    val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
+                        time = it.time_in.toDate()
+                    }
+                    val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+                    row.getCell(day).paragraphs[0].runs[0].run {
+                        setText("/", 0)
+                    }
+                }
+
+
+            }
+        }
     }
 
     // After populate table
     // Autofit name column
     // TODO
     private fun adjustSize(): Completable {
-        return Completable.complete()
+        return Completable.fromAction {
+            table.rows.forEach {
+                it.tableCells.forEach { cell ->
+                    cell.verticalAlignment = XWPFTableCell.XWPFVertAlign.CENTER
+                }
+            }
+
+            // Set table to auto fit document size
+            table.ctTbl.tblPr.tblW.w = BigInteger.valueOf(5000)
+            table.ctTbl.tblPr.tblW.type = STTblWidth.PCT
+        }
     }
 
 

@@ -27,8 +27,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
-import androidx.swiperefreshlayout.widget.CircularProgressDrawable
+import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -51,6 +50,7 @@ import java.io.FileNotFoundException
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 /**
  * A simple [Fragment] subclass.
@@ -69,7 +69,7 @@ class AttendanceFragment : Fragment() {
 
     private val dateFormat = SimpleDateFormat("MMMM d, yyyy", Locale.getDefault())
 
-    private val fileNameDateFormat = SimpleDateFormat("MMMM_d_yyyy", Locale.getDefault())
+    private val fileNameDateFormat = SimpleDateFormat("MMMM-yyyy", Locale.getDefault())
 
 //    private val datePicker: MaterialDatePicker<Long> by lazy {
 //        MaterialDatePicker.Builder.datePicker()
@@ -105,7 +105,7 @@ class AttendanceFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = activity?.run {
-            ViewModelProviders.of(this)[AttendanceViewModel::class.java]
+            ViewModelProvider(this)[AttendanceViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
     }
 
@@ -157,13 +157,14 @@ class AttendanceFragment : Fragment() {
             val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                 val selectedDate = positionToTime(rootView.attendance_pager.currentItem)
                 val fileName =
-                    "Attendance-${Constants.SECTION_LIST.getValue(viewModel.getSection()).display_name}-${fileNameDateFormat.format(
+                    "Attendance-${Constants.SECTION_LIST.getValue(viewModel.section).display_name}-${fileNameDateFormat.format(
                         selectedDate
                     )}.docx"
 
                 addCategory(Intent.CATEGORY_OPENABLE)
                 type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 putExtra(Intent.EXTRA_TITLE, fileName)
+                putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false)
             }
             startActivityForResult(intent, REQUEST_CREATE_DOCX)
         }
@@ -176,25 +177,17 @@ class AttendanceFragment : Fragment() {
         rootView.attendance_pager.adapter = AttendancePageAdapter(requireActivity(), viewModel)
 
         rootView.attendance_pager.offscreenPageLimit = 1
+
+        var smoothScroll = false
         val relativeTime = viewModel.selectedTimeObservable
             .subscribeOn(AndroidSchedulers.mainThread())
             .subscribe {
-                //                rootView.label_relative_time.text = viewModel.getRelativeDateString(it)
-//                rootView.label_date.text = dateFormat.format(Date(it))
-                rootView.attendance_pager.setCurrentItem(timeToPosition(it), true)
-                rootView.label_relative_time.text =
-                    viewModel.getRelativeDateString(Date(it))
+                rootView.attendance_pager.setCurrentItem(timeToPosition(it), smoothScroll)
+                rootView.label_relative_time.text = viewModel.getRelativeDateString(Date(it))
                 rootView.label_date.text = dateFormat.format(Date(it))
+                smoothScroll = true
             }
 
-
-//        val firebase = viewModel.selectedTimeObservable
-////            .flatMap { viewModel.getAttendance(Date(it)) }
-//            .observeOn(AndroidSchedulers.mainThread())
-//            .subscribe {
-////                (attendance_list.adapter as AttendanceAdaptor).updateData(it)
-//                rootView.attendance_pager.setCurrentItem(timeToPosition(it), false)
-//            }
         rootView.attendance_pager.registerOnPageChangeCallback(object :
             ViewPager2.OnPageChangeCallback() {
             var previousItem = rootView.attendance_pager.currentItem
@@ -221,7 +214,7 @@ class AttendanceFragment : Fragment() {
     }
 
     private fun saveAttendance(outputLocation: Uri) {
-        val saveAttendance = viewModel.processAttendance(
+        val saveAttendance = viewModel.saveAttendance(
             outputLocation,
             getMonthDate(Date(viewModel.selectedTimeObservable.value!!))
         )
@@ -232,8 +225,8 @@ class AttendanceFragment : Fragment() {
                 showResult(
                     getString(
                         R.string.msg_attendance_saved,
-                        outputLocation.lastPathSegment
-                    )
+                        viewModel.outputFileName(outputLocation)
+                    ), TimeUnit.SECONDS.toMillis(3).toInt()
                 )
             }, {
                 btn_export.setImageDrawable(context?.getDrawable(R.drawable.ic_save))
@@ -255,7 +248,7 @@ class AttendanceFragment : Fragment() {
                         getString(
                             R.string.err_unknown,
                             it.localizedMessage ?: "no error message."
-                        )
+                        ), TimeUnit.SECONDS.toMillis(3).toInt()
                     )
                 }
                 if (viewModel.isEmpty(outputLocation)) viewModel.deleteFile(outputLocation)
@@ -265,9 +258,9 @@ class AttendanceFragment : Fragment() {
 
     }
 
-    private fun showResult(message: String) {
+    private fun showResult(message: String, length: Int = Snackbar.LENGTH_SHORT) {
         view?.let {
-            Snackbar.make(it, message, Snackbar.LENGTH_SHORT).show()
+            Snackbar.make(it, message, length).show()
         }
     }
 
@@ -276,9 +269,7 @@ class AttendanceFragment : Fragment() {
         when (requestCode) {
             REQUEST_CREATE_DOCX -> {
                 if (resultCode == Activity.RESULT_OK) {
-                    val loading = CircularProgressDrawable(requireContext())
-                    btn_export.
-                    btn_export.setImageDrawable(loading)
+//                    btn_export.btn_export.setImageDrawable(loading)
                     data?.data?.let {
                         saveAttendance(it)
                     }

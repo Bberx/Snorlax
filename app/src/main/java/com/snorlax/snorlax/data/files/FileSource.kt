@@ -17,9 +17,10 @@
 package com.snorlax.snorlax.data.files
 
 import android.app.Application
-import android.content.ContentResolver
-import android.content.res.AssetManager
+import android.content.Context
 import android.net.Uri
+import android.os.CancellationSignal
+import android.provider.DocumentsContract
 import androidx.documentfile.provider.DocumentFile
 import com.snorlax.snorlax.utils.exception.TemplateNotFoundException
 import org.apache.poi.openxml4j.util.ZipSecureFile
@@ -27,39 +28,45 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
-import java.lang.Exception
 
-class FileSource private constructor() {
+class FileSource private constructor(private val application: Application) {
 
     companion object {
         private var instance: FileSource? = null
 
-        fun getInstance(): FileSource {
+        fun getInstance(context: Context): FileSource {
             instance?.let { return it }
-            instance = FileSource()
-            return getInstance()
+            instance = FileSource(context.applicationContext as Application)
+            return getInstance(context)
         }
     }
 
-    fun isFileEmpty(app: Application, document: Uri) =
-        DocumentFile.fromSingleUri(app, document)!!.length() == 0L
+    fun isFileEmpty(document: Uri) =
+        DocumentFile.fromSingleUri(application, document)!!.length() == 0L
+
+    fun getFileName(outputLocation: Uri) =
+        DocumentFile.fromSingleUri(application, outputLocation)!!.name
 
 
     @Throws(FileNotFoundException::class)
-    fun getFileOutputStream(contentResolver: ContentResolver, document: Uri): FileOutputStream =
-        contentResolver.openOutputStream(document) as FileOutputStream
+    fun getFileOutputStream(document: Uri): FileOutputStream {
+        return application.contentResolver.openOutputStream(document) as FileOutputStream
+
+    }
 
 
     @Throws(TemplateNotFoundException::class)
-    fun getTemplateDocument(assets: AssetManager): XWPFDocument {
+    fun getTemplateDocument(): XWPFDocument {
         ZipSecureFile.setMinInflateRatio(0.0)
         var template: XWPFDocument? = null
         try {
-            assets.open("template/AttendanceSheetTemplate.docx").use { template = XWPFDocument(it) }
+            // fixme: set to right template
+            application.assets.open("template/AttendanceSheetTemplate_test.docx").use { template = XWPFDocument(it) }
         } catch (error: IOException) {
             throw TemplateNotFoundException()
         }
         return template ?: throw TemplateNotFoundException()
     }
+
 }
 

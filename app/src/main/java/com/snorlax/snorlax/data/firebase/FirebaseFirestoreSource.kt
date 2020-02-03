@@ -16,9 +16,8 @@
 
 package com.snorlax.snorlax.data.firebase
 
-import android.util.Log
-import com.google.firebase.Timestamp
 import com.google.firebase.firestore.*
+import com.google.gson.Gson
 import com.snorlax.snorlax.model.Attendance
 import com.snorlax.snorlax.model.Student
 import com.snorlax.snorlax.model.User
@@ -29,6 +28,7 @@ import io.reactivex.Single
 import io.reactivex.SingleEmitter
 import io.reactivex.schedulers.Schedulers
 import java.util.*
+import kotlin.collections.HashMap
 
 class FirebaseFirestoreSource private constructor() {
 
@@ -45,6 +45,8 @@ class FirebaseFirestoreSource private constructor() {
 //    val attendanceGroup = firestoreDB.collectionGroup(ATTENDANCE_DATA_NAME)
 
 
+    private val gson = Gson()
+
     companion object {
 
         private var instance: FirebaseFirestoreSource? = null
@@ -59,6 +61,10 @@ class FirebaseFirestoreSource private constructor() {
         private const val SECTIONS_DATA_NAME = "section"
         private const val ATTENDANCE_DATA_NAME = "attendance"
         private const val USER_DATA_NAME = "user"
+//        private const val STUDENT_ATTENDANCE_NAME = "student"
+//        private const val TIME_IN_ATTENDANCE_NAME = "time_in"
+//        private const val LRN_ATTENDANCE_NAME = "lrn"
+
 
     }
 
@@ -251,6 +257,8 @@ class FirebaseFirestoreSource private constructor() {
                 .collection(ATTENDANCE_DATA_NAME)
                 .document(getTodayDateUTC().time.toString())
 
+//            reference.set(hashMapOf(Pair("date", Timestamp(getTodayDateUTC()))), SetOptions.merge())
+
             return Completable.create { emitter ->
                 firestoreDB.runTransaction {
                     attendanceList.forEach { attendance ->
@@ -261,18 +269,15 @@ class FirebaseFirestoreSource private constructor() {
                     it.set(reference, tempMap.toMap(), SetOptions.merge())
                 }.addOnSuccessListener { emitter.onComplete() }
                     .addOnFailureListener { emitter.onError(it) }
+
             }
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
-    fun getAttendanceQuery(section: String, dateStamp: Date): Observable<List<Attendance>> {
-
-//        val currentTimestamp = Timestamp(dateStamp)
-//        val tomorrowTimestamp = Timestamp(getTommorowDate(dateStamp))
-//        val attendanceQuery =
-
+    fun getAttendance(section: String, dateStamp: Date): Observable<List<Attendance>> {
         return Observable.create { emitter ->
+
+
             val listener = sectionRef.document(section)
                 .collection(ATTENDANCE_DATA_NAME)
                 .document(dateStamp.time.toString())
@@ -281,34 +286,57 @@ class FirebaseFirestoreSource private constructor() {
                         emitter.onError(it)
                         return@addSnapshotListener
                     }
+
                     documentSnapshot?.let {
                         it.data?.let { map ->
 
                             val attendance = map.map { mapEntry ->
-                                val entry = (mapEntry.value as HashMap<String, Any>)
-                                Attendance(
-                                    entry["time_in"] as Timestamp,
-                                    entry["reference"] as DocumentReference,
-                                    entry["lrn"] as String
-                                )
+                                val entry = mapEntry.value as HashMap<*, *>
+                                gson.fromJson(gson.toJsonTree(entry), Attendance::class.java)
                             }
 
                             emitter.onNext(attendance)
                         } ?: emitter.onNext(emptyList())
-                    } ?: emitter.onNext(listOf())
+                    } ?: emitter.onNext(emptyList())
                 }
             emitter.setCancellable { listener.remove() }
         }
+    }
 
-//                .whereLessThan(
-//                    "time_in",
-//                    tomorrowTimestamp
-//                )
-//                .whereGreaterThanOrEqualTo("time_in", currentTimestamp)
-//                .orderBy("time_in", Query.Direction.ASCENDING)
+    private fun getAttendanceByDocument(document: DocumentSnapshot): List<Attendance> {
+        document.data?.let { map ->
+            return map.map {
+                val entry = it.value as HashMap<*, *>
 
-//        return attendanceQuery
+                gson.fromJson(gson.toJsonTree(entry), Attendance::class.java)
+            }
+        }
+        return emptyList()
+    }
 
+    // TODO
+    fun getMonthlyAttendance(section: String, month: Date): Single<List<Attendance>> {
+        val attendanceList = mutableListOf<Attendance>()
+        val reference = sectionRef.document(section)
+            .collection(ATTENDANCE_DATA_NAME)
 
+        val maxMonthDate = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
+            time = month
+            set(Calendar.DAY_OF_MONTH, getMaximum(Calendar.DAY_OF_MONTH))
+        }.time
+
+        return Single.create {emitter ->
+            reference.whereGreaterThanOrEqualTo(FieldPath.documentId(), month.time.toString())
+                .whereLessThanOrEqualTo(FieldPath.documentId(), maxMonthDate.time.toString()).get()
+                .addOnSuccessListener {
+
+                    it.documents.forEach {document ->
+                        attendanceList.addAll(getAttendanceByDocument(document))
+                    }
+                    emitter.onSuccess(attendanceList.toList())
+                }.addOnFailureListener {
+                    emitter.onError(it)
+                }
+        }
     }
 }

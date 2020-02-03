@@ -26,6 +26,8 @@ import com.snorlax.snorlax.utils.validator.FormResult
 import com.snorlax.snorlax.utils.validator.FormValidator
 import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
 
@@ -36,8 +38,9 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     private val firebaseAuth = FirebaseAuthSource.getInstance()
 
     private val localCacheSource: LocalCacheSource by lazy {
-        LocalCacheSource.getInstance()
+        LocalCacheSource.getInstance(application)
     }
+
 
     val loginButtonObservable: PublishSubject<Unit> = PublishSubject.create()
 
@@ -72,17 +75,15 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     fun sendPasswordReset(email: String) = firebaseAuth.sendResetPasswordEmail(email)
 
-    fun login(email: String, password: String): Completable = userRepository.login(email, password)
-        .flatMapCompletable {
-            localCacheSource.addToCache(getApplication(), it)
-        }
-
-//    fun addUserToCache(context: Context, user: User): Completable {
-//        return localCacheSource.addToCache(context, user)
-//    }
-
-
-    fun clearDisposable() {
-        userRepository.clearDisposables()
+    fun logout(): Completable {
+        return Completable.fromAction { userRepository.logout() }
+            .andThen(localCacheSource.removeToCache())
+            .subscribeOn(Schedulers.io())
     }
+
+    fun login(email: String, password: String): Completable = userRepository.login(email, password)
+        .flatMapCompletable { localCacheSource.addToCache(it) }
+        .subscribeOn(Schedulers.io())
+
+
 }

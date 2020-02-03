@@ -22,7 +22,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.jakewharton.rxbinding3.view.clicks
@@ -56,7 +56,7 @@ class RegisterFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel = ViewModelProviders.of(this)[RegisterViewModel::class.java]
+        viewModel = ViewModelProvider(this)[RegisterViewModel::class.java]
     }
 
     override fun onCreateView(
@@ -143,7 +143,14 @@ class RegisterFragment : Fragment() {
                                 requireActivity().startHomeActivity()
                             }, {
                                 FirebaseAuth.getInstance().apply {
-                                    currentUser?.let { signOut() }
+                                    currentUser?.let {
+                                        viewModel.logout()
+                                            .subscribeOn(Schedulers.io())
+                                            .observeOn(AndroidSchedulers.mainThread())
+                                            .subscribe({}, {error ->
+                                                debugMessage(error.localizedMessage ?: "Logout failed")
+                                            })
+                                    }
                                 }
                                 btn_register.revertAnimation()
                                 it.message?.let { message ->
@@ -291,6 +298,5 @@ class RegisterFragment : Fragment() {
 //        btn_register.dispose()
         super.onDestroy()
         disposables.dispose()
-        viewModel.clearDisposable()
     }
 }

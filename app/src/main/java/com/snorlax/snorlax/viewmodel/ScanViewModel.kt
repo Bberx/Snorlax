@@ -26,6 +26,7 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.DocumentReference
 import com.karumi.dexter.Dexter
@@ -42,15 +43,20 @@ import com.snorlax.snorlax.model.Attendance
 import com.snorlax.snorlax.model.Student
 import io.reactivex.Completable
 import io.reactivex.Maybe
+import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import java.lang.NullPointerException
 import java.util.*
 
 class ScanViewModel(application: Application) : AndroidViewModel(application) {
 
 //    private val disposable = CompositeDisposable()
 
-    private val cacheSource = LocalCacheSource.getInstance()
+    private val cacheSource = LocalCacheSource.getInstance(application)
     //    private val cameraSource = CameraSource()
     private val firestore = FirebaseFirestoreSource.getInstance()
 
@@ -105,7 +111,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
         // Checks if LRN is valid
         if (lrn.length != 12) return Maybe.empty()
 
-        return firestore.getStudentList(cacheSource.getUserCache(getApplication())!!.section)
+        return firestore.getStudentList(cacheSource.getUserCache()!!.section)
             .subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
             .flatMapMaybe { studentList ->
@@ -171,11 +177,23 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun getCurrentSection(): String {
-        return cacheSource.getUserCache(getApplication())!!.section
+        return cacheSource.getUserCache()!!.section
     }
 
-    fun getStudentDocumentReference(lrn: String): DocumentReference =
-        firestore.getDocumentReference(getCurrentSection(), lrn)
+//    fun getStudent(lrn: String): Student {
+//        val studentObservable = Single.create<Student> { emitter ->
+//            firestore.getDocumentReference(getCurrentSection(), lrn).get().addOnSuccessListener {
+//                val student = it.toObject(Student::class.java)
+//                    ?: throw NullPointerException("No student found with the given LRN")
+//                emitter.onSuccess(student)
+//            }.addOnFailureListener {
+//                emitter.onError(it)
+//            }
+//        }
+//
+//        return studentObservable.subscribeOn(Schedulers.io()).observeOn(Schedulers.io()).blockingGet()
+//    }
+
 
 
     private inner class SnorlaxPermissionListener(

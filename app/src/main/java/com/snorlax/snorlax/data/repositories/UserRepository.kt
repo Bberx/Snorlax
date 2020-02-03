@@ -16,6 +16,7 @@
 
 package com.snorlax.snorlax.data.repositories
 
+import android.app.Application
 import android.content.Context
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.snorlax.snorlax.data.cache.LocalCacheSource
@@ -24,6 +25,7 @@ import com.snorlax.snorlax.data.firebase.FirebaseFirestoreSource
 import com.snorlax.snorlax.data.firebase.StorageSource
 import com.snorlax.snorlax.model.User
 import com.snorlax.snorlax.utils.updateAdminProfile
+import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
@@ -48,15 +50,14 @@ class UserRepository private constructor() {
     }
 
 
-    private val disposables = CompositeDisposable()
 
     private val firebase: FirebaseAuthSource by lazy {
         FirebaseAuthSource.getInstance()
     }
 
-    private val localCache: LocalCacheSource by lazy {
-        LocalCacheSource.getInstance()
-    }
+//    private val localCache: LocalCacheSource by lazy {
+//        LocalCacheSource.getInstance()
+//    }
 
 
     private val firestore by lazy {
@@ -93,7 +94,7 @@ class UserRepository private constructor() {
     }
 
     fun currentUser(context: Context): Maybe<User> {
-        val cache = localCache.getUserCache(context)
+        val cache = LocalCacheSource.getInstance(context).getUserCache()
 
         val databaseUser =
             firestore.getAdmin(firebase.currentUser()!!.uid)
@@ -106,7 +107,7 @@ class UserRepository private constructor() {
     }
 
 
-    fun logout() = firebase.logout()
-
-    fun clearDisposables() = disposables.clear()
+    fun logout() {
+        firebase.logout()
+    }
 }

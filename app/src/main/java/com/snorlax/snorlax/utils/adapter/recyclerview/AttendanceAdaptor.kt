@@ -21,15 +21,15 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SortedList
-import com.google.firebase.firestore.Source
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.model.Attendance
-import com.snorlax.snorlax.model.Student
+import com.snorlax.snorlax.utils.TimeUtils
 import com.snorlax.snorlax.utils.glide.GlideApp
 import com.snorlax.snorlax.utils.inflate
 import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.android.synthetic.main.item_attendance.view.*
 import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 class AttendanceAdaptor : RecyclerView.Adapter<AttendanceAdaptor.AttendanceHolder>() {
@@ -60,9 +60,8 @@ class AttendanceAdaptor : RecyclerView.Adapter<AttendanceAdaptor.AttendanceHolde
                 o1!!.time_in.compareTo(o2!!.time_in)
 
             override fun areContentsTheSame(oldItem: Attendance?, newItem: Attendance?) =
-                (oldItem!!.lrn == newItem!!.lrn) && (oldItem.reference == newItem.reference) && (oldItem.time_in == newItem.time_in)
+                (oldItem!!.lrn == newItem!!.lrn) && (oldItem.student == newItem.student) && (oldItem.time_in == newItem.time_in)
         })
-
     private val clockFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
 
     fun updateData(attendance: List<Attendance>) = mAttendance.replaceAll(attendance)
@@ -96,26 +95,20 @@ class AttendanceAdaptor : RecyclerView.Adapter<AttendanceAdaptor.AttendanceHolde
 
 //    inner class EmptyHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
+
     override fun onBindViewHolder(holder: AttendanceHolder, position: Int) {
-
-//        if (getItemViewType(position) != ITEM_EMPTY) {
-//
-//            holder as AttendanceHolder
-
         val currentAttendance = mAttendance[position]
 
-        currentAttendance.reference.get(Source.DEFAULT).addOnSuccessListener {
+        val student = currentAttendance.student
 
-            val student = it.toObject(Student::class.java)!!
+        holder.studentTimeIn.text =
+            clockFormat.format(currentAttendance.time_in.toDate())
+        holder.studentLrn.text = student.lrn
+        holder.studentName.text = student.displayName
 
-            holder.studentTimeIn.text = clockFormat.format(currentAttendance.time_in.toDate())
-            holder.studentLrn.text = student.lrn
-            holder.studentName.text = student.displayName
+        GlideApp.with(holder.studentLogo)
+            .load(R.drawable.img_avatar)
+            .into(holder.studentLogo)
 
-            GlideApp.with(holder.studentLogo)
-                .load(R.drawable.img_avatar)
-                .into(holder.studentLogo)
-//            }
-        }
     }
 }

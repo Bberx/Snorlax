@@ -16,6 +16,7 @@
 
 package com.snorlax.snorlax.data.cache
 
+import android.app.Application
 import android.content.Context
 import com.google.gson.Gson
 import com.snorlax.snorlax.model.User
@@ -23,42 +24,50 @@ import com.snorlax.snorlax.utils.Constants.PREFS_KEY
 import com.snorlax.snorlax.utils.Constants.USER_KEY
 import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
+import java.lang.RuntimeException
 
-class LocalCacheSource private constructor() {
+class LocalCacheSource private constructor(application: Context) {
 
     companion object {
-        private var instance : LocalCacheSource? = null
+        private var instance: LocalCacheSource? = null
 
-        fun getInstance() : LocalCacheSource {
+        fun getInstance(application: Context): LocalCacheSource {
             instance?.let {
                 return it
             }
 
-            instance = LocalCacheSource()
-            return getInstance()
+            instance = LocalCacheSource(application)
+            return getInstance(application)
         }
+
     }
 
-    fun addToCache(context: Context, user: User): Completable {
-        val cache = context.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE).edit()
-        cache.putString(USER_KEY, Gson().toJson(user))
-//
-//        context.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE).edit {
-//            putString(USER_KEY, Gson().toJson(user))
-//        }
-//
-        return Completable.create {
-            if (cache.commit()) {
-                it.onComplete()
-            } else it.onError(Throwable("Could not write user to shared preferences"))
+    private val sharedPreferences =
+        application.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
+
+    fun addToCache(user: User): Completable =
+        Completable.create {
+            val cache = sharedPreferences.edit()
+            cache.putString(USER_KEY, Gson().toJson(user))
+
+            if (cache.commit()) it.onComplete()
+            else it.onError(RuntimeException("Could not write user to shared preferences"))
         }.subscribeOn(Schedulers.io())
+
+    fun removeToCache(): Completable = Completable.create {emitter ->
+        val cache = sharedPreferences.edit()
+        cache.remove(USER_KEY)
+
+        if (cache.commit()) emitter.onComplete()
+        else emitter.onError(RuntimeException("Could not delete user"))
     }
 
-    fun getUserCache(context: Context): User? {
-        val cache = context.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
-
-        return if (cache.contains(USER_KEY)) Gson().fromJson(cache.getString(USER_KEY, Gson().toJson(User())), User::class.java)
-        else null
+    fun getUserCache(): User? {
+        return Gson().fromJson(
+            sharedPreferences.getString(
+                USER_KEY, null
+            ), User::class.java
+        )
 //            Gson().fromJson(cache.getString(USER_KEY, Gson().toJson(User())), User::class.java)
     }
 

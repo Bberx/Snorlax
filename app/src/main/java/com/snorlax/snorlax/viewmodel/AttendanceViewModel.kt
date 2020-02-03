@@ -21,33 +21,29 @@ import android.net.Uri
 import android.provider.DocumentsContract
 import android.text.format.DateUtils
 import androidx.lifecycle.AndroidViewModel
-import com.snorlax.snorlax.BeabotApp
 import com.snorlax.snorlax.data.cache.LocalCacheSource
 import com.snorlax.snorlax.data.files.FileSource
 import com.snorlax.snorlax.data.firebase.FirebaseFirestoreSource
+import com.snorlax.snorlax.model.Attendance
 import com.snorlax.snorlax.model.Student
 import com.snorlax.snorlax.utils.Constants
 import com.snorlax.snorlax.utils.TimeUtils.getTodayDateLocal
 import com.snorlax.snorlax.utils.processor.WordProcessor
 import io.reactivex.Completable
 import io.reactivex.Single
-import io.reactivex.SingleEmitter
 import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import org.apache.poi.xwpf.usermodel.XWPFDocument
-import java.io.FileNotFoundException
-import java.io.IOException
-import java.lang.Exception
 import java.util.*
 
 class AttendanceViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val cache = LocalCacheSource.getInstance()
+    private val cache = LocalCacheSource.getInstance(application)
 
     private val firestore = FirebaseFirestoreSource.getInstance()
 
-    private val fileSource = FileSource.getInstance()
+    private val fileSource = FileSource.getInstance(application)
 
     val selectedTimeObservable = BehaviorSubject.create<Long>()
 
@@ -96,41 +92,52 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
         ) deleteFile(location)
     }
 
-    fun isEmpty(document: Uri) = fileSource.isFileEmpty(getApplication(), document)
+    fun isEmpty(document: Uri) = fileSource.isFileEmpty(document)
 
-    private fun saveAttendance(document: XWPFDocument, outputLocation: Uri) =
+    fun outputFileName(outputLocation: Uri) = fileSource.getFileName(outputLocation)
+
+    private fun saveToFile(document: XWPFDocument, outputLocation: Uri) =
         Completable.fromAction {
-            val fileOutputStream = fileSource.getFileOutputStream(
-                    getApplication<Application>().contentResolver,
-                    outputLocation
-                )
-                fileOutputStream.use { stream ->
-                    document.use {
-                        it.write(stream)
-                    }
+            fileSource.getFileOutputStream(outputLocation).use { stream ->
+                document.use {
+                    it.write(stream)
                 }
+            }
         }.subscribeOn(Schedulers.io())
 
 
-    fun processAttendance(outputLocation: Uri, month: Date): Completable {
-        return firestore.getStudentList(getSection()).flatMap { students ->
+    fun saveAttendance(outputLocation: Uri, month: Date): Completable {
+
+        val attendance = firestore.getMonthlyAttendance(section, month)
+        val student = firestore.getStudentList(section)
+
+        val lists = Single.zip(
+            student,
+            attendance,
+            BiFunction<List<Student>, List<Attendance>, Pair<List<Student>, List<Attendance>>> { studentList, attendanceList ->
+                Pair(studentList, attendanceList)
+            })
+
+        val word = lists.flatMap { list ->
             WordProcessor(
-                fileSource.getTemplateDocument(getApplication<Application>().resources.assets),
+                fileSource.getTemplateDocument(),
                 month
             ).processTable(
-                Constants.SECTION_LIST.getValue(getSection()),
-                students,
-                emptyList() // TODO
+                Constants.SECTION_LIST.getValue(section),
+                list.first,
+                list.second // TODO
             )
-        }.flatMapCompletable { saveAttendance(it, outputLocation) }
+        }.flatMapCompletable { saveToFile(it, outputLocation) }
+
+        return word
     }
 
     fun getAttendance(timestamp: Date) =
-        firestore.getAttendanceQuery(getSection(), timestamp)
+        firestore.getAttendance(section, timestamp)
 
-    fun getSection(): String {
-        return cache.getUserCache(getApplication())!!.section
-    }
+    val section: String
+        get() = cache.getUserCache()!!.section
+
 
     fun getRelativeDateString(relative: Date): String {
         val relativeTime = getTodayDateLocal().time - relative.time

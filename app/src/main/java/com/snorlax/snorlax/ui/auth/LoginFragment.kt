@@ -24,7 +24,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.getSystemService
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
@@ -61,7 +61,8 @@ class LoginFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel = ViewModelProviders.of(this)[LoginViewModel::class.java]
+//        viewModel = ViewModelProviders.of(this)[LoginViewModel::class.java]
+        viewModel = ViewModelProvider(this)[LoginViewModel::class.java]
     }
 
     override fun onCreateView(
@@ -155,7 +156,6 @@ class LoginFragment : Fragment() {
 
                 if (results.isOverallSuccess()) {
                     btn_login.startAnimation()
-
                     add(
                         viewModel.login(
                             input_email.text.toString(),
@@ -169,7 +169,12 @@ class LoginFragment : Fragment() {
                             }, {
                                 FirebaseAuth.getInstance().apply {
                                     currentUser?.let {
-                                        signOut()
+                                        viewModel.logout()
+                                            .subscribeOn(Schedulers.io())
+                                            .observeOn(AndroidSchedulers.mainThread())
+                                            .subscribe({}, {error ->
+                                                debugMessage(error.localizedMessage ?: "Logout failed")
+                                            })
                                     }
                                 }
                                 btn_login.revertAnimation()
@@ -307,6 +312,5 @@ class LoginFragment : Fragment() {
 //        btn_login.dispose()
         super.onDestroy()
         disposables.dispose()
-        viewModel.clearDisposable()
     }
 }

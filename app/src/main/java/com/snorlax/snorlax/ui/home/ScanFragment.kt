@@ -33,7 +33,7 @@ import androidx.camera.core.*
 import androidx.camera.view.CameraView
 import androidx.core.content.getSystemService
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Timestamp
@@ -78,7 +78,7 @@ class ScanFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = activity?.run {
-            ViewModelProviders.of(this)[ScanViewModel::class.java]
+            ViewModelProvider(this)[ScanViewModel::class.java]
         } ?: throw RuntimeException("Invalid Activity")
 
     }
@@ -267,16 +267,17 @@ class ScanFragment : Fragment() {
             listOf(
                 Attendance(
                     Timestamp(Date(it.second)),
-                    viewModel.getStudentDocumentReference(it.first.lrn),
+//                    viewModel.getStudent(it.first.lrn),
+                    it.first,
                     it.first.lrn
                 )
             )
         }
 
         disposables.add(viewModel.addAttendance(attendanceEntry).subscribe({
-            Snackbar.make(view!!, "Success", Snackbar.LENGTH_LONG).show()
+            Snackbar.make(requireView(), "Attendance saved", Snackbar.LENGTH_LONG).show()
         }, {
-            Snackbar.make(view!!, it.localizedMessage!!, Snackbar.LENGTH_LONG).show()
+            Snackbar.make(requireView(), it.localizedMessage ?: "", Snackbar.LENGTH_LONG).show()
         }))
     }
 

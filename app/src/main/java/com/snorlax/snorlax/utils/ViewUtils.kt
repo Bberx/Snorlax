@@ -49,25 +49,27 @@ fun Activity.exitApp() {
 fun Activity.startHomeActivity() {
     val intent = Intent(this, HomeActivity::class.java).also {
         it.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-//        finish()
     }
     startActivity(intent)
     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+    finishAndRemoveTask()
 }
 
 
 fun Activity.startLoginActivity() {
-    Intent(this, CredentialsActivity::class.java).also {
+    val intent = Intent(this, CredentialsActivity::class.java).also {
         it.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        startActivity(it)
+
 //        finish()
     }
+    startActivity(intent)
+    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+    finishAndRemoveTask()
 }
 
 
-fun ViewGroup?.inflate(@LayoutRes layoutRes: Int, attachToRoot: Boolean = false): View {
-    return LayoutInflater.from(this?.context).inflate(layoutRes, this, attachToRoot)
-}
+fun ViewGroup?.inflate(@LayoutRes layoutRes: Int, attachToRoot: Boolean = false): View =
+    LayoutInflater.from(this?.context).inflate(layoutRes, this, attachToRoot)
 
 //fun ViewGroup?.inflate(view: View, attachToRoot: Boolean = false): View {
 //    return LayoutInflater.from(this?.context).i

@@ -38,4 +38,19 @@ data class Student(
 //    fun getDisplayName() : String {
 //        return "${name.getValue("last").toUpperCase(Locale.getDefault())}, ${name.getValue("first")}"
 //    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        val otherStudent = other as Student? ?: return false
+        return lrn.contentEquals(otherStudent.lrn) &&
+                name == otherStudent.name &&
+                imageUrl.equals(otherStudent.imageUrl)
+    }
+
+    override fun hashCode(): Int {
+        var result = name.hashCode()
+        result = 69 * result + lrn.hashCode()
+        result = 69 * result + (imageUrl?.hashCode() ?: 0)
+        return result
+    }
 }

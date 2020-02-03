@@ -16,21 +16,29 @@
 
 package com.snorlax.snorlax.viewmodel
 
-import android.content.Context
+import android.app.Application
 import android.net.Uri
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import com.google.firebase.auth.FirebaseAuth
+import com.snorlax.snorlax.data.cache.LocalCacheSource
 import com.snorlax.snorlax.data.repositories.UserRepository
 import com.snorlax.snorlax.model.User
 import com.snorlax.snorlax.utils.Constants.SECTION_LIST
 import com.snorlax.snorlax.utils.caps
 import io.reactivex.Completable
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import java.util.*
 
-class HomeActivityViewModel : ViewModel() {
+class HomeActivityViewModel(application: Application) : AndroidViewModel(application) {
 
     private val userRepository: UserRepository by lazy { UserRepository.getInstance() }
+
+    private val localCacheSource: LocalCacheSource by lazy {
+        LocalCacheSource.getInstance(
+            application
+        )
+    }
 
     private val firebaseAuth: FirebaseAuth by lazy {
         FirebaseAuth.getInstance()
@@ -48,17 +56,14 @@ class HomeActivityViewModel : ViewModel() {
 //        }
 //    }
 
-    fun logout() {
-        userRepository.logout()
-//        return Completable.create { emitter ->
-//            firebaseAuth.addAuthStateListener {
-//                if (it.currentUser == null) emitter.onComplete()
-//            }
-//        }
+    fun logout(): Completable {
+        return Completable.fromAction { userRepository.logout() }
+            .andThen(localCacheSource.removeToCache())
+            .subscribeOn(Schedulers.io())
     }
 
 
-    fun getUser(context: Context) = userRepository.currentUser(context)
+    fun getUser() = userRepository.currentUser(getApplication())
 
     fun getRole(user: User): String {
         val builder: StringBuilder = StringBuilder()
@@ -74,7 +79,5 @@ class HomeActivityViewModel : ViewModel() {
     fun getUserPhoto(): Uri {
         return firebaseAuth.currentUser!!.photoUrl!!
     }
-
-
 
 }

@@ -20,6 +20,14 @@ import java.util.*
 
 object TimeUtils {
 
+    fun numOfDays(month: Date): Int {
+        return GregorianCalendar(TimeZone.getTimeZone("UTC"))
+            .apply { time = month }
+            .getActualMaximum(Calendar.DAY_OF_MONTH)
+    }
+
+
+
     fun getTodayDateUTC(): Date {
         val rawCalendar = GregorianCalendar.getInstance()
         val safe = getCalendar()
@@ -46,7 +54,6 @@ object TimeUtils {
         return safe.time
 
     }
-
     fun getTodayDateLocal(): Date {
 //            val calendar = Calendar.getInstance(TimeZone.getDefault())
 //

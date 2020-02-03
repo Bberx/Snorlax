@@ -17,17 +17,16 @@
 package com.snorlax.snorlax.viewmodel
 
 import android.app.Application
-import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import com.snorlax.snorlax.data.cache.LocalCacheSource
 import com.snorlax.snorlax.data.repositories.UserRepository
-import com.snorlax.snorlax.model.User
 import com.snorlax.snorlax.utils.Constants.SECTION_LIST
 import com.snorlax.snorlax.utils.validator.FormResult
 import com.snorlax.snorlax.utils.validator.FormValidator
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.functions.BiFunction
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
 import java.util.*
@@ -37,7 +36,7 @@ class RegisterViewModel(application: Application) : AndroidViewModel(application
     private val userRepository = UserRepository.getInstance()
 
     private val localCacheSource: LocalCacheSource by lazy {
-        LocalCacheSource.getInstance()
+        LocalCacheSource.getInstance(application)
     }
 
 //    companion object {
@@ -229,17 +228,18 @@ class RegisterViewModel(application: Application) : AndroidViewModel(application
             getSectionCode(section).trim(),
             accType.trim().toLowerCase(Locale.ROOT)
         ).flatMapCompletable {
-            localCacheSource.addToCache(getApplication(), it)
+            localCacheSource.addToCache(it)
         }
     }
 
 //    fun getCurrentUser(context: Context) = userRepository.currentUser(context)
 
-//    fun addUserToCache(context: Context, user: User) : Completable {
+    //    fun addUserToCache(context: Context, user: User) : Completable {
 //        return localCacheSource.addToCache(context, user)
 //    }
-
-    fun clearDisposable() {
-        userRepository.clearDisposables()
+    fun logout(): Completable {
+        return Completable.fromAction { userRepository.logout() }
+            .andThen(localCacheSource.removeToCache())
+            .subscribeOn(Schedulers.io())
     }
 }
