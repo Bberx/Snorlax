@@ -19,8 +19,6 @@ package com.snorlax.snorlax.data.files
 import android.app.Application
 import android.content.Context
 import android.net.Uri
-import android.os.CancellationSignal
-import android.provider.DocumentsContract
 import androidx.documentfile.provider.DocumentFile
 import com.snorlax.snorlax.utils.exception.TemplateNotFoundException
 import org.apache.poi.openxml4j.util.ZipSecureFile
@@ -61,7 +59,7 @@ class FileSource private constructor(private val application: Application) {
         var template: XWPFDocument? = null
         try {
             // fixme: set to right template
-            application.assets.open("template/AttendanceSheetTemplate_test.docx").use { template = XWPFDocument(it) }
+            application.assets.open("").use { template = XWPFDocument(it) }
         } catch (error: IOException) {
             throw TemplateNotFoundException()
         }

@@ -23,12 +23,12 @@ import com.snorlax.snorlax.utils.TimeUtils
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
-import org.apache.poi.xwpf.usermodel.*
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPPr
+import org.apache.poi.xwpf.usermodel.UnderlinePatterns
+import org.apache.poi.xwpf.usermodel.XWPFDocument
+import org.apache.poi.xwpf.usermodel.XWPFParagraph
+import org.apache.poi.xwpf.usermodel.XWPFTableCell
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STJc
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.STLineSpacingRule
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTblWidth
-import java.lang.NullPointerException
 import java.math.BigInteger
 import java.text.SimpleDateFormat
 import java.util.*
@@ -41,6 +41,10 @@ class WordProcessor(private val document: XWPFDocument, private val month: Date)
     }
 
     private val table = document.tables.first()
+    private val currentDay: Int = GregorianCalendar.getInstance().apply {
+        time = TimeUtils.getTodayDateLocal()
+    }.get(Calendar.DAY_OF_MONTH)
+
 
     private fun setSingleLineSpacing(para: XWPFParagraph) {
         para.ctp.pPr = table.rows[0].getCell(0).paragraphs[0].ctp.pPr
@@ -121,11 +125,11 @@ class WordProcessor(private val document: XWPFDocument, private val month: Date)
         return Completable.fromAction {
             students.forEachIndexed { index, student ->
                 val row = table.rows[index + 1]
-                val cell = row.getCell(0)
+                val studentCell = row.getCell(0)
 
-                setSingleLineSpacing(cell.paragraphs[0])
+                setSingleLineSpacing(studentCell.paragraphs[0])
 
-                cell.paragraphs[0].createRun().run {
+                studentCell.paragraphs[0].createRun().run {
                     fontFamily = "Arial"
                     fontSize = 10
                     setText(student.displayName)
@@ -137,9 +141,9 @@ class WordProcessor(private val document: XWPFDocument, private val month: Date)
 
 
                 // Fill each day with "A" first
-                repeat(numOfDays) {
-                    setSingleLineSpacing(row.getCell(it + 1).paragraphs[0])
+                repeat(currentDay) {
                     val cell = row.getCell(it + 1)
+                    setSingleLineSpacing(cell.paragraphs[0])
 
                     cell.paragraphs[0].createRun().run {
                         fontFamily = "Arial"
@@ -149,6 +153,13 @@ class WordProcessor(private val document: XWPFDocument, private val month: Date)
 
                     cell.paragraphs[0].ctp.pPr.jc = cell.paragraphs[0].ctp.pPr.addNewJc()
                     cell.paragraphs[0].ctp.pPr.jc.`val` = STJc.CENTER
+
+                    val day = it + 1
+                    if (day == currentDay) {
+                        repeat(numOfDays - day) { emptyDayIndex ->
+                            setSingleLineSpacing(row.getCell(day + emptyDayIndex + 1).paragraphs[0])
+                        }
+                    }
                 }
 
                 studentAttendance.forEach {
@@ -169,6 +180,7 @@ class WordProcessor(private val document: XWPFDocument, private val month: Date)
 
     // After populate table
     // Autofit name column
+
     // TODO
     private fun adjustSize(): Completable {
         return Completable.fromAction {
