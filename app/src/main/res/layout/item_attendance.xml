@@ -20,11 +20,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_main"
     android:layout_width="match_parent"
-    android:layout_height="72dp"
+    android:layout_height="@dimen/item_height"
     android:background="?android:attr/selectableItemBackground"
     android:clickable="true"
     android:elevation="8dp"
     android:focusable="true">
+
+
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/student_image"

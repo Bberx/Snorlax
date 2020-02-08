@@ -237,7 +237,7 @@ class AttendanceFragment : Fragment() {
 
                     is IOException -> showResult(
                         getString(
-                            R.string.err_ioexception,
+                            R.string.err_io_exception,
                             it.localizedMessage ?: "unknown error occurred."
                         )
                     )

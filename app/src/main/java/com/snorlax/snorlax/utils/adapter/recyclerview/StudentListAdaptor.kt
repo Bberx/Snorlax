@@ -22,9 +22,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.chauthai.swipereveallayout.SwipeRevealLayout
 import com.chauthai.swipereveallayout.ViewBinderHelper
@@ -39,7 +36,7 @@ import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.android.synthetic.main.item_student.view.student_displayName
 import kotlinx.android.synthetic.main.item_student.view.student_image
 import kotlinx.android.synthetic.main.item_student.view.student_lrn
-import kotlinx.android.synthetic.main.test_layout.view.*
+import kotlinx.android.synthetic.main.item_student_list.view.*
 
 
 class StudentListAdaptor(
@@ -84,7 +81,7 @@ class StudentListAdaptor(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StudentViewHolder {
-        val inflatedView = parent.inflate(R.layout.test_layout)
+        val inflatedView = parent.inflate(R.layout.item_student_list)
         return StudentViewHolder(inflatedView)
     }
 

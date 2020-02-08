@@ -57,7 +57,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView"
-        tools:text="@string/msg_camera_no_permission" />
+        tools:text="@string/msg_enable_camera_permission" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"

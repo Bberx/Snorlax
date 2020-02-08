@@ -176,7 +176,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="64dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="24dp"
             android:layout_marginEnd="64dp"
             android:layout_marginBottom="16dp"
             android:backgroundTint="@color/colorAccent"
@@ -186,7 +186,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/text_layout_password_confirm"
             app:layout_constraintStart_toStartOf="@+id/text_layout_password_confirm"
-            app:layout_constraintTop_toBottomOf="@+id/text_layout_password_confirm" />
+            app:layout_constraintTop_toBottomOf="@+id/btn_have_account" />
 
         <androidx.constraintlayout.widget.Barrier
             android:id="@+id/barrier"
@@ -196,5 +196,19 @@
             app:constraint_referenced_ids="text_layout_account_type,text_layout_section"
             tools:layout_editor_absoluteX="8dp"
             tools:layout_editor_absoluteY="416dp" />
+
+        <TextView
+            android:id="@+id/btn_have_account"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="end"
+            android:textSize="16sp"
+            android:text="@string/label_have_account"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_layout_password_confirm" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

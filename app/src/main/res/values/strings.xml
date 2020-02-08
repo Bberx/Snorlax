@@ -44,7 +44,7 @@
     <string name="label_actions">Actions</string>
     <string name="label_section">Section</string>
     <string name="msg_camera_loading">Camera loading please wait…</string>
-    <string name="msg_camera_no_permission">Please allow camera permission</string>
+    <string name="msg_enable_camera_permission">Please allow camera permission</string>
     <string name="msg_allow_permission_in_settings">To use the scan functionality, allow camera permission to scan the barcodes</string>
     <string name="label_attendance_list">Attendance list:</string>
     <string name="act_edit">Edit</string>
@@ -72,11 +72,14 @@
     <string name="accs_empty_list">Empty list</string>
     <string name="msg_empty_list">It seems empty here…</string>
     <string name="label_which_day">Select which day…</string>
-    <string name="msg_enable_automatic_time">Enable automatic time and time zone settings to continue</string>
+    <string name="msg_enable_auto_time_and_time_zone">Enable automatic time and time zone settings to continue</string>
     <string name="msg_attendance_saved">Attendance saved as %s</string>
     <string name="err_file_not_found">Failed, output file is not found</string>
-    <string name="err_ioexception">Error creating document, %s</string>
+    <string name="err_io_exception">Error creating document, %s</string>
     <string name="err_unknown">Failed unknown error, %s</string>
     <string name="err_unknown_section">Error, unknown section. Please sign out and login again</string>
     <string name="err_template_not_found">Document template not found, please reinstall app.</string>
+    <string name="msg_enable_auto_time">Enable automatic time settings to continue</string>
+    <string name="msg_enable_auto_time_zone">Enable automatic time zone settings to continue</string>
+    <string name="label_have_account">Already have account? <u><font color='blue'>Login here</font></u></string>
 </resources>

@@ -163,12 +163,15 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
             getApplication<BeabotApp>().contentResolver,
             Settings.Global.AUTO_TIME, 0
         )
+        return autoTime == 1
+    }
+
+    fun isAutoTimeZoneEnabled(): Boolean {
         val autoTimeZone = Settings.Global.getInt(
             getApplication<BeabotApp>().contentResolver,
             Settings.Global.AUTO_TIME_ZONE, 0
         )
-
-        return (autoTime == 1 && autoTimeZone == 1)
+        return autoTimeZone == 1
     }
 
     fun getCurrentTime(): Date {
@@ -217,7 +220,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
             if (response!!.isPermanentlyDenied) {
                 if (!fromOnStart) {
                     Snackbar.make(
-                        fragment.view!!,
+                        fragment.requireView(),
                         fragment.getString(R.string.msg_allow_permission_in_settings),
                         8000
                     )

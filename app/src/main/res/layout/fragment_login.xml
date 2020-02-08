@@ -30,7 +30,7 @@
 
 
         <TextView
-            android:id="@+id/btn_forgot_password"
+            android:id="@+id/btn_create_account"
             style="@style/Widget.MaterialComponents.TextView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -39,10 +39,25 @@
             android:clickable="true"
             android:focusable="true"
             android:gravity="end"
-            android:text="@string/label_forgot_password"
+            android:text="@string/label_register"
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="@+id/text_layout_password"
             app:layout_constraintTop_toBottomOf="@+id/text_layout_password" />
+
+        <TextView
+            android:id="@+id/btn_forgot_password"
+            style="@style/Widget.MaterialComponents.TextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="end"
+            android:text="@string/label_forgot_password"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="@+id/text_layout_password"
+            app:layout_constraintTop_toBottomOf="@+id/btn_create_account" />
 
         <br.com.simplepass.loadingbutton.customViews.CircularProgressButton
             android:id="@+id/btn_login"

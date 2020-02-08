@@ -74,7 +74,7 @@ class AttendanceAdaptor : RecyclerView.Adapter<AttendanceAdaptor.AttendanceHolde
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AttendanceHolder {
 //        return if (viewType == ITEM_EMPTY) {
-//            val inflatedView = parent.inflate(R.layout.label_empty_list)
+//            val inflatedView = parent.inflate(R.layout.layout_empty_list)
 //            EmptyHolder(inflatedView)
 //        } else {
         val inflatedView = parent.inflate(R.layout.item_attendance)
@@ -86,7 +86,7 @@ class AttendanceAdaptor : RecyclerView.Adapter<AttendanceAdaptor.AttendanceHolde
         return if (mAttendance.size() == 0) ITEM_EMPTY else ITEM_DEFAULT
     }
 
-    inner class AttendanceHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class AttendanceHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val studentLogo: CircleImageView = itemView.student_image
         val studentName: TextView = itemView.student_displayName
         val studentLrn: TextView = itemView.student_lrn

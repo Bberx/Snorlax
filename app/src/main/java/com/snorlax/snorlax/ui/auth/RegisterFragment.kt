@@ -42,6 +42,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
+import kotlinx.android.synthetic.main.activity_credentials.*
 import kotlinx.android.synthetic.main.fragment_register.*
 import kotlinx.android.synthetic.main.fragment_register.view.*
 
@@ -97,6 +98,9 @@ class RegisterFragment : Fragment() {
             .subscribe(viewModel.rawPasswordConfirmObserver)
         view.btn_register.clicks()
             .subscribe(viewModel.registerButtonObservable)
+        view.btn_have_account.setOnClickListener {
+            (requireActivity() as CredentialsActivity).view_pager.currentItem = 0
+        }
 
         return view
     }

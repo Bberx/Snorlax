@@ -42,6 +42,7 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import kotlinx.android.synthetic.main.activity_credentials.*
 import kotlinx.android.synthetic.main.diag_forgot_password.*
 import kotlinx.android.synthetic.main.fragment_login.*
 import kotlinx.android.synthetic.main.fragment_login.view.*
@@ -61,7 +62,6 @@ class LoginFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        viewModel = ViewModelProviders.of(this)[LoginViewModel::class.java]
         viewModel = ViewModelProvider(this)[LoginViewModel::class.java]
     }
 
@@ -84,6 +84,9 @@ class LoginFragment : Fragment() {
 
         view.btn_forgot_password.setOnClickListener {
             showForgotDialog()
+        }
+        view.btn_create_account.setOnClickListener {
+            (requireActivity() as CredentialsActivity).view_pager.currentItem = 1
         }
 
 

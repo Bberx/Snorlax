@@ -118,7 +118,7 @@ android {
             ext.alwaysUpdateBuildId = false
             debuggable true
             firebaseAppDistribution {
-                releaseNotes = "Debug build\nNow forces phone to use automatic time for more accurate time keeping"
+                releaseNotes = "Debug build\nNow displays a placeholder when there is no data (only in attendance atm).\n Can now output monthly attendance to a word document"
                 groups = "researchers, developer"
             }
 //            manifestPlaceholders = [crashlyticsCollectionEnabled:"false"]
@@ -172,7 +172,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'androidx.core:core-ktx:1.1.0'
+    implementation 'androidx.core:core-ktx:1.2.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'com.google.firebase:firebase-auth:19.2.0'
 //    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
@@ -183,7 +183,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
     //New Material Design
-    implementation 'com.google.android.material:material:1.2.0-alpha03'
+    implementation 'com.google.android.material:material:1.2.0-alpha04'
 
     //RxJava
     implementation 'io.reactivex.rxjava2:rxjava:2.2.15'
@@ -206,11 +206,11 @@ dependencies {
     implementation 'com.google.firebase:firebase-ml-vision:24.0.1'
 
     // Firestore
-    implementation 'com.google.firebase:firebase-firestore:21.3.1'
+    implementation 'com.google.firebase:firebase-firestore:21.4.0'
     implementation 'com.firebaseui:firebase-ui-firestore:6.0.2'
 
     // Firebase Storage
-    implementation 'com.google.firebase:firebase-storage:19.1.0'
+    implementation 'com.google.firebase:firebase-storage:19.1.1'
     implementation 'com.firebaseui:firebase-ui-storage:6.0.2'
 
     // Glide
@@ -233,8 +233,8 @@ dependencies {
     implementation 'com.chauthai.swipereveallayout:swipe-reveal-layout:1.4.1'
 
     // KTX
-    implementation 'androidx.core:core-ktx:1.1.0'
-    implementation 'androidx.fragment:fragment-ktx:1.2.0'
+    implementation 'androidx.core:core-ktx:1.2.0'
+    implementation 'androidx.fragment:fragment-ktx:1.2.1'
 
     // CameraX View
     implementation "androidx.camera:camera-view:1.0.0-alpha03"
@@ -270,6 +270,9 @@ dependencies {
     kapt 'com.google.dagger:dagger-compiler:2.25.2'
     api 'com.google.dagger:dagger-android:2.25.2'
     kapt 'com.google.dagger:dagger-android-processor:2.25.2'
+
+    // Shimmer
+    implementation 'com.facebook.shimmer:shimmer:0.5.0'
 
     // ViewModel and LiveData
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"

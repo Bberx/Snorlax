@@ -25,18 +25,37 @@
     android:orientation="vertical"
     tools:context=".ui.home.attendance.AttendanceListFragment">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/attendance_list"
-        android:layout_width="match_parent"
+    <FrameLayout
+        android:id="@+id/attendance_frame"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:fadingEdge="vertical"
-        android:fadingEdgeLength="16dp"
-        android:requiresFadingEdge="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:listitem="@layout/item_student" />
+        app:layout_constraintTop_toTopOf="parent" >
+
+<!--        <com.facebook.shimmer.ShimmerFrameLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent">-->
+<!--            <include layout="@layout/shimmer_layout_attendance"/>-->
+<!--        </com.facebook.shimmer.ShimmerFrameLayout>-->
+
+    </FrameLayout>
+
+
+<!--    <androidx.recyclerview.widget.RecyclerView-->
+<!--        android:id="@+id/attendance_list"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="0dp"-->
+<!--        android:fadingEdge="vertical"-->
+<!--        android:fadingEdgeLength="16dp"-->
+<!--        android:requiresFadingEdge="vertical"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent"-->
+<!--        tools:listitem="@layout/item_student" />-->
+<!--    </FrameLayout>-->
 
     <!--    <TextView-->
     <!--        android:id="@+id/label_empty"-->

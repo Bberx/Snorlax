@@ -169,7 +169,7 @@ class WordProcessor(private val document: XWPFDocument, private val month: Date)
                     val day = calendar.get(Calendar.DAY_OF_MONTH)
 
                     row.getCell(day).paragraphs[0].runs[0].run {
-                        setText("/", 0)
+                        setText("✓", 0)
                     }
                 }
 

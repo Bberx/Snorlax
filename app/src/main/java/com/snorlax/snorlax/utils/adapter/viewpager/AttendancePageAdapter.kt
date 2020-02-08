@@ -33,6 +33,7 @@ class AttendancePageAdapter(
     override fun getItemCount() = (getTodayDateLocal().time / 86_400_000).toInt() + 1
 
     override fun createFragment(position: Int): Fragment {
+
         return AttendanceListFragment(viewModel.getAttendance(positionToTime(position)))
     }
 

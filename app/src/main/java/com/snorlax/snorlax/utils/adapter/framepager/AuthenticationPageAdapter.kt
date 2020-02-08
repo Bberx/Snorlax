@@ -41,6 +41,7 @@ class AuthenticationPageAdapter(
         return 2
     }
 
+
     override fun getPageTitle(position: Int): CharSequence =
         when (position) {
             0 -> mContext.resources.getString(R.string.act_log_in)

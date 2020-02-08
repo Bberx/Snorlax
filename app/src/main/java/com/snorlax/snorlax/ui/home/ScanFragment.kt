@@ -127,12 +127,11 @@ class ScanFragment : Fragment() {
             .subscribeOn(Schedulers.io())
 //            .observeOn(AndroidSchedulers.mainThread())
             .doAfterNext {
-                if (it && viewModel.isAutoTimeEnabled()) {
+                if (it && viewModel.isAutoTimeEnabled() && viewModel.isAutoTimeZoneEnabled()) {
                     if (CameraX.isBound(barcodeAnalyzer)) {
                         CameraX.unbind(barcodeAnalyzer)
                         CameraX.bindToLifecycle(this, barcodeAnalyzer)
                     } else CameraX.bindToLifecycle(this, barcodeAnalyzer)
-//                    viewModel.startCamera(this)
                     cameraView.bindToLifecycle(this)
                 } else {
                     CameraX.unbindAll()
@@ -144,21 +143,56 @@ class ScanFragment : Fragment() {
                     typedArray.recycle()
                     rootView.camera_frame.setBackgroundResource(backgroundResource)
 
-                    if (!viewModel.isAutoTimeEnabled()) {
-                        rootView.camera_frame.addView(cameraPlaceholderView.apply {
-                            this.error_message.text = getString(R.string.msg_enable_automatic_time)
-                            rootView.camera_frame.setOnClickListener {
-                                startActivityForResult(Intent(Settings.ACTION_DATE_SETTINGS), 69)
+                    fun getErrorMessage(): String = when {
+                        !viewModel.isAutoTimeEnabled() && !viewModel.isAutoTimeZoneEnabled() -> {
+                            getString(R.string.msg_enable_auto_time_and_time_zone)
+                        }
+                        !viewModel.isAutoTimeEnabled() && viewModel.isAutoTimeZoneEnabled() -> {
+                            getString(R.string.msg_enable_auto_time)
+                        }
+                        viewModel.isAutoTimeEnabled() && !viewModel.isAutoTimeZoneEnabled() -> {
+                            getString(R.string.msg_enable_auto_time_zone)
+                        }
+                        else -> {
+                            getString(R.string.msg_enable_camera_permission)
+                        }
+                    }
+
+                    fun getErrorClickListener(): View.OnClickListener {
+                        return when {
+                            !viewModel.isAutoTimeEnabled() || !viewModel.isAutoTimeZoneEnabled() -> View.OnClickListener {
+                                startActivityForResult(Intent(Settings.ACTION_DATE_SETTINGS), 3000)
                             }
-                        })
-                    } else {
-                        rootView.camera_frame.addView(cameraPlaceholderView.apply {
-                            this.error_message.text = getString(R.string.msg_camera_no_permission)
-                            rootView.camera_frame.setOnClickListener {
+                            else -> View.OnClickListener {
                                 viewModel.requestPermission(this@ScanFragment, false)
                             }
-                        })
+                        }
                     }
+                    rootView.camera_frame.addView(cameraPlaceholderView.apply {
+                        error_message.text = getErrorMessage()
+                    })
+                    rootView.camera_frame.setOnClickListener(getErrorClickListener())
+
+//                    if (!viewModel.isAutoTimeEnabled()) {
+//                        rootView.camera_frame.addView(cameraPlaceholderView.apply {
+//                            //                            this.error_message.text = if (!viewModel.isAutoTimeEnabled()) getString(R.string.msg_enable_automatic_time) else if (!viewModel.isAutoTimeZoneEnabled()) "Please enable automatic time zone"
+//                            this.error_message.text = getErrorMessage()
+//
+//
+//                            rootView.camera_frame.setOnClickListener {
+//                                startActivityForResult(Intent(Settings.ACTION_DATE_SETTINGS), 69)
+//                            }
+//                        })
+//                    } else if (!viewModel.isAutoTimeZoneEnabled()) {
+//
+//                    } else {
+//                        rootView.camera_frame.addView(cameraPlaceholderView.apply {
+//                            this.error_message.text = getString(R.string.msg_enable_camera_permission)
+//                            rootView.camera_frame.setOnClickListener {
+//                                viewModel.requestPermission(this@ScanFragment, false)
+//                            }
+//                        })
+//                    }
                 }
             }
             .subscribe {
@@ -171,38 +205,6 @@ class ScanFragment : Fragment() {
                     parent.addView(cameraView, 0)
                 }
             }
-//            .flatMap { viewModel.getCameraPreview() }
-
-
-//            .subscribe { result ->
-//                val parent = camera_frame
-////                val cameraPreview = CameraPreview(context!!)
-//
-//
-//
-//
-//
-////                cameraPreview.surfaceTextureListener = object : TextureView.SurfaceTextureListener {
-////                    override fun onSurfaceTextureSizeChanged(
-////                        surface: SurfaceTexture?,
-////                        width: Int,
-////                        height: Int
-////                    ) {}
-////                    override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) {}
-////                    override fun onSurfaceTextureDestroyed(surface: SurfaceTexture?) = cameraPreview.surfaceTexture == null
-////                    override fun onSurfaceTextureAvailable(
-////                        surface: SurfaceTexture?,
-////                        width: Int,
-////                        height: Int
-////                    ) { cameraPreview.surfaceTexture = result.surfaceTexture }
-////                }
-//
-////                parent.setOnClickListener(null)
-////                parent.setBackgroundResource(0)
-////                parent.removeAllViews()
-////
-////                parent.addView(testView, 0)
-//            }
 
         rootView.student_log_list.layoutManager = LinearLayoutManager(context)
         rootView.student_log_list.adapter = studentScannerAdaptor
@@ -239,7 +241,6 @@ class ScanFragment : Fragment() {
                 }
                 .doOnNext { shouldAdd ->
                     if (shouldAdd.first) {
-                        Log.d("Threading", "adding list ${Thread.currentThread().name}")
                         studentScannerAdaptor.studentList.add(
                             Pair(shouldAdd.second, viewModel.getCurrentTime().time)
                         )
@@ -252,7 +253,6 @@ class ScanFragment : Fragment() {
                         studentScannerAdaptor.notifyDataSetChanged()
                         vibrate()
                         addAttendance()
-                        Log.d("Threading", "data changed ${Thread.currentThread().name}")
                     }
 
                 }, { Toast.makeText(context, it.localizedMessage, Toast.LENGTH_LONG).show() })
@@ -289,6 +289,7 @@ class ScanFragment : Fragment() {
             vibrator.vibrate(pattern, -1)
         }
     }
+
     override fun onDestroy() {
 
         disposables.dispose()

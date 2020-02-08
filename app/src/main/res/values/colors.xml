@@ -20,4 +20,5 @@
     <color name="colorPrimaryDark">#072A47</color>
     <color name="colorAccent">#0A7E7E</color>
     <color name="alertColor">#FFAB00</color>
+    <color name="shimmerColor">#DDDDDD</color>
 </resources>
