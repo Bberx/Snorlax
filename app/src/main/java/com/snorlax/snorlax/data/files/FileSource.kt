@@ -59,7 +59,7 @@ class FileSource private constructor(private val application: Application) {
         var template: XWPFDocument? = null
         try {
             // fixme: set to right template
-            application.assets.open("").use { template = XWPFDocument(it) }
+            application.assets.open("template/AttendanceSheetTemplate.docx").use { template = XWPFDocument(it) }
         } catch (error: IOException) {
             throw TemplateNotFoundException()
         }
