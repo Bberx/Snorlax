@@ -93,20 +93,12 @@ class HomeActivity : AppCompatActivity() {
             }
             when (it.itemId) {
                 R.id.nav_scan -> {
-//                    supportFragmentManager.beginTransaction().replace(
-//                        R.id.fragment_container,
-//                        ScanFragment()
-//                    ).commit()
                     supportFragmentManager.commit {
                         replace(R.id.fragment_container, ScanFragment())
                     }
                 }
 
                 R.id.nav_attendance -> {
-//                    supportFragmentManager.beginTransaction().replace(
-//                        R.id.fragment_container,
-//                        AttendanceFragment()
-//                    ).commit()
                     supportFragmentManager.commit {
                         replace(
                             R.id.fragment_container,
@@ -116,12 +108,14 @@ class HomeActivity : AppCompatActivity() {
                 }
 
                 R.id.nav_students -> {
-//                    supportFragmentManager.beginTransaction().replace(
-//                        R.id.fragment_container,
-//                        StudentsFragment()
-//                    ).commit()
                     supportFragmentManager.commit {
                         replace(R.id.fragment_container, StudentsFragment())
+                    }
+                }
+
+                R.id.nav_generate -> {
+                    supportFragmentManager.commit {
+                        replace(R.id.fragment_container, GenerateFragment())
                     }
                 }
 
@@ -156,7 +150,7 @@ class HomeActivity : AppCompatActivity() {
 
     private fun initObservables() {
         disposables.add(
-            viewModel.getUser()
+            viewModel.getUser(this)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {

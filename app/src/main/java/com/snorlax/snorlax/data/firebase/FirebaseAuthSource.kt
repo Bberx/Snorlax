@@ -19,6 +19,7 @@ package com.snorlax.snorlax.data.firebase
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FirebaseFirestore
 import com.snorlax.snorlax.model.User
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -82,13 +83,9 @@ class FirebaseAuthSource private constructor() {
                 .addOnFailureListener { emitter.onError(it) }
         }
 
-    fun logout() = mAuth.signOut()
-
-    fun loggedOut() : Observable<Boolean> {
-        return Observable.create {emitter ->
-            mAuth.addAuthStateListener {
-                emitter.onNext(it.currentUser == null)
-            }
+    fun logout() {
+        FirebaseFirestore.getInstance().waitForPendingWrites().addOnSuccessListener {
+            mAuth.signOut()
         }
     }
 

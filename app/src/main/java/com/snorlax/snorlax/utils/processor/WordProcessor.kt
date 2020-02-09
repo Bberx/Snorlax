@@ -23,10 +23,7 @@ import com.snorlax.snorlax.utils.TimeUtils
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
-import org.apache.poi.xwpf.usermodel.UnderlinePatterns
-import org.apache.poi.xwpf.usermodel.XWPFDocument
-import org.apache.poi.xwpf.usermodel.XWPFParagraph
-import org.apache.poi.xwpf.usermodel.XWPFTableCell
+import org.apache.poi.xwpf.usermodel.*
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STJc
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTblWidth
 import java.math.BigInteger
@@ -34,13 +31,13 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
-class WordProcessor(private val document: XWPFDocument, private val month: Date) {
+class WordProcessor(private val document: XWPFDocument, private val month: Date) : BaseWordProcessor(document) {
 
     private val numOfDays: Int by lazy {
         TimeUtils.numOfDays(month)
     }
 
-    private val table = document.tables.first()
+//    private val table = document.tables.first()
     private val currentDay: Int = GregorianCalendar.getInstance().apply {
         time = TimeUtils.getTodayDateLocal()
     }.get(Calendar.DAY_OF_MONTH)
@@ -73,6 +70,8 @@ class WordProcessor(private val document: XWPFDocument, private val month: Date)
     private fun populateHeader(section: Section): Completable {
         return Completable.fromAction {
             val header = document.paragraphs[0]
+
+
 
             val gradeField = header.runs[1]!!
             val dateField = header.runs[3]!!

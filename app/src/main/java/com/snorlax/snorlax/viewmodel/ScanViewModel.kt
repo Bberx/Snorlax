@@ -17,6 +17,7 @@
 package com.snorlax.snorlax.viewmodel
 
 import android.Manifest
+import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.content.Intent
@@ -26,9 +27,8 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.LifecycleOwner
 import com.google.android.material.snackbar.Snackbar
-import com.google.firebase.firestore.DocumentReference
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
@@ -43,13 +43,8 @@ import com.snorlax.snorlax.model.Attendance
 import com.snorlax.snorlax.model.Student
 import io.reactivex.Completable
 import io.reactivex.Maybe
-import io.reactivex.Observable
-import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
-import java.lang.NullPointerException
 import java.util.*
 
 class ScanViewModel(application: Application) : AndroidViewModel(application) {
@@ -107,11 +102,11 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
 //        }, BackpressureStrategy.DROP)
 //    }
 
-    fun analyzeLRN(lrn: String): Maybe<Student> {
+    fun analyzeLRN(owner: Activity, lrn: String): Maybe<Student> {
         // Checks if LRN is valid
         if (lrn.length != 12) return Maybe.empty()
 
-        return firestore.getStudentList(cacheSource.getUserCache()!!.section)
+        return firestore.getStudentList(owner, cacheSource.getUserCache()!!.section)
             .subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
             .flatMapMaybe { studentList ->
@@ -146,8 +141,8 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
             .check()
     }
 
-    fun addAttendance(attendanceList: List<Attendance>): Completable {
-        return firestore.addAttendance(getCurrentSection(), attendanceList)
+    fun addAttendance(owner: Activity, attendanceList: List<Attendance>): Completable {
+        return firestore.addAttendance(owner, getCurrentSection(), attendanceList)
     }
 
 //    fun getStudentRef(context: Context, student: Student): Single<DocumentReference> {

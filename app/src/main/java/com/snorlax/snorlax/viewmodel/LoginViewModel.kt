@@ -17,6 +17,7 @@
 package com.snorlax.snorlax.viewmodel
 
 
+import android.app.Activity
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.snorlax.snorlax.data.cache.LocalCacheSource
@@ -76,12 +77,12 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     fun sendPasswordReset(email: String) = firebaseAuth.sendResetPasswordEmail(email)
 
     fun logout(): Completable {
-        return Completable.fromAction { userRepository.logout() }
+        return userRepository.logout()
             .andThen(localCacheSource.removeToCache())
             .subscribeOn(Schedulers.io())
     }
 
-    fun login(email: String, password: String): Completable = userRepository.login(email, password)
+    fun login(owner: Activity, email: String, password: String): Completable = userRepository.login(owner, email, password)
         .flatMapCompletable { localCacheSource.addToCache(it) }
         .subscribeOn(Schedulers.io())
 

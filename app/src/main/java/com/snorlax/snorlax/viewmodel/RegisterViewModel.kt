@@ -16,6 +16,7 @@
 
 package com.snorlax.snorlax.viewmodel
 
+import android.app.Activity
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.snorlax.snorlax.data.cache.LocalCacheSource
@@ -206,6 +207,7 @@ class RegisterViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun register(
+        owner: Activity,
         email: String,
         password: String,
         firstName: String,
@@ -214,6 +216,7 @@ class RegisterViewModel(application: Application) : AndroidViewModel(application
         accType: String
     ): Completable {
         return userRepository.register(
+            owner,
             email.trim(),
             password,
             "${firstName.trim()} ${lastName.trim()}",
@@ -230,7 +233,7 @@ class RegisterViewModel(application: Application) : AndroidViewModel(application
 //        return localCacheSource.addToCache(context, user)
 //    }
     fun logout(): Completable {
-        return Completable.fromAction { userRepository.logout() }
+        return userRepository.logout()
             .andThen(localCacheSource.removeToCache())
             .subscribeOn(Schedulers.io())
     }

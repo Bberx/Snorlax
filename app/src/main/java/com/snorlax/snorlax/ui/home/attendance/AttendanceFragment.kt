@@ -175,7 +175,9 @@ class AttendanceFragment : Fragment() {
         rootView.label_relative_time.text = viewModel.getRelativeDateString(getTodayDateUTC())
         rootView.label_date.text = dateFormat.format(getTodayDateUTC())
 
-        rootView.attendance_pager.adapter = AttendancePageAdapter(requireActivity(), viewModel)
+        rootView.attendance_pager.adapter = AttendancePageAdapter(requireActivity()) {
+            viewModel.getAttendance(requireActivity(), it)
+        }
 
         rootView.attendance_pager.offscreenPageLimit = 1
 
@@ -216,6 +218,7 @@ class AttendanceFragment : Fragment() {
 
     private fun saveAttendance(outputLocation: Uri) {
         val saveAttendance = viewModel.saveAttendance(
+            requireActivity(),
             outputLocation,
             getMonthDate(Date(viewModel.selectedTimeObservable.value!!))
         )

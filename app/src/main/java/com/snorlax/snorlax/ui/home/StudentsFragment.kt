@@ -215,7 +215,7 @@ class StudentsFragment : Fragment() {
                             .observeOn(AndroidSchedulers.mainThread())
                             .doOnComplete {
                                 loadingView.visibility = View.GONE
-                            }.andThen(viewModel.deleteStudent(student))
+                            }.andThen(viewModel.deleteStudent(requireActivity(), student))
                             .subscribeBy(
                                 onComplete = {
                                     dialog.dismiss()
@@ -347,11 +347,12 @@ class StudentsFragment : Fragment() {
                         button.isEnabled = false
 
                         val disposable =
-                            viewModel.studentExist(lrnInput.text.toString()).flatMapCompletable {
+                            viewModel.studentExist(requireActivity(), lrnInput.text.toString()).flatMapCompletable {
                                 if (it) {
                                     Completable.error(StudentAlreadyExistException())
                                 } else {
                                     viewModel.addStudent(
+                                        requireActivity(),
                                         Student(
                                             mapOf(
                                                 Student.FIRST_NAME_VAL to firstNameInput.text.toString().trim().caps(),

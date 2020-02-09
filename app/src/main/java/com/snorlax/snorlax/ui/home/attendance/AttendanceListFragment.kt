@@ -17,18 +17,14 @@
 package com.snorlax.snorlax.ui.home.attendance
 
 
-import android.content.res.Resources
 import android.os.Bundle
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.core.content.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.facebook.shimmer.ShimmerFrameLayout
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.model.Attendance
 import com.snorlax.snorlax.utils.adapter.recyclerview.AttendanceAdaptor
@@ -37,20 +33,13 @@ import com.snorlax.snorlax.views.ShimmerListProgress
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import kotlinx.android.synthetic.main.fragment_attendance_list.*
 import kotlinx.android.synthetic.main.fragment_attendance_list.view.*
-import kotlin.math.ceil
-import kotlin.math.roundToInt
 
-/**
- * A simple [Fragment] subclass.
- */
+// TODO animate change in layout
 class AttendanceListFragment(private val attendance: Observable<List<Attendance>>) : Fragment() {
-
-//    private lateinit var viewModel: AttendanceViewModel
 
     private val disposables = CompositeDisposable()
 

@@ -16,11 +16,13 @@
 
 package com.snorlax.snorlax.viewmodel
 
+import android.app.Activity
 import android.app.Application
 import android.net.Uri
 import android.provider.DocumentsContract
 import android.text.format.DateUtils
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LifecycleOwner
 import com.snorlax.snorlax.data.cache.LocalCacheSource
 import com.snorlax.snorlax.data.files.FileSource
 import com.snorlax.snorlax.data.firebase.FirebaseFirestoreSource
@@ -106,10 +108,10 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
         }.subscribeOn(Schedulers.io())
 
 
-    fun saveAttendance(outputLocation: Uri, month: Date): Completable {
+    fun saveAttendance(owner: Activity, outputLocation: Uri, month: Date): Completable {
 
-        val attendance = firestore.getMonthlyAttendance(section, month)
-        val student = firestore.getStudentList(section)
+        val attendance = firestore.getMonthlyAttendance(owner, section, month)
+        val student = firestore.getStudentList(owner, section)
 
         val lists = Single.zip(
             student,
@@ -132,8 +134,8 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
         return word
     }
 
-    fun getAttendance(timestamp: Date) =
-        firestore.getAttendance(section, timestamp)
+    fun getAttendance(owner: Activity, timestamp: Date) =
+        firestore.getAttendance(owner, section, timestamp)
 
     val section: String
         get() = cache.getUserCache()!!.section

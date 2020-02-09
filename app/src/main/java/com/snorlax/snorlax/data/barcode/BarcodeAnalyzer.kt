@@ -31,7 +31,7 @@ class BarcodeAnalyzer(private val barcodeEmitter: FlowableEmitter<FirebaseVision
     ImageAnalysis.Analyzer {
 
     private val options = FirebaseVisionBarcodeDetectorOptions.Builder()
-        .setBarcodeFormats(FirebaseVisionBarcode.FORMAT_CODE_39)
+        .setBarcodeFormats(FirebaseVisionBarcode.FORMAT_CODE_128)
         .build()
 
     private val detector = FirebaseVision.getInstance().getVisionBarcodeDetector(options)

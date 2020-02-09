@@ -88,4 +88,5 @@
     <string name="rmsg_reso_ask_teacher">ask your teacher to add students.</string>
     <string name="msg_student_deleted">Student deleted</string>
     <string name="err_incorrect_password">Incorrect password</string>
+    <string name="label_generate">Generate</string>
 </resources>

@@ -37,10 +37,7 @@ class AuthenticationPageAdapter(
         }
     }
 
-    override fun getCount(): Int {
-        return 2
-    }
-
+    override fun getCount() = 2
 
     override fun getPageTitle(position: Int): CharSequence =
         when (position) {

@@ -16,8 +16,11 @@
 
 package com.snorlax.snorlax.data.repositories
 
+import android.app.Activity
 import android.app.Application
 import android.content.Context
+import androidx.lifecycle.LifecycleOwner
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.snorlax.snorlax.data.cache.LocalCacheSource
 import com.snorlax.snorlax.data.firebase.FirebaseAuthSource
@@ -68,11 +71,12 @@ class UserRepository private constructor() {
         StorageSource.instance
     }
 
-    fun login(email: String, password: String) = firebase.login(email, password)
-        .flatMap { firestore.getAdmin(it.uid) }
+    fun login(owner: Activity, email: String, password: String) = firebase.login(email, password)
+        .flatMap { firestore.getAdmin(owner, it.uid) }
         .subscribeOn(Schedulers.io())
 
     fun register(
+        owner: Activity,
         email: String,
         password: String,
         name: String,
@@ -87,16 +91,16 @@ class UserRepository private constructor() {
 
         return firebase.register(email, password).flatMap {
             it.updateAdminProfile(profileUpdates)
-                .andThen(firestore.addAdmin(User(name, section, accType, it.uid, it.email!!)))
-                .andThen(firestore.getAdmin(it.uid))
+                .andThen(firestore.addAdmin(owner, User(name, section, accType, it.uid, it.email!!)))
+                .andThen(firestore.getAdmin(owner, it.uid))
         }.subscribeOn(Schedulers.io())
     }
 
-    fun currentUser(context: Context): Maybe<User> {
+    fun currentUser(owner: Activity, context: Context): Maybe<User> {
         val cache = LocalCacheSource.getInstance(context).getUserCache()
 
         val databaseUser =
-            firestore.getAdmin(firebase.currentUser()!!.uid)
+            firestore.getAdmin(owner, firebase.currentUser()!!.uid)
                 .subscribeOn(Schedulers.io())
 
         cache?.let {
@@ -106,7 +110,11 @@ class UserRepository private constructor() {
     }
 
 
-    fun logout() {
-        firebase.logout()
+    fun logout() : Completable {
+        return Completable.fromAction { firebase.logout() }.andThen {
+            FirebaseAuth.getInstance().addAuthStateListener {auth ->
+                if (auth.currentUser == null) it.onComplete()
+            }
+        }
     }
 }

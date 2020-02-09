@@ -16,9 +16,11 @@
 
 package com.snorlax.snorlax.viewmodel
 
+import android.app.Activity
 import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LifecycleOwner
 import com.google.firebase.auth.FirebaseAuth
 import com.snorlax.snorlax.data.cache.LocalCacheSource
 import com.snorlax.snorlax.data.repositories.UserRepository
@@ -57,13 +59,24 @@ class HomeActivityViewModel(application: Application) : AndroidViewModel(applica
 //    }
 
     fun logout(): Completable {
-        return Completable.fromAction { userRepository.logout() }
-            .andThen(localCacheSource.removeToCache())
-            .subscribeOn(Schedulers.io())
+        return userRepository.logout()
+//        return Completable.fromAction { userRepository.logout() }.andThen {
+//            FirebaseAuth.AuthStateListener {auth ->
+//                if (auth.currentUser == null) it.onComplete()
+//            }
+//        }
+//         Completable.create {emitter ->
+//            FirebaseAuth.AuthStateListener {
+//                if (it.currentUser == null) emitter.onComplete()
+//            }
+//        }
+//        return Completable.fromAction { userRepository.logout() }
+//            .andThen(localCacheSource.removeToCache())
+//            .subscribeOn(Schedulers.io())
     }
 
 
-    fun getUser() = userRepository.currentUser(getApplication())
+    fun getUser(owner: Activity) = userRepository.currentUser(owner, getApplication())
 
     fun getRole(user: User): String {
         val builder: StringBuilder = StringBuilder()

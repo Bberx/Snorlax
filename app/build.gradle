@@ -107,8 +107,8 @@ android {
         applicationId "com.snorlax.snorlax"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 3
-        versionName "1.3.2"
+        versionCode 4
+        versionName "1.3.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
     }
@@ -118,7 +118,7 @@ android {
             ext.alwaysUpdateBuildId = false
             debuggable true
             firebaseAppDistribution {
-                releaseNotes = "Debug build\nFix crash when signing out on attendance page"
+                releaseNotes = "Debug build\nFix crash when logging out in attendance fragment"
                 groups = "researchers, developer"
             }
 //            manifestPlaceholders = [crashlyticsCollectionEnabled:"false"]
@@ -178,6 +178,8 @@ dependencies {
 //    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
@@ -247,22 +249,6 @@ dependencies {
     // Custom tabs
     implementation 'androidx.browser:browser:1.2.0'
 
-    // Apache POI
-//    implementation 'org.apache.poi:poi:4.0.1'
-//    implementation 'org.apache.poi:poi-ooxml:4.0.1'
-//    implementation 'org.apache.poi:poi-ooxml-schemas:4.0.1'
-//    implementation 'javax.xml.stream:stax-api:1.0-2'
-//    implementation 'org.apache.xmlbeans:xmlbeans:3.1.0'
-//    implementation group: 'dom4j', name: 'dom4j', version: '1.6.1'
-//
-//    // open office
-//    implementation group: 'org.openoffice', name: 'jurt', version: '4.1.2'
-
-//    implementation 'com.github.Bberx:poi-android:4.1.1'
-//    implementation 'com.github.Bberx.poi-android:proguard:4.1.1'
-//    compileOnly 'org.apache.poi:poi-ooxml:3.17'
-
-//    implementation 'com.github.Bberx:poi-android:4.1.1'
 
     // Viewmodel
     def lifecycle_version = "2.2.0"
@@ -278,7 +264,12 @@ dependencies {
 
     // ViewModel and LiveData
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
+
+    // Apache POI
     implementation files('../poishadow/build/libs/poishadow-all.jar')
 
+    // ZXing
+    implementation 'com.google.zxing:core:3.3.3'
+    implementation('com.journeyapps:zxing-android-embedded:4.0.2') { transitive = false }
 
 }

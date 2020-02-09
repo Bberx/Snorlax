@@ -47,6 +47,7 @@ import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.camera_placeholder.view.*
 import kotlinx.android.synthetic.main.fragment_scan.view.*
@@ -215,7 +216,7 @@ class ScanFragment : Fragment() {
                 }, BarcodeAnalyzer(it))
             }, BackpressureStrategy.DROP)
                 .subscribeOn(AndroidSchedulers.mainThread())
-                .flatMapMaybe { viewModel.analyzeLRN(it.displayValue!!) }
+                .flatMapMaybe { viewModel.analyzeLRN(requireActivity(), it.displayValue!!) }
                 .map { student ->
                     Log.d("Threading", "mapping ${Thread.currentThread().name}")
                     Pair(student !in studentScannerAdaptor.studentList.map { it.first }, student)
@@ -255,11 +256,15 @@ class ScanFragment : Fragment() {
             )
         }
 
-        disposables.add(viewModel.addAttendance(attendanceEntry).subscribe({
-            Snackbar.make(requireView(), "Attendance saved", Snackbar.LENGTH_LONG).show()
-        }, {
-            Snackbar.make(requireView(), it.localizedMessage ?: "", Snackbar.LENGTH_LONG).show()
-        }))
+        disposables.add(viewModel.addAttendance(requireActivity(), attendanceEntry)
+            .subscribeBy(onError = {
+                Snackbar.make(requireView(), it.localizedMessage ?: "", Snackbar.LENGTH_LONG).show()
+            }))
+//            .subscribe({
+////            Snackbar.make(requireView(), "Attendance saved", Snackbar.LENGTH_LONG).show()
+//        }, {
+//            Snackbar.make(requireView(), it.localizedMessage ?: "", Snackbar.LENGTH_LONG).show()
+//        }))
     }
 
     private fun vibrate() {

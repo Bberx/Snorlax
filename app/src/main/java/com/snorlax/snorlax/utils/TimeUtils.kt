@@ -86,6 +86,11 @@ object TimeUtils {
 //            return this
 //        }
 
+    fun getMaxMonthDate(month: Date) = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
+        time = month
+        set(Calendar.DAY_OF_MONTH, getMaximum(Calendar.DAY_OF_MONTH))
+    }.time
+
     fun timeToPosition(timeInMillis: Long): Int {
         return (timeInMillis / 86_400_000).toInt()
     }
