@@ -82,4 +82,5 @@
     <string name="msg_enable_auto_time">Enable automatic time settings to continue</string>
     <string name="msg_enable_auto_time_zone">Enable automatic time zone settings to continue</string>
     <string name="label_have_account">Already have account? <u><font color='blue'>Login here</font></u></string>
+    <string name="btn_open">Open</string>
 </resources>

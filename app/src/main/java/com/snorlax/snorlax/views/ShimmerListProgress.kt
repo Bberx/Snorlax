@@ -23,10 +23,7 @@ class ShimmerListProgress @JvmOverloads constructor(
         return ceil((pxHeight / skeletonRowHeight).toDouble()).toInt()
     }
 
-    private fun getDeviceHeight(): Int {
-        return context.resources.displayMetrics.heightPixels
-    }
-
+    private fun getDeviceHeight(): Int = context.resources.displayMetrics.heightPixels
 
     fun setLayoutChild(id: Int) {
         val inflater = context.getSystemService<LayoutInflater>()!!

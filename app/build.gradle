@@ -108,7 +108,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 29
         versionCode 2
-        versionName "1.2.0"
+        versionName "1.3.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
     }
@@ -118,7 +118,7 @@ android {
             ext.alwaysUpdateBuildId = false
             debuggable true
             firebaseAppDistribution {
-                releaseNotes = "Debug build\nNow displays a placeholder when there is no data (only in attendance atm).\n Can now output monthly attendance to a word document"
+                releaseNotes = "Debug build\nFix attendance template not found"
                 groups = "researchers, developer"
             }
 //            manifestPlaceholders = [crashlyticsCollectionEnabled:"false"]

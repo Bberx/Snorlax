@@ -19,6 +19,7 @@ package com.snorlax.snorlax.ui.home.attendance
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Parcel
@@ -222,11 +223,12 @@ class AttendanceFragment : Fragment() {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 btn_export.setImageDrawable(context?.getDrawable(R.drawable.ic_save))
-                showResult(
+                showSuccessResult(
                     getString(
                         R.string.msg_attendance_saved,
                         viewModel.outputFileName(outputLocation)
-                    ), TimeUnit.SECONDS.toMillis(3).toInt()
+                    )
+                    , outputLocation
                 )
             }, {
                 btn_export.setImageDrawable(context?.getDrawable(R.drawable.ic_save))
@@ -261,6 +263,30 @@ class AttendanceFragment : Fragment() {
     private fun showResult(message: String, length: Int = Snackbar.LENGTH_SHORT) {
         view?.let {
             Snackbar.make(it, message, length).show()
+        }
+    }
+
+    private fun showSuccessResult(message: String, location: Uri) {
+        view?.let {
+            val snackbar = Snackbar.make(it, message, 3000)
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(
+                    location,
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                )
+                flags = Intent.FLAG_ACTIVITY_NO_HISTORY or
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+            }
+            if (intent.resolveActivity(requireActivity().packageManager) != null) {
+                snackbar.setAction(getString(R.string.btn_open)) {
+                    startActivity(Intent.createChooser(intent, "Open attendance with"))
+                }.setActionTextColor(Color.YELLOW)
+                    .show()
+            } else {
+                snackbar.show()
+            }
+
         }
     }
 
