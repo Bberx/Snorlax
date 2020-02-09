@@ -263,9 +263,6 @@ class StudentsFragment : Fragment() {
             }
         }
 
-        val list = listOf("Alpha", "Beta", "Gamma", "Delta", "Epsilon")
-
-
         val recyclerOptions: FirestoreRecyclerOptions<Student> =
             FirestoreRecyclerOptions.Builder<Student>()
                 .setLifecycleOwner(this)

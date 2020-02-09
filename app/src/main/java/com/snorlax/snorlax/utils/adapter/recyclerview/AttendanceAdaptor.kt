@@ -39,6 +39,7 @@ class AttendanceAdaptor : RecyclerView.Adapter<AttendanceAdaptor.AttendanceHolde
         private const val ITEM_DEFAULT = 2
     }
 
+    // TODO: Coding flow recycler view
     private val mAttendance: SortedList<Attendance> =
         SortedList(Attendance::class.java, object : SortedList.Callback<Attendance>() {
             override fun areItemsTheSame(item1: Attendance?, item2: Attendance?) =

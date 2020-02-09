@@ -24,8 +24,7 @@
     <FrameLayout
         android:id="@+id/student_list_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:animateLayoutChanges="true" />
+        android:layout_height="match_parent" />
     <!--    <androidx.recyclerview.widget.RecyclerView-->
     <!--        android:id="@+id/students_list"-->
     <!--        android:layout_width="match_parent"-->
