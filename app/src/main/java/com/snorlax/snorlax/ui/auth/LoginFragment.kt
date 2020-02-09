@@ -133,7 +133,7 @@ class LoginFragment : Fragment() {
                     }, {
                         loadingView.visibility = View.GONE
                         if (it is IllegalArgumentException) {
-                            textLayout.error = getString(R.string.err_msg_not_valid_email)
+                            textLayout.error = getString(R.string.err_invalid_email)
                         } else {
                             textLayout.error = it.localizedMessage!!
                         }

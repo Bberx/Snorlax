@@ -23,6 +23,8 @@ import com.snorlax.snorlax.data.firebase.FirebaseAuthSource
 import com.snorlax.snorlax.data.firebase.FirebaseFirestoreSource
 import com.snorlax.snorlax.model.Student
 import io.reactivex.Completable
+import io.reactivex.Single
+import io.reactivex.schedulers.Schedulers
 
 class StudentsViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -63,6 +65,15 @@ class StudentsViewModel(application: Application) : AndroidViewModel(application
 
     fun deleteStudent(student: Student): Completable {
         return firestore.deleteStudent(getCurrentSection(), student)
+    }
+
+    fun studentExist(lrn: String): Single<Boolean> {
+        return firestore.getStudentList(localCacheSource.getUserCache()!!.section)
+            .subscribeOn(Schedulers.io())
+            .map {
+                val students = it.map { student -> student.lrn }
+                lrn in students
+            }
     }
 
     fun canAddStudent(): Boolean {

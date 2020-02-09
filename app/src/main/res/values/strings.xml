@@ -59,7 +59,7 @@
     <string name="btn_cancel">Cancel</string>
     <string name="btn_ok">OK</string>
     <string name="msg_password_reset_success">Success, check your email for instructions</string>
-    <string name="err_msg_not_valid_email">Please enter a valid email</string>
+    <string name="err_invalid_email">Please enter a valid email</string>
     <string name="label_our_team">Our team</string>
     <string name="label_github">Github</string>
     <string name="label_facebook">Facebook</string>
@@ -83,4 +83,9 @@
     <string name="msg_enable_auto_time_zone">Enable automatic time zone settings to continue</string>
     <string name="label_have_account">Already have account? <u><font color='blue'>Login here</font></u></string>
     <string name="btn_open">Open</string>
+    <string name="msg_empty_student_list">There\'s no students yet, %s</string>
+    <string name="msg_reso_add_students">please add students.</string>
+    <string name="rmsg_reso_ask_teacher">ask your teacher to add students.</string>
+    <string name="msg_student_deleted">Student deleted</string>
+    <string name="err_incorrect_password">Incorrect password</string>
 </resources>

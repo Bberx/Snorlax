@@ -43,7 +43,8 @@ class StudentListAdaptor(
     private val activity: Activity,
     private val lock: Boolean,
     private val options: FirestoreRecyclerOptions<Student>,
-    private val studentActionListener: StudentActionListener
+    private val studentActionListener: StudentActionListener,
+    private val callback: (size: Int) -> Unit
 ) :
     FirestoreRecyclerAdapter<Student, StudentListAdaptor.StudentViewHolder>(options) {
 
@@ -80,12 +81,17 @@ class StudentListAdaptor(
 
     }
 
+    override fun onDataChanged() {
+        super.onDataChanged()
+        callback(itemCount)
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StudentViewHolder {
         val inflatedView = parent.inflate(R.layout.item_student_list)
         return StudentViewHolder(inflatedView)
     }
 
-    inner class StudentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class StudentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val displayName: TextView = itemView.student_displayName
         val lrn: TextView = itemView.student_lrn
         val image: CircleImageView = itemView.student_image
@@ -95,6 +101,7 @@ class StudentListAdaptor(
 
 
     }
+
 
 //    private fun deleteStudent(student: Student) {
 //        MaterialAlertDialogBuilder(activity)

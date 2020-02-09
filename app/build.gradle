@@ -186,8 +186,10 @@ dependencies {
     implementation 'com.google.android.material:material:1.2.0-alpha04'
 
     //RxJava
-    implementation 'io.reactivex.rxjava2:rxjava:2.2.15'
-    implementation "io.reactivex.rxjava2:rxandroid:2.1.1"
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.17'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+    //RxKotlin
+    implementation 'io.reactivex.rxjava2:rxkotlin:2.4.0'
 
     // CircleImageView
     implementation 'de.hdodenhof:circleimageview:3.0.1'
@@ -277,5 +279,6 @@ dependencies {
     // ViewModel and LiveData
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
     implementation files('../poishadow/build/libs/poishadow-all.jar')
+
 
 }

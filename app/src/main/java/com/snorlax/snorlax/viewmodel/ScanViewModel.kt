@@ -123,8 +123,6 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
                     } else emitter.onComplete()
                     Log.d("Threading", "analyze lrn2 ${Thread.currentThread().name}")
                 }
-            }.doOnError {
-                Maybe.error<Student>(it)
             }
     }
 
