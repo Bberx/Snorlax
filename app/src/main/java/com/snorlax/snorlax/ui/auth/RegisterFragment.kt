@@ -112,8 +112,6 @@ class RegisterFragment : Fragment() {
 
     private fun initObservables() {
         disposables.apply {
-
-            // TODO
             add(viewModel.registerButtonObservable.subscribe {
 
                 val results = viewModel.validateFields(
@@ -237,9 +235,6 @@ class RegisterFragment : Fragment() {
                 }
             })
 
-
-
-
             add(viewModel.fieldErrorsObservable.subscribe { result ->
                 when (result.message.getMessageItem()) {
                     EMAIL ->
@@ -259,38 +254,6 @@ class RegisterFragment : Fragment() {
 
                 }
             })
-
-//            add(viewModel.registerButtonObservable.subscribe {
-//                btn_register.startAnimation()
-//            })
-//
-//            add(viewModel.resultObservable.subscribe {
-//                btn_register.isEnabled = it
-//            })
-//
-//            add((viewModel.registerObservable.subscribe {
-//                it.subscribe({
-//                    // TODO Shared prefs
-//                    val sharedPref = activity?.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
-//                    viewModel.getAdmin(viewModel.getCurrentUser()!!.uid).subscribe { currentAdmin ->
-//                        with(sharedPref!!.edit()) {
-//                            putString(USER_KEY, Gson().toJson(currentAdmin))
-//                            val commitObservable: Single<Boolean> = Single.fromCallable { commit() }
-//                                .subscribeOn(Schedulers.io())
-//                                .observeOn(AndroidSchedulers.mainThread())
-//                            add(commitObservable.subscribe { result ->
-//                                if (result) {
-//                                    debugMessage("Success")
-//                                    activity!!.startHomeActivity()
-//                                }
-//                            })
-//                        }
-//                    }
-//                }, { error ->
-//                    btn_register.revertAnimation()
-//                    debugMessage(error.localizedMessage!!)
-//                })
-//            }))
         }
     }
 

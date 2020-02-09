@@ -56,12 +56,9 @@ import kotlinx.android.synthetic.main.fragment_students.*
 
 class StudentsFragment : Fragment() {
 
-    // TODO get section of current user
-
     private lateinit var viewModel: StudentsViewModel
 
     private val disposables = CompositeDisposable()
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,8 +71,6 @@ class StudentsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-
-
         return inflater.inflate(R.layout.fragment_students, container, false)
     }
 
@@ -415,39 +410,6 @@ class StudentsFragment : Fragment() {
         ).apply {
             setView(R.layout.diag_add_student)
             setPositiveButton("Add", null)
-//            { dialog, _ ->
-//                val alertDialog = (dialog as AlertDialog)
-//
-//                // TODO MVVM conflict
-//                if (alertDialog.input_first_name.text!!.isNotEmpty() &&
-//                    alertDialog.input_last_name.text!!.isNotEmpty() &&
-//                    alertDialog.input_lrn.text!!.isNotEmpty()
-//                ) {
-//                    if (alertDialog.input_lrn.text!!.length != 12) {
-//                        Toast.makeText(activity, "Please enter a valid LRN", Toast.LENGTH_LONG)
-//                            .show()
-//                    } else {
-//                        viewModel.addStudent(
-//                            Student(
-//                                mapOf(
-//                                    "first" to alertDialog.input_first_name.text.toString().trim(),
-//                                    "last" to alertDialog.input_last_name.text.toString().trim()
-//                                ), alertDialog.input_lrn.text.toString()
-//                            )
-//                        ).subscribe({
-//                            view?.let {
-//                                Snackbar.make(it, "Student added", Snackbar.LENGTH_SHORT).show()
-//                            }
-//
-//                        }, { error ->
-//                            view?.let {
-//                                Snackbar.make(it, error.localizedMessage!!, Snackbar.LENGTH_LONG)
-//                                    .show()
-//                            }
-//                        })
-//                    }
-//                }
-//            }
             setNegativeButton("Cancel", null)
             setTitle("Add Student")
             setIcon(R.drawable.ic_students)
@@ -474,11 +436,6 @@ class StudentsFragment : Fragment() {
                         lastNameInput.text!!.isNotEmpty() &&
                         lrnInput.text!!.length == 12 && lrnInput.text.toString().isDigitsOnly()
                     ) {
-//                    if (lrnInput.text!!.length != 12 || !lrnInput.text.toString().isDigitsOnly()) {
-////                        Toast.makeText(activity, "Please enter a valid LRN", Toast.LENGTH_LONG)
-////                            .show()
-//                        lrnLayout.error = "Please enter a valid LRN"
-//                    } else {
                         (button as Button).isEnabled = false
                         viewModel.addStudent(
                             Student(

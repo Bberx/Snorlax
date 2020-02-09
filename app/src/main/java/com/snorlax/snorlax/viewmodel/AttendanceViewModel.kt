@@ -125,7 +125,7 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
             ).processTable(
                 Constants.SECTION_LIST.getValue(section),
                 list.first,
-                list.second // TODO
+                list.second
             )
         }.flatMapCompletable { saveToFile(it, outputLocation) }
 

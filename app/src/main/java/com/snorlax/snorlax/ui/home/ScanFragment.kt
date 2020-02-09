@@ -53,10 +53,6 @@ import kotlinx.android.synthetic.main.fragment_scan.view.*
 import java.util.*
 import java.util.concurrent.Executor
 
-
-/**
- * A simple [Fragment] subclass.
- */
 class ScanFragment : Fragment() {
 
     private lateinit var viewModel: ScanViewModel
@@ -64,12 +60,6 @@ class ScanFragment : Fragment() {
     private val studentScannerAdaptor: StudentScannerAdaptor by lazy {
         StudentScannerAdaptor()
     }
-
-//    private lateinit var cameraPlaceholderView: View
-//
-////    private lateinit var cameraPreview: TextureView
-//
-//    private lateinit var testView: CameraView
 
     private val vibrator: Vibrator by lazy {
         context!!.getSystemService<Vibrator>()!!
@@ -108,20 +98,13 @@ class ScanFragment : Fragment() {
         }, 0)
 
         val analyzerConfig = ImageAnalysisConfig.Builder().apply {
-
             // In our analysis, we care more about the latest image than
             // analyzing *every* image
             setImageReaderMode(ImageAnalysis.ImageReaderMode.ACQUIRE_LATEST_IMAGE)
             setTargetAspectRatio(AspectRatio.RATIO_4_3)
 
-//            setTargetResolution(Size(1920, 1080))
         }.build()
         val barcodeAnalyzer = ImageAnalysis(analyzerConfig)
-
-        // fixme remove me
-//        rootView.debug_save.setOnClickListener {
-//            addAttendance()
-//        }
 
         val camera = viewModel.permissionObservable
             .subscribeOn(Schedulers.io())
@@ -208,8 +191,6 @@ class ScanFragment : Fragment() {
 
         rootView.student_log_list.layoutManager = LinearLayoutManager(context)
         rootView.student_log_list.adapter = studentScannerAdaptor
-
-        // TODO conflicts MVVM
 
         val barcode =
 //            viewModel.getBarcode()

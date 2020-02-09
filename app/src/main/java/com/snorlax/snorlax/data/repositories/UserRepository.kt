@@ -68,7 +68,6 @@ class UserRepository private constructor() {
         StorageSource.instance
     }
 
-    // TODO handle firebase logic here
     fun login(email: String, password: String) = firebase.login(email, password)
         .flatMap { firestore.getAdmin(it.uid) }
         .subscribeOn(Schedulers.io())

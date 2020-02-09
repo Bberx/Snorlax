@@ -92,7 +92,6 @@ class WordProcessor(private val document: XWPFDocument, private val month: Date)
 
     // 1. Correct number of students
     // 2. Correct number of days
-    // TODO
     private fun formatTable(numberOfStudents: Int): Completable {
         return Completable.fromAction {
             repeat(numOfDays) {
@@ -117,11 +116,7 @@ class WordProcessor(private val document: XWPFDocument, private val month: Date)
     }
 
     // After formatTable
-    // TODO
     private fun populateTable(students: List<Student>, attendance: List<Attendance>): Completable {
-//        return Completable.complete()
-
-
         return Completable.fromAction {
             students.forEachIndexed { index, student ->
                 val row = table.rows[index + 1]
@@ -138,7 +133,6 @@ class WordProcessor(private val document: XWPFDocument, private val month: Date)
                 val studentAttendance = attendance.filter {
                     student == it.student
                 }
-
 
                 // Fill each day with "A" first
                 repeat(currentDay) {
@@ -172,16 +166,12 @@ class WordProcessor(private val document: XWPFDocument, private val month: Date)
                         setText("✓", 0)
                     }
                 }
-
-
             }
         }
     }
 
     // After populate table
     // Autofit name column
-
-    // TODO
     private fun adjustSize(): Completable {
         return Completable.fromAction {
             table.rows.forEach {

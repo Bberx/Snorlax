@@ -91,14 +91,6 @@ class RegisterViewModel(application: Application) : AndroidViewModel(application
                 FormValidator.isValidPasswordConfirm(password, passwordConfirm)
             })
 
-    // TODO fix
-//    private val passwordNotSameErrorObservable: Observable<FormResult.Result> =
-//        passwordObserver.withLatestFrom(
-//            passwordConfirmObserver,
-//            BiFunction<String, String, FormResult.Result> { password, passwordConfirm ->
-//                FormValidator.isValidPassword(password, passwordConfirm)
-//            }
-//        )
     private val firstNameErrorObservable: Observable<FormResult.Result> = firstNameObserver
         .filter { it.isNotEmpty() }
         .map {

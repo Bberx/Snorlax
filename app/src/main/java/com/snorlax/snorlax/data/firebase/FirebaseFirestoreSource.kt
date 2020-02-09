@@ -314,7 +314,6 @@ class FirebaseFirestoreSource private constructor() {
         return emptyList()
     }
 
-    // TODO
     fun getMonthlyAttendance(section: String, month: Date): Single<List<Attendance>> {
         val attendanceList = mutableListOf<Attendance>()
         val reference = sectionRef.document(section)
