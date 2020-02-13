@@ -23,16 +23,11 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SortedList
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.model.Attendance
-import com.snorlax.snorlax.utils.TimeUtils
 import com.snorlax.snorlax.utils.glide.GlideApp
 import com.snorlax.snorlax.utils.inflate
 import de.hdodenhof.circleimageview.CircleImageView
-import io.reactivex.Completable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.item_attendance.view.*
 import java.text.SimpleDateFormat
-import java.time.format.DateTimeFormatter
 import java.util.*
 
 class AttendanceAdaptor : RecyclerView.Adapter<AttendanceAdaptor.AttendanceHolder>() {
@@ -65,9 +60,9 @@ class AttendanceAdaptor : RecyclerView.Adapter<AttendanceAdaptor.AttendanceHolde
                 o1!!.time_in.compareTo(o2!!.time_in)
 
             override fun areContentsTheSame(oldItem: Attendance?, newItem: Attendance?) =
-                (oldItem!!.lrn == newItem!!.lrn) &&
-                        (oldItem.student == newItem.student) &&
-                        (oldItem.time_in == newItem.time_in)
+                (oldItem?.lrn == newItem?.lrn) &&
+                        (oldItem?.student == newItem?.student) &&
+                        (oldItem?.time_in == newItem?.time_in)
         })
     private val clockFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
 

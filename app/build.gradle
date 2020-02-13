@@ -107,8 +107,8 @@ android {
         applicationId "com.snorlax.snorlax"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 6
-        versionName "1.3.5"
+        versionCode 8
+        versionName "1.3.7"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
     }
@@ -130,9 +130,10 @@ android {
             proguardFiles 'proguard-rules.pro', getDefaultProguardFile('proguard-android-optimize.txt')
             renderscriptOptimLevel = 3
             signingConfig signingConfigs.release
+            multiDexEnabled = true
 //            manifestPlaceholders = [crashlyticsCollectionEnabled:"true"]
             firebaseAppDistribution {
-                releaseNotes = "Release build\nVersion 1 released\nFix margin and add replaced logo"
+                releaseNotes = "Release build\nFix login screen"
                 groups = "researchers, developer"
             }
         }

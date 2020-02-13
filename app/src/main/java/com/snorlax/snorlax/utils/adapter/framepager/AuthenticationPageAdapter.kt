@@ -21,7 +21,6 @@ import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.snorlax.snorlax.ui.auth.LoginFragment
 import com.snorlax.snorlax.ui.auth.RegisterFragment
-import java.lang.IllegalStateException
 
 class AuthenticationPageAdapter(activity: FragmentActivity) : FragmentStateAdapter(activity) {
 //    override fun getItem(position: Int): Fragment {
@@ -44,7 +43,7 @@ class AuthenticationPageAdapter(activity: FragmentActivity) : FragmentStateAdapt
         return when (position) {
             0 -> LoginFragment()
             1 -> RegisterFragment()
-            else -> throw IllegalStateException("Unknown page position")
+            else -> throw IllegalStateException("Invalid page position")
         }
     }
 }

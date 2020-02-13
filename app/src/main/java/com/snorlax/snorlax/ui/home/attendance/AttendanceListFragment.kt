@@ -33,6 +33,7 @@ import com.snorlax.snorlax.views.ShimmerListProgress
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import kotlinx.android.synthetic.main.fragment_attendance_list.*
@@ -108,7 +109,7 @@ class AttendanceListFragment(private val attendance: Observable<List<Attendance>
                 }
 
             }
-        disposables.add(attendanceDisposable)
+        disposables += attendanceDisposable
     }
 
     override fun onResume() {

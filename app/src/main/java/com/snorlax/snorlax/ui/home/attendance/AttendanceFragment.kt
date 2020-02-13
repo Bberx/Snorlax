@@ -175,21 +175,14 @@ class AttendanceFragment : Fragment() {
         rootView.label_relative_time.text = viewModel.getRelativeDateString(getTodayDateUTC())
         rootView.label_date.text = dateFormat.format(getTodayDateUTC())
 
-        rootView.attendance_pager.adapter = AttendancePageAdapter(requireActivity()) {
+        rootView.attendance_pager.adapter = AttendancePageAdapter(this) {
             viewModel.getAttendance(it)
         }
 
         rootView.attendance_pager.offscreenPageLimit = 1
 
-        var smoothScroll = false
-        val relativeTime = viewModel.selectedTimeObservable
-            .subscribeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                rootView.attendance_pager.setCurrentItem(timeToPosition(it), smoothScroll)
-                rootView.label_relative_time.text = viewModel.getRelativeDateString(Date(it))
-                rootView.label_date.text = dateFormat.format(Date(it))
-                smoothScroll = true
-            }
+
+
 
         rootView.attendance_pager.registerOnPageChangeCallback(object :
             ViewPager2.OnPageChangeCallback() {
@@ -202,6 +195,16 @@ class AttendanceFragment : Fragment() {
             }
 
         })
+
+        var smoothScroll = false
+        val relativeTime = viewModel.selectedTimeObservable
+            .subscribeOn(AndroidSchedulers.mainThread())
+            .subscribe {
+                rootView.attendance_pager.setCurrentItem(timeToPosition(it), smoothScroll)
+                rootView.label_relative_time.text = viewModel.getRelativeDateString(Date(it))
+                rootView.label_date.text = dateFormat.format(Date(it))
+                smoothScroll = true
+            }
 
 //        val today = getTodayDateUTC().time
 //        rootView.attendance_pager.setCurrentItem(timeToPosition(today), false)

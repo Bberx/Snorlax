@@ -17,7 +17,7 @@
 package com.snorlax.snorlax.utils.adapter.viewpager
 
 
-import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.snorlax.snorlax.model.Attendance
 import com.snorlax.snorlax.ui.home.attendance.AttendanceListFragment
@@ -27,9 +27,9 @@ import io.reactivex.Observable
 import java.util.*
 
 class AttendancePageAdapter(
-    fragmentActivity: FragmentActivity,
+    fragment: Fragment,
     private val callback: (date: Date) -> Observable<List<Attendance>>
-) : FragmentStateAdapter(fragmentActivity) {
+) : FragmentStateAdapter(fragment) {
     override fun getItemCount() = (getTodayDateLocal().time / 86_400_000).toInt() + 1
 
     override fun createFragment(position: Int) =
