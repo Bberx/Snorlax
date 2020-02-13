@@ -161,7 +161,6 @@ class LoginFragment : Fragment() {
                     btn_login.startAnimation()
                     add(
                         viewModel.login(
-                            requireActivity(),
                             input_email.text.toString(),
                             input_password.text.toString()
                         )

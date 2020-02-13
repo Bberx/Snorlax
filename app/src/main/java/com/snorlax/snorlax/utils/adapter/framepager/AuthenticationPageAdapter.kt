@@ -16,32 +16,35 @@
 
 package com.snorlax.snorlax.utils.adapter.framepager
 
-import android.content.Context
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentPagerAdapter
-import com.snorlax.snorlax.R
+import androidx.fragment.app.FragmentActivity
+import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.snorlax.snorlax.ui.auth.LoginFragment
 import com.snorlax.snorlax.ui.auth.RegisterFragment
+import java.lang.IllegalStateException
 
-class AuthenticationPageAdapter(
-    private val mContext: Context,
-    fm: FragmentManager,
-    behavior: Int
-) : FragmentPagerAdapter(fm, behavior) {
-    override fun getItem(position: Int): Fragment {
+class AuthenticationPageAdapter(activity: FragmentActivity) : FragmentStateAdapter(activity) {
+//    override fun getItem(position: Int): Fragment {
+//        return when (position) {
+//            0 -> LoginFragment()
+//            1 -> RegisterFragment()
+//            else -> null!!
+//        }
+//    }
+
+    override fun getItemCount() = 2
+
+//    override fun getPageTitle(position: Int): CharSequence =
+//        when (position) {
+//            0 -> mContext.resources.getString(R.string.act_log_in)
+//            else -> mContext.resources.getString(R.string.act_register)
+//        }
+
+    override fun createFragment(position: Int): Fragment {
         return when (position) {
             0 -> LoginFragment()
             1 -> RegisterFragment()
-            else -> null!!
+            else -> throw IllegalStateException("Unknown page position")
         }
     }
-
-    override fun getCount() = 2
-
-    override fun getPageTitle(position: Int): CharSequence =
-        when (position) {
-            0 -> mContext.resources.getString(R.string.act_log_in)
-            else -> mContext.resources.getString(R.string.act_register)
-        }
 }

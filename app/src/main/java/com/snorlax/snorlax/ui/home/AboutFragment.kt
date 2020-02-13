@@ -18,15 +18,19 @@ package com.snorlax.snorlax.ui.home
 
 
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.snackbar.Snackbar
 import com.snorlax.snorlax.BuildConfig
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.data.researcher.ResearcherSource
@@ -34,7 +38,10 @@ import com.snorlax.snorlax.utils.Constants.GITHUB_URL
 import com.snorlax.snorlax.utils.adapter.recyclerview.AboutAdaptor
 import com.snorlax.snorlax.utils.customTab.CustomTabHelper
 import com.snorlax.snorlax.utils.inflate
+import io.reactivex.Completable
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_about.view.*
+import kotlinx.coroutines.delay
 
 /**
  * A simple [Fragment] subclass.
@@ -86,6 +93,5 @@ class AboutFragment : Fragment() {
         return rootView
 
     }
-
 
 }

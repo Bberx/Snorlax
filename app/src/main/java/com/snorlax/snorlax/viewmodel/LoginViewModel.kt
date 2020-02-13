@@ -34,9 +34,9 @@ import io.reactivex.subjects.PublishSubject
 
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val userRepository = UserRepository.getInstance()
+    private val userRepository = UserRepository
 
-    private val firebaseAuth = FirebaseAuthSource.getInstance()
+    private val firebaseAuth = FirebaseAuthSource
 
     private val localCacheSource: LocalCacheSource by lazy {
         LocalCacheSource.getInstance(application)
@@ -82,7 +82,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             .subscribeOn(Schedulers.io())
     }
 
-    fun login(owner: Activity, email: String, password: String): Completable = userRepository.login(owner, email, password)
+    fun login(email: String, password: String): Completable = userRepository.login(email, password)
         .flatMapCompletable { localCacheSource.addToCache(it) }
         .subscribeOn(Schedulers.io())
 

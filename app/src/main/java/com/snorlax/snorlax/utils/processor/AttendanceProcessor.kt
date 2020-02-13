@@ -16,6 +16,7 @@
 
 package com.snorlax.snorlax.utils.processor
 
+import android.graphics.Bitmap
 import com.snorlax.snorlax.model.Attendance
 import com.snorlax.snorlax.model.Section
 import com.snorlax.snorlax.model.Student
@@ -31,7 +32,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
-class WordProcessor(private val document: XWPFDocument, private val month: Date) : BaseWordProcessor(document) {
+class AttendanceProcessor(document: XWPFDocument, private val month: Date) : BaseProcessor(document) {
 
     private val numOfDays: Int by lazy {
         TimeUtils.numOfDays(month)
@@ -60,6 +61,7 @@ class WordProcessor(private val document: XWPFDocument, private val month: Date)
             populateTable(students, attendance),
             adjustSize()
         ).subscribeOn(Schedulers.io())
+
 
         // Process asynchronously
         return Completable.mergeArray(populateHeader(section), process)

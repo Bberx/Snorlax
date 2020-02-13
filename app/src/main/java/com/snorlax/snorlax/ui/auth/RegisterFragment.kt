@@ -129,7 +129,6 @@ class RegisterFragment : Fragment() {
 
                     add(
                         viewModel.register(
-                            requireActivity(),
                             input_email.text.toString(),
                             input_password.text.toString(),
                             input_first_name.text.toString(),

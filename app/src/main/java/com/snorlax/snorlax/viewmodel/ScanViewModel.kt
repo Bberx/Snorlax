@@ -27,7 +27,6 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LifecycleOwner
 import com.google.android.material.snackbar.Snackbar
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
@@ -53,7 +52,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
 
     private val cacheSource = LocalCacheSource.getInstance(application)
     //    private val cameraSource = CameraSource()
-    private val firestore = FirebaseFirestoreSource.getInstance()
+    private val firestore = FirebaseFirestoreSource
 
     val permissionObservable = PublishSubject.create<Boolean>()
 
@@ -102,11 +101,11 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
 //        }, BackpressureStrategy.DROP)
 //    }
 
-    fun analyzeLRN(owner: Activity, lrn: String): Maybe<Student> {
+    fun analyzeLRN(lrn: String): Maybe<Student> {
         // Checks if LRN is valid
         if (lrn.length != 12) return Maybe.empty()
 
-        return firestore.getStudentList(owner, cacheSource.getUserCache()!!.section)
+        return firestore.getStudentList(cacheSource.getUserCache()!!.section)
             .subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
             .flatMapMaybe { studentList ->
@@ -141,8 +140,8 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
             .check()
     }
 
-    fun addAttendance(owner: Activity, attendanceList: List<Attendance>): Completable {
-        return firestore.addAttendance(owner, getCurrentSection(), attendanceList)
+    fun addAttendance(attendanceList: List<Attendance>): Completable {
+        return firestore.addAttendance(getCurrentSection(), attendanceList)
     }
 
 //    fun getStudentRef(context: Context, student: Student): Single<DocumentReference> {

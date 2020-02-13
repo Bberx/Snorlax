@@ -107,7 +107,7 @@ class AttendanceFragment : Fragment() {
         super.onCreate(savedInstanceState)
         viewModel = activity?.run {
             ViewModelProvider(this)[AttendanceViewModel::class.java]
-        } ?: throw Exception("Invalid Activity")
+        } ?: throw IllegalStateException("Invalid Activity")
     }
 
     override fun onCreateView(
@@ -176,7 +176,7 @@ class AttendanceFragment : Fragment() {
         rootView.label_date.text = dateFormat.format(getTodayDateUTC())
 
         rootView.attendance_pager.adapter = AttendancePageAdapter(requireActivity()) {
-            viewModel.getAttendance(requireActivity(), it)
+            viewModel.getAttendance(it)
         }
 
         rootView.attendance_pager.offscreenPageLimit = 1
@@ -218,7 +218,6 @@ class AttendanceFragment : Fragment() {
 
     private fun saveAttendance(outputLocation: Uri) {
         val saveAttendance = viewModel.saveAttendance(
-            requireActivity(),
             outputLocation,
             getMonthDate(Date(viewModel.selectedTimeObservable.value!!))
         )

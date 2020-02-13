@@ -27,34 +27,34 @@ import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
 
-class FileSource private constructor(private val application: Application) {
+object FileUtils {
 
-    companion object {
-        private var instance: FileSource? = null
+//    companion object {
+//        private var instance: FileUtils? = null
+//
+//        fun getInstance(context: Context): FileUtils {
+//            instance?.let { return it }
+//            instance = FileUtils(context.applicationContext as Application)
+//            return getInstance(context)
+//        }
+//    }
 
-        fun getInstance(context: Context): FileSource {
-            instance?.let { return it }
-            instance = FileSource(context.applicationContext as Application)
-            return getInstance(context)
-        }
-    }
-
-    fun isFileEmpty(document: Uri) =
+    fun isFileEmpty(application: Application, document: Uri) =
         DocumentFile.fromSingleUri(application, document)!!.length() == 0L
 
-    fun getFileName(outputLocation: Uri) =
+    fun getFileName(application: Application, outputLocation: Uri) =
         DocumentFile.fromSingleUri(application, outputLocation)!!.name
 
 
     @Throws(FileNotFoundException::class)
-    fun getFileOutputStream(document: Uri): FileOutputStream {
+    fun getFileOutputStream(application: Application, document: Uri): FileOutputStream {
         return application.contentResolver.openOutputStream(document) as FileOutputStream
 
     }
 
 
     @Throws(TemplateNotFoundException::class)
-    fun getTemplateDocument(): XWPFDocument {
+    fun getTemplateDocument(application: Application): XWPFDocument {
         ZipSecureFile.setMinInflateRatio(0.0)
         var template: XWPFDocument? = null
         try {

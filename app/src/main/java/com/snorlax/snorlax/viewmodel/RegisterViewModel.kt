@@ -34,7 +34,7 @@ import java.util.*
 
 class RegisterViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val userRepository = UserRepository.getInstance()
+    private val userRepository = UserRepository
 
     private val localCacheSource: LocalCacheSource by lazy {
         LocalCacheSource.getInstance(application)
@@ -207,7 +207,6 @@ class RegisterViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun register(
-        owner: Activity,
         email: String,
         password: String,
         firstName: String,
@@ -216,7 +215,6 @@ class RegisterViewModel(application: Application) : AndroidViewModel(application
         accType: String
     ): Completable {
         return userRepository.register(
-            owner,
             email.trim(),
             password,
             "${firstName.trim()} ${lastName.trim()}",

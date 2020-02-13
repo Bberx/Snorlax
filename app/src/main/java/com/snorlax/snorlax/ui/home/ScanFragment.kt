@@ -44,6 +44,7 @@ import com.snorlax.snorlax.model.Attendance
 import com.snorlax.snorlax.utils.adapter.recyclerview.StudentScannerAdaptor
 import com.snorlax.snorlax.viewmodel.ScanViewModel
 import io.reactivex.BackpressureStrategy
+import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -207,16 +208,16 @@ class ScanFragment : Fragment() {
 //                    .subscribeOn(Schedulers.computation())
 //                    .doOnComplete { Log.d("Threading", " barcode ${Thread.currentThread().name}") }
 //                    .subscribe()
-                    disposables.add(Flowable.fromCallable { command.run() }
+                    disposables.add(Completable.fromAction { command.run() }
                         .subscribeOn(Schedulers.computation())
-                        .onBackpressureDrop()
+//                        .onBackpressureDrop()
 //                    .doOnComplete { Log.d("Threading", " barcode ${Thread.currentThread().name}") }
                         .subscribe())
 
                 }, BarcodeAnalyzer(it))
             }, BackpressureStrategy.DROP)
                 .subscribeOn(AndroidSchedulers.mainThread())
-                .flatMapMaybe { viewModel.analyzeLRN(requireActivity(), it.displayValue!!) }
+                .flatMapMaybe { viewModel.analyzeLRN(it.displayValue!!) }
                 .map { student ->
                     Log.d("Threading", "mapping ${Thread.currentThread().name}")
                     Pair(student !in studentScannerAdaptor.studentList.map { it.first }, student)
@@ -256,7 +257,7 @@ class ScanFragment : Fragment() {
             )
         }
 
-        disposables.add(viewModel.addAttendance(requireActivity(), attendanceEntry)
+        disposables.add(viewModel.addAttendance(attendanceEntry)
             .subscribeBy(onError = {
                 Snackbar.make(requireView(), it.localizedMessage ?: "", Snackbar.LENGTH_LONG).show()
             }))

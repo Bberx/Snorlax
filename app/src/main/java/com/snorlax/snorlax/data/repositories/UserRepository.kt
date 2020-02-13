@@ -34,7 +34,7 @@ import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 
-class UserRepository private constructor() {
+object UserRepository {
 
     //    companion object {
 //
@@ -48,14 +48,14 @@ class UserRepository private constructor() {
 //            return instance!!
 //        }
 //    }
-    companion object {
-        fun getInstance() = UserRepository()
-    }
+//    companion object {
+//        fun getInstance() = UserRepository()
+//    }
 
 
 
     private val firebase: FirebaseAuthSource by lazy {
-        FirebaseAuthSource.getInstance()
+        FirebaseAuthSource
     }
 
 //    private val localCache: LocalCacheSource by lazy {
@@ -64,19 +64,18 @@ class UserRepository private constructor() {
 
 
     private val firestore by lazy {
-        FirebaseFirestoreSource.getInstance()
+        FirebaseFirestoreSource
     }
 
     private val storage by lazy {
         StorageSource.instance
     }
 
-    fun login(owner: Activity, email: String, password: String) = firebase.login(email, password)
-        .flatMap { firestore.getAdmin(owner, it.uid) }
+    fun login(email: String, password: String) = firebase.login(email, password)
+        .flatMap { firestore.getAdmin(it.uid) }
         .subscribeOn(Schedulers.io())
 
     fun register(
-        owner: Activity,
         email: String,
         password: String,
         name: String,
@@ -91,16 +90,16 @@ class UserRepository private constructor() {
 
         return firebase.register(email, password).flatMap {
             it.updateAdminProfile(profileUpdates)
-                .andThen(firestore.addAdmin(owner, User(name, section, accType, it.uid, it.email!!)))
-                .andThen(firestore.getAdmin(owner, it.uid))
+                .andThen(firestore.addAdmin(User(name, section, accType, it.uid, it.email!!)))
+                .andThen(firestore.getAdmin(it.uid))
         }.subscribeOn(Schedulers.io())
     }
 
-    fun currentUser(owner: Activity, context: Context): Maybe<User> {
+    fun currentUser(context: Context): Maybe<User> {
         val cache = LocalCacheSource.getInstance(context).getUserCache()
 
         val databaseUser =
-            firestore.getAdmin(owner, firebase.currentUser()!!.uid)
+            firestore.getAdmin(firebase.currentUser()!!.uid)
                 .subscribeOn(Schedulers.io())
 
         cache?.let {
@@ -111,7 +110,10 @@ class UserRepository private constructor() {
 
 
     fun logout() : Completable {
-        return Completable.fromAction { firebase.logout() }.andThen {
+        return Completable.fromAction {
+            firestore.removeListeners()
+            firebase.logout()
+        }.andThen {
             FirebaseAuth.getInstance().addAuthStateListener {auth ->
                 if (auth.currentUser == null) it.onComplete()
             }

@@ -16,21 +16,19 @@
 
 package com.snorlax.snorlax.viewmodel
 
-import android.app.Activity
 import android.app.Application
 import android.net.Uri
 import android.provider.DocumentsContract
 import android.text.format.DateUtils
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LifecycleOwner
 import com.snorlax.snorlax.data.cache.LocalCacheSource
-import com.snorlax.snorlax.data.files.FileSource
+import com.snorlax.snorlax.data.files.FileUtils
 import com.snorlax.snorlax.data.firebase.FirebaseFirestoreSource
 import com.snorlax.snorlax.model.Attendance
 import com.snorlax.snorlax.model.Student
 import com.snorlax.snorlax.utils.Constants
 import com.snorlax.snorlax.utils.TimeUtils.getTodayDateLocal
-import com.snorlax.snorlax.utils.processor.WordProcessor
+import com.snorlax.snorlax.utils.processor.AttendanceProcessor
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.functions.BiFunction
@@ -43,9 +41,9 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
 
     private val cache = LocalCacheSource.getInstance(application)
 
-    private val firestore = FirebaseFirestoreSource.getInstance()
+    private val firestore = FirebaseFirestoreSource
 
-    private val fileSource = FileSource.getInstance(application)
+    private val fileSource = FileUtils
 
     val selectedTimeObservable = BehaviorSubject.create<Long>()
 
@@ -94,13 +92,13 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
         ) deleteFile(location)
     }
 
-    fun isEmpty(document: Uri) = fileSource.isFileEmpty(document)
+    fun isEmpty(document: Uri) = fileSource.isFileEmpty(getApplication(), document)
 
-    fun outputFileName(outputLocation: Uri) = fileSource.getFileName(outputLocation)
+    fun outputFileName(outputLocation: Uri) = fileSource.getFileName(getApplication(), outputLocation)
 
     private fun saveToFile(document: XWPFDocument, outputLocation: Uri) =
         Completable.fromAction {
-            fileSource.getFileOutputStream(outputLocation).use { stream ->
+            fileSource.getFileOutputStream(getApplication(), outputLocation).use { stream ->
                 document.use {
                     it.write(stream)
                 }
@@ -108,10 +106,10 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
         }.subscribeOn(Schedulers.io())
 
 
-    fun saveAttendance(owner: Activity, outputLocation: Uri, month: Date): Completable {
+    fun saveAttendance(outputLocation: Uri, month: Date): Completable {
 
-        val attendance = firestore.getMonthlyAttendance(owner, section, month)
-        val student = firestore.getStudentList(owner, section)
+        val attendance = firestore.getMonthlyAttendance(section, month)
+        val student = firestore.getStudentList(section)
 
         val lists = Single.zip(
             student,
@@ -120,9 +118,9 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
                 Pair(studentList, attendanceList)
             })
 
-        val word = lists.flatMap { list ->
-            WordProcessor(
-                fileSource.getTemplateDocument(),
+        return lists.flatMap { list ->
+            AttendanceProcessor(
+                fileSource.getTemplateDocument(getApplication()),
                 month
             ).processTable(
                 Constants.SECTION_LIST.getValue(section),
@@ -130,12 +128,10 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
                 list.second
             )
         }.flatMapCompletable { saveToFile(it, outputLocation) }
-
-        return word
     }
 
-    fun getAttendance(owner: Activity, timestamp: Date) =
-        firestore.getAttendance(owner, section, timestamp)
+    fun getAttendance(timestamp: Date) =
+        firestore.getAttendanceObservable(section, timestamp)
 
     val section: String
         get() = cache.getUserCache()!!.section

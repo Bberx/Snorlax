@@ -17,8 +17,10 @@
 package com.snorlax.snorlax.data.firebase
 
 import android.app.Activity
+
 import com.google.firebase.firestore.*
 import com.google.gson.Gson
+
 import com.snorlax.snorlax.model.Attendance
 import com.snorlax.snorlax.model.Student
 import com.snorlax.snorlax.model.User
@@ -33,7 +35,15 @@ import io.reactivex.schedulers.Schedulers
 import java.util.*
 import kotlin.collections.HashMap
 
-class FirebaseFirestoreSource private constructor() {
+object FirebaseFirestoreSource {
+
+    private const val STUDENTS_DATA_NAME = "student"
+    private const val SECTIONS_DATA_NAME = "section"
+    private const val ATTENDANCE_DATA_NAME = "attendance"
+    private const val USER_DATA_NAME = "user"
+
+    private val listeners = mutableListOf<ListenerRegistration>()
+
 
     private val firestoreDB = FirebaseFirestore.getInstance()
 
@@ -50,26 +60,26 @@ class FirebaseFirestoreSource private constructor() {
 
     private val gson = Gson()
 
-    companion object {
-
-        private var instance: FirebaseFirestoreSource? = null
-
-        fun getInstance(): FirebaseFirestoreSource {
-            instance?.let { return it }
-            instance = FirebaseFirestoreSource()
-            return getInstance()
-        }
-
-        private const val STUDENTS_DATA_NAME = "student"
-        private const val SECTIONS_DATA_NAME = "section"
-        private const val ATTENDANCE_DATA_NAME = "attendance"
-        private const val USER_DATA_NAME = "user"
-//        private const val STUDENT_ATTENDANCE_NAME = "student"
-//        private const val TIME_IN_ATTENDANCE_NAME = "time_in"
-//        private const val LRN_ATTENDANCE_NAME = "lrn"
-
-
-    }
+//    companion object {
+//
+////        private var instance: FirebaseFirestoreSource? = null
+////
+////        fun getInstance(): FirebaseFirestoreSource {
+////            instance?.let { return it }
+////            instance = FirebaseFirestoreSource()
+////            return getInstance()
+////        }
+//
+////        private const val STUDENTS_DATA_NAME = "student"
+////        private const val SECTIONS_DATA_NAME = "section"
+////        private const val ATTENDANCE_DATA_NAME = "attendance"
+////        private const val USER_DATA_NAME = "user"
+////        private const val STUDENT_ATTENDANCE_NAME = "student"
+////        private const val TIME_IN_ATTENDANCE_NAME = "time_in"
+////        private const val LRN_ATTENDANCE_NAME = "lrn"
+//
+//
+//    }
 
     fun getDocumentReference(section: String, lrn: String): DocumentReference {
         return sectionRef
@@ -78,33 +88,33 @@ class FirebaseFirestoreSource private constructor() {
             .document(lrn)
     }
 
-    fun getAdmin(owner: Activity, uid: String): Single<User> {
+    fun getAdmin(uid: String): Single<User> {
         return Single.create<User> { emitter ->
             userRef
                 .document(uid)
                 .get()
-                .addOnSuccessListener(owner) {
+                .addOnSuccessListener {
                     emitter.onSuccess(it.toObject(User::class.java)!!)
                 }
-                .addOnFailureListener(owner) {
+                .addOnFailureListener {
                     emitter.onError(it)
                 }
         }.subscribeOn(Schedulers.io())
     }
 
-    fun addAdmin(owner: Activity, user: User): Completable {
+    fun addAdmin(user: User): Completable {
         return Completable.create { emitter ->
             userRef
                 .document(user.uid)
                 .set(user)
-                .addOnCompleteListener(owner) {
+                .addOnCompleteListener {
                     if (it.isSuccessful) emitter.onComplete()
                     else emitter.onError(it.exception!!)
                 }
         }.subscribeOn(Schedulers.io())
     }
 
-    fun getStudentList(owner: Activity, section: String): Single<List<Student>> {
+    fun getStudentList(section: String): Single<List<Student>> {
         return Single.create { emitter: SingleEmitter<List<Student>> ->
             //            Log.d("Threading", "get student list ${Thread.currentThread().name}")
 //            val listenerRegistration = sectionRef
@@ -132,14 +142,19 @@ class FirebaseFirestoreSource private constructor() {
 //                listenerRegistration.remove()
 //            }
             getStudentQuery(section).get()
-                .addOnSuccessListener(owner) {
+                .addOnSuccessListener {
                     emitter.onSuccess(it.documents.map { documentSnapshot ->
                         documentSnapshot.toObject(Student::class.java)!!
                     })
-                }.addOnFailureListener(owner) { emitter.onError(it) }
+                }.addOnFailureListener { emitter.onError(it) }
         }
     }
 
+    fun removeListeners() {
+        listeners.forEach {
+            it.remove()
+        }
+    }
 
     fun getStudentQuery(section: String): Query {
 //        return Single.create<Query> { emitter ->
@@ -166,7 +181,7 @@ class FirebaseFirestoreSource private constructor() {
 
     }
 
-    fun deleteStudent(owner: Activity, section: String, student: Student): Completable {
+    fun deleteStudent(section: String, student: Student): Completable {
 
         val studentDeleteTask = Completable.create { emitter ->
             sectionRef
@@ -174,8 +189,8 @@ class FirebaseFirestoreSource private constructor() {
                 .collection(STUDENTS_DATA_NAME)
                 .document(student.lrn)
                 .delete()
-                .addOnSuccessListener(owner) { emitter.onComplete() }
-                .addOnFailureListener(owner) { emitter.onError(it) }
+                .addOnSuccessListener { emitter.onComplete() }
+                .addOnFailureListener { emitter.onError(it) }
         }
 
 //        val attendanceDeleteTask = Completable.create { emitter ->
@@ -219,7 +234,6 @@ class FirebaseFirestoreSource private constructor() {
 
 
     fun addStudent(
-        owner: Activity,
         section: String,
         student: Student
     ): Completable {
@@ -229,9 +243,9 @@ class FirebaseFirestoreSource private constructor() {
                 .collection(STUDENTS_DATA_NAME)
                 .document(student.lrn)
                 .set(student)
-                .addOnSuccessListener(owner) {
+                .addOnSuccessListener {
                     completableEmitter.onComplete()
-                }.addOnFailureListener(owner) {
+                }.addOnFailureListener {
                     completableEmitter.onError(it)
                 }
         }
@@ -256,7 +270,6 @@ class FirebaseFirestoreSource private constructor() {
 
 
     fun addAttendance(
-        owner: Activity,
         section: String,
         attendanceList: List<Attendance>
     ): Completable {
@@ -268,8 +281,6 @@ class FirebaseFirestoreSource private constructor() {
                 .collection(ATTENDANCE_DATA_NAME)
                 .document(getTodayDateUTC().time.toString())
 
-//            reference.set(hashMapOf(Pair("date", Timestamp(getTodayDateUTC()))), SetOptions.merge())
-
             return Completable.create { emitter ->
                 firestoreDB.runTransaction {
                     attendanceList.forEach { attendance ->
@@ -278,31 +289,27 @@ class FirebaseFirestoreSource private constructor() {
                         }
                     }
                     it.set(reference, tempMap.toMap(), SetOptions.merge())
-                }.addOnSuccessListener(owner) { emitter.onComplete() }
-                    .addOnFailureListener(owner) { emitter.onError(it) }
+                }.addOnSuccessListener { emitter.onComplete() }
+                    .addOnFailureListener { emitter.onError(it) }
 
             }
         }
     }
 
 
-    fun getAttendance(
-        owner: Activity,
+    fun getAttendanceObservable(
         section: String,
         dateStamp: Date
     ): Observable<List<Attendance>> {
 
-        var listener: ListenerRegistration? = null
         return Observable.create<List<Attendance>> { emitter ->
-            listener = sectionRef.document(section)
+            val listener = sectionRef.document(section)
                 .collection(ATTENDANCE_DATA_NAME)
                 .document(dateStamp.time.toString())
-                .addSnapshotListener(owner) { documentSnapshot, firebaseFirestoreException ->
+                .addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
                     firebaseFirestoreException?.let {
-                        //                        if (it.code == FirebaseFirestoreException.Code.PERMISSION_DENIED) {
-//
-//                        } else {
-                        emitter.onError(it)
+//                        if (!(it.code == FirebaseFirestoreException.Code.PERMISSION_DENIED && FirebaseAuthSource.getInstance().currentUser() == null)) {
+                            emitter.onError(it)
 //                        }
                         return@addSnapshotListener
                     }
@@ -319,11 +326,12 @@ class FirebaseFirestoreSource private constructor() {
                         } ?: emitter.onNext(emptyList())
                     } ?: emitter.onNext(emptyList())
                 }
-        }.doOnDispose {
-            listener?.remove()
-        }.doFinally {
-            listener?.remove()
-        }.unsubscribeOn(AndroidSchedulers.mainThread())
+            listeners.add(listener)
+            emitter.setCancellable {
+                listener.remove()
+            }
+        }
+            .subscribeOn(Schedulers.io()).unsubscribeOn(AndroidSchedulers.mainThread())
     }
 
     private fun getAttendanceByDocument(document: DocumentSnapshot): List<Attendance> {
@@ -336,7 +344,10 @@ class FirebaseFirestoreSource private constructor() {
         return emptyList()
     }
 
-    fun getMonthlyAttendance(owner: Activity, section: String, month: Date): Single<List<Attendance>> {
+    fun getMonthlyAttendance(
+        section: String,
+        month: Date
+    ): Single<List<Attendance>> {
         val attendanceList = mutableListOf<Attendance>()
         val reference = sectionRef.document(section)
             .collection(ATTENDANCE_DATA_NAME)
@@ -347,15 +358,30 @@ class FirebaseFirestoreSource private constructor() {
                     FieldPath.documentId(),
                     getMaxMonthDate(month).time.toString()
                 ).get()
-                .addOnSuccessListener(owner) {
+                .addOnSuccessListener {
 
                     it.documents.forEach { document ->
                         attendanceList.addAll(getAttendanceByDocument(document))
                     }
                     emitter.onSuccess(attendanceList.toList())
-                }.addOnFailureListener(owner) {
+                }.addOnFailureListener {
                     emitter.onError(it)
                 }
         }
     }
+
+//    companion object {
+//        private const val STUDENTS_DATA_NAME = "student"
+//        private const val SECTIONS_DATA_NAME = "section"
+//        private const val ATTENDANCE_DATA_NAME = "attendance"
+//        private const val USER_DATA_NAME = "user"
+//
+//        private var instance: FirebaseFirestoreSource? = null
+//
+//        fun getInstance(): FirebaseFirestoreSource {
+//            instance?.let { return it }
+//            instance = FirebaseFirestoreSource()
+//            return getInstance()
+//        }
+//    }
 }

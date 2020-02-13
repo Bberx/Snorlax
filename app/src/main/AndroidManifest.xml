@@ -47,11 +47,15 @@
 
 
 
+<!--        <activity android:name=".ui.home.HomeActivity"-->
+<!--            android:screenOrientation="portrait"-->
+<!--            android:theme="@style/AppTheme.NoActionBar"/>-->
         <activity android:name=".ui.home.HomeActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.SplashScreen"/>
 
         <activity android:name=".ui.auth.CredentialsActivity"
+            android:theme="@style/AppTheme.SplashScreen"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>

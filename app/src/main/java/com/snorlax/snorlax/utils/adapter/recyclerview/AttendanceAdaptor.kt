@@ -27,6 +27,9 @@ import com.snorlax.snorlax.utils.TimeUtils
 import com.snorlax.snorlax.utils.glide.GlideApp
 import com.snorlax.snorlax.utils.inflate
 import de.hdodenhof.circleimageview.CircleImageView
+import io.reactivex.Completable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.item_attendance.view.*
 import java.text.SimpleDateFormat
 import java.time.format.DateTimeFormatter
@@ -57,15 +60,27 @@ class AttendanceAdaptor : RecyclerView.Adapter<AttendanceAdaptor.AttendanceHolde
             override fun onRemoved(position: Int, count: Int) =
                 notifyItemRangeRemoved(position, count)
 
+
             override fun compare(o1: Attendance?, o2: Attendance?) =
                 o1!!.time_in.compareTo(o2!!.time_in)
 
             override fun areContentsTheSame(oldItem: Attendance?, newItem: Attendance?) =
-                (oldItem!!.lrn == newItem!!.lrn) && (oldItem.student == newItem.student) && (oldItem.time_in == newItem.time_in)
+                (oldItem!!.lrn == newItem!!.lrn) &&
+                        (oldItem.student == newItem.student) &&
+                        (oldItem.time_in == newItem.time_in)
         })
     private val clockFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
 
-    fun updateData(attendance: List<Attendance>) = mAttendance.replaceAll(attendance)
+    fun updateData(attendance: List<Attendance>) {
+//        Completable.fromAction { mAttendance.replaceAll(attendance) }
+//            .subscribeOn(Schedulers.io())
+//            .observeOn(AndroidSchedulers.mainThread())
+//            .subscribe()
+
+            mAttendance.replaceAll(attendance)
+
+    }
+
 
     override fun getItemCount(): Int {
 //        return if (mAttendance.size() == 0) 1

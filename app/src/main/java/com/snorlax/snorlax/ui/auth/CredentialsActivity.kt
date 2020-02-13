@@ -19,6 +19,8 @@ package com.snorlax.snorlax.ui.auth
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentPagerAdapter
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.data.firebase.FirebaseAuthSource
 import com.snorlax.snorlax.utils.adapter.framepager.AuthenticationPageAdapter
@@ -38,19 +40,24 @@ class CredentialsActivity : AppCompatActivity() {
 //                if (it == false) startHomeActivity()
 //            }
 //        )
-        FirebaseAuthSource.getInstance().currentUser()?.let {
+        FirebaseAuthSource.currentUser()?.let {
             startHomeActivity()
+            super.onCreate(savedInstanceState)
+            return
         }
+        setTheme(R.style.AppTheme)
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_credentials)
 
-        view_pager.adapter = AuthenticationPageAdapter(
-            this,
-            supportFragmentManager,
-            FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT
-        )
-        tabs.setupWithViewPager(view_pager)
+        view_pager.adapter = AuthenticationPageAdapter(this)
+//        tabs.setupWithViewPager(view_pager)
+        TabLayoutMediator(tabs, view_pager) { tab: TabLayout.Tab, index: Int ->
+            tab.text = when (index) {
+                0 -> getString(R.string.act_log_in)
+                else -> getString(R.string.act_register)
+            }
+        }.attach()
     }
 
 

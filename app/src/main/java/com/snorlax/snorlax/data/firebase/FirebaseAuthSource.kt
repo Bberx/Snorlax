@@ -27,13 +27,13 @@ import io.reactivex.Single
 import java.lang.RuntimeException
 
 
-class FirebaseAuthSource private constructor() {
+object FirebaseAuthSource {
 
-    companion object {
-        private val M_INSTANCE: FirebaseAuthSource = FirebaseAuthSource()
-
-        fun getInstance(): FirebaseAuthSource = M_INSTANCE
-    }
+//    companion object {
+//        private val M_INSTANCE: FirebaseAuthSource = FirebaseAuthSource()
+//
+//        fun getInstance(): FirebaseAuthSource = M_INSTANCE
+//    }
 
     private val mAuth: FirebaseAuth by lazy {
         FirebaseAuth.getInstance()

@@ -59,6 +59,7 @@ class HomeActivity : AppCompatActivity() {
     private val disposables = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(R.style.AppTheme_NoActionBar)
         super.onCreate(savedInstanceState)
 
         viewModel = ViewModelProvider(this)[HomeActivityViewModel::class.java]
@@ -150,7 +151,7 @@ class HomeActivity : AppCompatActivity() {
 
     private fun initObservables() {
         disposables.add(
-            viewModel.getUser(this)
+            viewModel.getUser()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
@@ -225,7 +226,8 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun setDialog(show: Boolean) {
-        val diag = object : Dialog(this) {
+
+        var diag: Dialog? = object : Dialog(this) {
             override fun onCreate(savedInstanceState: Bundle?) {
                 super.onCreate(savedInstanceState)
                 requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -234,9 +236,13 @@ class HomeActivity : AppCompatActivity() {
             }
         }
 
+        if (!show) {
+            diag = null
+        }
+
         if (show) {
-            diag.show()
-        } else diag.dismiss()
+            diag?.show() // fixme: Leaking
+        } else diag?.dismiss()
 //        val builder = MaterialAlertDialogBuilder(this).setCancelable(false)
 //        builder.setView(R.layout.diag_loading)
 //        val dialog: Dialog = builder.create()

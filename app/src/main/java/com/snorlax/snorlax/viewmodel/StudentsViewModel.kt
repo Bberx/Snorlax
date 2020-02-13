@@ -41,15 +41,15 @@ class StudentsViewModel(application: Application) : AndroidViewModel(application
 //        }
 //    }
 
-    private val firebaseAuthSource = FirebaseAuthSource.getInstance()
+    private val firebaseAuthSource = FirebaseAuthSource
 
     private val localCacheSource = LocalCacheSource.getInstance(application)
 
-    private val firestore = FirebaseFirestoreSource.getInstance()
+    private val firestore = FirebaseFirestoreSource
 
 
-    fun addStudent(owner: Activity, student: Student): Completable {
-        return firestore.addStudent(owner, getCurrentSection(), student)
+    fun addStudent(student: Student): Completable {
+        return firestore.addStudent(getCurrentSection(), student)
     }
 
     fun reAuth(password: String): Completable {
@@ -64,12 +64,12 @@ class StudentsViewModel(application: Application) : AndroidViewModel(application
         return localCacheSource.getUserCache()!!.section
     }
 
-    fun deleteStudent(owner: Activity, student: Student): Completable {
-        return firestore.deleteStudent(owner, getCurrentSection(), student)
+    fun deleteStudent(student: Student): Completable {
+        return firestore.deleteStudent(getCurrentSection(), student)
     }
 
-    fun studentExist(owner: Activity, lrn: String): Single<Boolean> {
-        return firestore.getStudentList(owner, localCacheSource.getUserCache()!!.section)
+    fun studentExist(lrn: String): Single<Boolean> {
+        return firestore.getStudentList(localCacheSource.getUserCache()!!.section)
             .subscribeOn(Schedulers.io())
             .map {
                 val students = it.map { student -> student.lrn }

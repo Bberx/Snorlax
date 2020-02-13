@@ -48,11 +48,11 @@ fun Activity.exitApp() {
 
 fun Activity.startHomeActivity() {
     val intent = Intent(this, HomeActivity::class.java).also {
-        it.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        it.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION
     }
     startActivity(intent)
-    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
-    finishAndRemoveTask()
+//    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+    finish()
 }
 
 
@@ -63,7 +63,7 @@ fun Activity.startLoginActivity() {
 //        finish()
     }
     startActivity(intent)
-    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+//    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
     finishAndRemoveTask()
 }
 

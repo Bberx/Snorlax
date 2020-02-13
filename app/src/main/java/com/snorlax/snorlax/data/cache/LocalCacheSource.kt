@@ -16,7 +16,6 @@
 
 package com.snorlax.snorlax.data.cache
 
-import android.app.Application
 import android.content.Context
 import com.google.gson.Gson
 import com.snorlax.snorlax.model.User
@@ -24,7 +23,6 @@ import com.snorlax.snorlax.utils.Constants.PREFS_KEY
 import com.snorlax.snorlax.utils.Constants.USER_KEY
 import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
-import java.lang.RuntimeException
 
 class LocalCacheSource private constructor(application: Context) {
 

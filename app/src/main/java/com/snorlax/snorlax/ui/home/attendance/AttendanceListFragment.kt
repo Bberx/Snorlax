@@ -116,16 +116,6 @@ class AttendanceListFragment(private val attendance: Observable<List<Attendance>
         attachSubscriber()
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        attachSubscriber()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        disposables.clear()
-    }
-
     override fun onPause() {
         super.onPause()
         disposables.clear()

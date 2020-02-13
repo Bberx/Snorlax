@@ -34,7 +34,7 @@ import java.util.*
 
 class HomeActivityViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val userRepository: UserRepository by lazy { UserRepository.getInstance() }
+    private val userRepository: UserRepository by lazy { UserRepository }
 
     private val localCacheSource: LocalCacheSource by lazy {
         LocalCacheSource.getInstance(
@@ -76,7 +76,7 @@ class HomeActivityViewModel(application: Application) : AndroidViewModel(applica
     }
 
 
-    fun getUser(owner: Activity) = userRepository.currentUser(owner, getApplication())
+    fun getUser() = userRepository.currentUser(getApplication())
 
     fun getRole(user: User): String {
         val builder: StringBuilder = StringBuilder()
