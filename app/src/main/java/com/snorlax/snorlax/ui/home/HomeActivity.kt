@@ -31,6 +31,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.ui.home.attendance.AttendanceFragment
+import com.snorlax.snorlax.ui.home.generate.GeneratorFragment
 import com.snorlax.snorlax.utils.exitApp
 import com.snorlax.snorlax.utils.startLoginActivity
 import com.snorlax.snorlax.viewmodel.HomeActivityViewModel
@@ -116,7 +117,10 @@ class HomeActivity : AppCompatActivity() {
 
                 R.id.nav_generate -> {
                     supportFragmentManager.commit {
-                        replace(R.id.fragment_container, GenerateFragment())
+                        replace(
+                            R.id.fragment_container,
+                            GeneratorFragment()
+                        )
                     }
                 }
 

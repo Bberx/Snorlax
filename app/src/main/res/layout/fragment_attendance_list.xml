@@ -25,55 +25,13 @@
     tools:context=".ui.home.attendance.AttendanceListFragment">
 
     <FrameLayout
+        android:animateLayoutChanges="true"
         android:id="@+id/attendance_frame"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <!--        <com.facebook.shimmer.ShimmerFrameLayout-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="match_parent">-->
-        <!--            <include layout="@layout/shimmer_layout_attendance"/>-->
-        <!--        </com.facebook.shimmer.ShimmerFrameLayout>-->
-
-    </FrameLayout>
-
-
-    <!--    <androidx.recyclerview.widget.RecyclerView-->
-    <!--        android:id="@+id/attendance_list"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="0dp"-->
-    <!--        android:fadingEdge="vertical"-->
-    <!--        android:fadingEdgeLength="16dp"-->
-    <!--        android:requiresFadingEdge="vertical"-->
-    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
-    <!--        app:layout_constraintEnd_toEndOf="parent"-->
-    <!--        app:layout_constraintStart_toStartOf="parent"-->
-    <!--        app:layout_constraintTop_toTopOf="parent"-->
-    <!--        tools:listitem="@layout/item_student" />-->
-    <!--    </FrameLayout>-->
-
-    <!--    <TextView-->
-    <!--        android:id="@+id/label_empty"-->
-    <!--        android:layout_width="wrap_content"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:layout_gravity="center"-->
-    <!--        android:drawableTop="@drawable/img_empty_box"-->
-    <!--        android:drawablePadding="16dp"-->
-    <!--        android:fontFamily="@font/work_sans"-->
-    <!--        android:gravity="center_horizontal|center_vertical"-->
-    <!--        android:text="@string/msg_empty_list"-->
-    <!--        android:textColor="@android:color/primary_text_light"-->
-    <!--        android:textSize="16sp"-->
-    <!--        android:visibility="gone"-->
-    <!--        app:drawableTint="@color/colorPrimaryDark"-->
-    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
-    <!--        app:layout_constraintEnd_toEndOf="parent"-->
-    <!--        app:layout_constraintStart_toStartOf="parent"-->
-    <!--        app:layout_constraintTop_toTopOf="parent"-->
-    <!--        tools:visibility="gone" />-->
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

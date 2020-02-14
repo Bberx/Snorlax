@@ -21,7 +21,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import androidx.core.content.getSystemService
+import androidx.core.view.contains
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -35,7 +37,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.PublishSubject
 import kotlinx.android.synthetic.main.fragment_attendance_list.*
 import kotlinx.android.synthetic.main.fragment_attendance_list.view.*
 
@@ -49,8 +50,9 @@ class AttendanceListFragment(private val attendance: Observable<List<Attendance>
 ////        viewModel = ViewModelProviders.of(parentFragment!!)[AttendanceViewModel::class.java]
 //    }
 
-    private val switchObservable = PublishSubject.create<Boolean>()
-    private lateinit var baseObservable: Observable<List<Attendance>>
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var emptyView: LinearLayout
+    private lateinit var adapter: AttendanceAdaptor
 
     // TODO show an empty layout when there is no data
     override fun onCreateView(
@@ -60,48 +62,45 @@ class AttendanceListFragment(private val attendance: Observable<List<Attendance>
         // todo Add shimmer
         val rootView = inflater.inflate(R.layout.fragment_attendance_list, container, false)
         val frame = rootView.attendance_frame
-
-
         val loadingView = ShimmerListProgress(requireContext()).apply {
             setLayoutChild(R.layout.shimmer_layout_attendance)
         }
-
         frame.addView(loadingView)
 
         return rootView
     }
 
-    private fun attachSubscriber() {
-        val inflater = requireContext().getSystemService<LayoutInflater>()!!
-        val frame = attendance_frame
-
-        val adapter = AttendanceAdaptor()
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        adapter = AttendanceAdaptor()
         val layoutManager = LinearLayoutManager(requireContext())
-
-        val recyclerView = RecyclerView(requireContext()).apply {
+        val inflater = requireContext().getSystemService<LayoutInflater>()!!
+        recyclerView = RecyclerView(requireContext()).apply {
             isVerticalFadingEdgeEnabled = true
             setFadingEdgeLength(16.toPx())
             this.layoutManager = layoutManager
-            this.adapter = adapter
+            this.adapter = this@AttendanceListFragment.adapter
         }
 
-        val emptyView =
-            inflater.inflate(R.layout.layout_empty_list, frame, false)
+        emptyView =
+            inflater.inflate(R.layout.layout_empty_list, attendance_frame, false) as LinearLayout
+    }
 
+    private fun attachSubscriber() {
+        val frame = attendance_frame
         val attendanceDisposable = attendance
             .subscribeOn(Schedulers.io())
             .unsubscribeOn(AndroidSchedulers.mainThread())
             .subscribe {
-
                 if (it.isEmpty()) {
                     // todo create empty placeholder
-                    if (frame.indexOfChild(emptyView) == -1) {
+                    if (!frame.contains(emptyView)) {
                         frame.removeAllViews()
                         frame.addView(emptyView, 0)
                     }
                 } else {
                     // todo create recycler view
-                    if (frame.indexOfChild(recyclerView) == -1) {
+                    if (!frame.contains(recyclerView)) {
                         frame.removeAllViews()
                         frame.addView(recyclerView, 0)
                     }

@@ -42,6 +42,7 @@ import com.snorlax.snorlax.utils.adapter.recyclerview.StudentListAdaptor
 import com.snorlax.snorlax.utils.callback.StudentActionListener
 import com.snorlax.snorlax.utils.caps
 import com.snorlax.snorlax.utils.exception.StudentAlreadyExistException
+import com.snorlax.snorlax.utils.inflate
 import com.snorlax.snorlax.utils.toPx
 import com.snorlax.snorlax.viewmodel.StudentsViewModel
 import com.snorlax.snorlax.views.ShimmerListProgress
@@ -78,8 +79,13 @@ class StudentsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val rootView = inflater.inflate(R.layout.fragment_students, container, false)
-        val frame = rootView.student_list_container
+        return inflater.inflate(R.layout.fragment_students, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val frame = view.student_list_container
 
         val shimmerView = ShimmerListProgress(requireContext()).apply {
             setLayoutChild(R.layout.shimmer_layout_student)
@@ -94,15 +100,14 @@ class StudentsFragment : Fragment() {
             this.adapter = adapter
         }
 
-        val emptyView =
-            inflater.inflate(R.layout.layout_empty_list, frame, false).apply {
-                val label = findViewById<TextView>(R.id.label_empty)
+        val emptyView = frame.inflate(R.layout.layout_empty_list).apply {
+            val label = findViewById<TextView>(R.id.label_empty)
                 val resolution =
                     if (viewModel.canAddStudent()) getString(R.string.msg_reso_add_students) else context.getString(
                         R.string.rmsg_reso_ask_teacher
                     )
                 label.text = getString(R.string.msg_empty_student_list, resolution)
-            }
+        }
 
         val studentActionListener = object : StudentActionListener() {
             override fun editStudent(
@@ -143,14 +148,14 @@ class StudentsFragment : Fragment() {
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe({
                                     Snackbar.make(
-                                        view!!,
+                                        view,
                                         "Student edited",
                                         Snackbar.LENGTH_SHORT
                                     )
                                         .show()
                                 }, {
                                     Snackbar.make(
-                                        view!!,
+                                        view,
                                         it.localizedMessage!!,
                                         Snackbar.LENGTH_SHORT
                                     ).show()
@@ -293,9 +298,7 @@ class StudentsFragment : Fragment() {
 
 
 
-        return rootView
     }
-
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)

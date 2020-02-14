@@ -1,7 +1,6 @@
 package com.snorlax.snorlax.utils.barcode
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import androidx.annotation.Px
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.WriterException
@@ -28,7 +27,7 @@ fun BitMatrix.toBitmap(): Bitmap {
 
 object BarcodeUtils {
     @Throws(WriterException::class, IllegalArgumentException::class)
-    fun encodeToBitmap(content: String?, width: Int = 0, height: Int = 0): Bitmap =
+    fun encodeToBitmap(content: String?, width: Int = 400, height: Int = 100): Bitmap =
         encode(content, width, height).toBitmap()
 
 
