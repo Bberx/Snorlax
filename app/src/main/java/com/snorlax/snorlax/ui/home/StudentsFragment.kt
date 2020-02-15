@@ -20,16 +20,11 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Html
 import android.text.Spanned
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.text.isDigitsOnly
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -39,77 +34,44 @@ import com.jakewharton.rxbinding3.widget.textChanges
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.model.Student
 import com.snorlax.snorlax.utils.adapter.recyclerview.StudentListAdaptor
-import com.snorlax.snorlax.utils.callback.StudentActionListener
+import com.snorlax.snorlax.utils.callback.StudentEditListener
 import com.snorlax.snorlax.utils.caps
 import com.snorlax.snorlax.utils.exception.StudentAlreadyExistException
-import com.snorlax.snorlax.utils.inflate
-import com.snorlax.snorlax.utils.toPx
 import com.snorlax.snorlax.viewmodel.StudentsViewModel
-import com.snorlax.snorlax.views.ShimmerListProgress
 import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.diag_add_student.*
 import kotlinx.android.synthetic.main.diag_delete_student.*
 import kotlinx.android.synthetic.main.fragment_students.*
-import kotlinx.android.synthetic.main.fragment_students.view.*
 
 
 /**
  * A simple [Fragment] subclass.
  */
 
-class StudentsFragment : Fragment() {
+class StudentsFragment : BaseStudentFragment() {
 
-    private lateinit var viewModel: StudentsViewModel
+    override lateinit var viewModel: StudentsViewModel
+    override lateinit var adaptor: StudentListAdaptor
 
-    private val disposables = CompositeDisposable()
-    private val addDisposable = CompositeDisposable()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = ViewModelProvider(this)[StudentsViewModel::class.java]
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_students, container, false)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val frame = view.student_list_container
+        btn_action.setImageResource(R.drawable.ic_person_add)
 
-        val shimmerView = ShimmerListProgress(requireContext()).apply {
-            setLayoutChild(R.layout.shimmer_layout_student)
-        }
+        val studentActionListener = object : StudentEditListener() {
 
-        frame.addView(shimmerView)
-
-        val recyclerView = RecyclerView(requireContext()).apply {
-            isVerticalFadingEdgeEnabled = true
-            setFadingEdgeLength(16.toPx())
-            this.layoutManager = layoutManager
-            this.adapter = adapter
-        }
-
-        val emptyView = frame.inflate(R.layout.layout_empty_list).apply {
-            val label = findViewById<TextView>(R.id.label_empty)
-                val resolution =
-                    if (viewModel.canAddStudent()) getString(R.string.msg_reso_add_students) else context.getString(
-                        R.string.rmsg_reso_ask_teacher
-                    )
-                label.text = getString(R.string.msg_empty_student_list, resolution)
-        }
-
-        val studentActionListener = object : StudentActionListener() {
             override fun editStudent(
                 position: Int,
                 student: Student,
@@ -268,42 +230,18 @@ class StudentsFragment : Fragment() {
             }
         }
 
-        val recyclerOptions: FirestoreRecyclerOptions<Student> =
-            FirestoreRecyclerOptions.Builder<Student>()
-                .setLifecycleOwner(this)
-                .setQuery(viewModel.getStudentQuery(), Student::class.java)
-                .build()
-
-        recyclerView.layoutManager = LinearLayoutManager(context!!)
-        recyclerView.adapter =
-            StudentListAdaptor(
-                activity!!,
+        adaptor = StudentListAdaptor(
+            this,
                 !viewModel.canAddStudent(),
                 recyclerOptions,
-                studentActionListener
-            ) {
-                if (it > 0) {
-                    if (frame.indexOfChild(recyclerView) == -1) {
-                        frame.removeAllViews()
-                        frame.addView(recyclerView)
-                    }
-                } else {
-                    if (frame.indexOfChild(emptyView) == -1) {
-                        frame.removeAllViews()
-                        frame.addView(emptyView)
-                    }
-                }
-
-            }
-
-
-
+            studentActionListener, callback
+        )
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        if (viewModel.canAddStudent()) btn_add_student.setOnClickListener { showAddStudentDialog() }
-        else btn_add_student.visibility = View.GONE
+        if (viewModel.canAddStudent()) btn_action.setOnClickListener { showAddStudentDialog() }
+        else btn_action.visibility = View.GONE
     }
 
     private fun getSpannedText(text: String): Spanned {
@@ -326,8 +264,9 @@ class StudentsFragment : Fragment() {
             setIcon(R.drawable.ic_students)
         }.create()
 
-        addStudentAlertDialog.setOnShowListener { dialog ->
+        val addDisposable = CompositeDisposable()
 
+        addStudentAlertDialog.setOnShowListener { dialog ->
             addStudentAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE)
                 .setOnClickListener { button ->
 
@@ -387,7 +326,7 @@ class StudentsFragment : Fragment() {
                                     ).show()
                                 }
                             )
-                        addDisposable.add(disposable)
+                        addDisposable += disposable
                     } else {
                         if (firstNameInput.text.isNullOrBlank()) {
                             firstNameLayout.error = "Please enter a valid first name"
@@ -407,11 +346,5 @@ class StudentsFragment : Fragment() {
             addDisposable.clear()
         }
         addStudentAlertDialog.show()
-    }
-
-
-    override fun onDestroy() {
-        super.onDestroy()
-        disposables.clear()
     }
 }

@@ -16,52 +16,21 @@
 
 package com.snorlax.snorlax.viewmodel
 
-import android.app.Activity
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import com.snorlax.snorlax.data.cache.LocalCacheSource
 import com.snorlax.snorlax.data.firebase.FirebaseAuthSource
-import com.snorlax.snorlax.data.firebase.FirebaseFirestoreSource
 import com.snorlax.snorlax.model.Student
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 
-class StudentsViewModel(application: Application) : AndroidViewModel(application) {
-
-//    companion object {
-//        private var instance: StudentsViewModel? = null
-//
-//        fun getInstance(context: Context) : StudentsViewModel {
-//            instance?.let {
-//                return it
-//            }
-//            instance = StudentsViewModel(context)
-//            return getInstance(context)
-//        }
-//    }
-
-    private val firebaseAuthSource = FirebaseAuthSource
-
-    private val localCacheSource = LocalCacheSource.getInstance(application)
-
-    private val firestore = FirebaseFirestoreSource
-
+class StudentsViewModel(application: Application) : BaseStudentViewModel(application) {
 
     fun addStudent(student: Student): Completable {
         return firestore.addStudent(getCurrentSection(), student)
     }
 
     fun reAuth(password: String): Completable {
-        return firebaseAuthSource.reAuth(password)
-    }
-
-//    fun getStudentList() = firestore.getStudentList(getCurrentSection()).subscribeOn(Schedulers.io())
-
-    fun getStudentQuery() = firestore.getStudentQuery(getCurrentSection())
-
-    private fun getCurrentSection(): String {
-        return localCacheSource.getUserCache()!!.section
+        return FirebaseAuthSource.reAuth(password)
     }
 
     fun deleteStudent(student: Student): Completable {
@@ -75,9 +44,5 @@ class StudentsViewModel(application: Application) : AndroidViewModel(application
                 val students = it.map { student -> student.lrn }
                 lrn in students
             }
-    }
-
-    fun canAddStudent(): Boolean {
-        return (localCacheSource.getUserCache()!!.accType.equals("teacher", true))
     }
 }

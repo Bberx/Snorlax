@@ -107,8 +107,8 @@ android {
         applicationId "com.snorlax.snorlax"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 8
-        versionName "1.3.7"
+        versionCode 9
+        versionName "1.3.8"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
     }
@@ -133,7 +133,7 @@ android {
             multiDexEnabled = true
 //            manifestPlaceholders = [crashlyticsCollectionEnabled:"true"]
             firebaseAppDistribution {
-                releaseNotes = "Release build\nFix login screen"
+                releaseNotes = "Release build\nAdd tabs to generator page"
                 groups = "researchers, developer"
             }
         }

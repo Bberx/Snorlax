@@ -13,15 +13,12 @@ import com.snorlax.snorlax.R
 import com.snorlax.snorlax.utils.adapter.viewpager.GeneratorAdapter
 import com.snorlax.snorlax.viewmodel.GeneratorViewModel
 import io.reactivex.disposables.CompositeDisposable
-import kotlinx.android.synthetic.main.fragment_generate.*
 import kotlinx.android.synthetic.main.fragment_generate.view.*
 
 class GeneratorFragment : Fragment() {
 
     private lateinit var viewModel: GeneratorViewModel
     private val manualDisposable = CompositeDisposable()
-
-    private lateinit var tabListener: TabLayout.OnTabSelectedListener
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -60,11 +57,5 @@ class GeneratorFragment : Fragment() {
 
 
     }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        generate_tab.removeOnTabSelectedListener(tabListener)
-    }
-
 
 }

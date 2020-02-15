@@ -38,9 +38,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_attendance_list.*
-import kotlinx.android.synthetic.main.fragment_attendance_list.view.*
 
-// TODO animate change in layout
 class AttendanceListFragment(private val attendance: Observable<List<Attendance>>) : Fragment() {
 
     private val disposables = CompositeDisposable()
@@ -54,24 +52,22 @@ class AttendanceListFragment(private val attendance: Observable<List<Attendance>
     private lateinit var emptyView: LinearLayout
     private lateinit var adapter: AttendanceAdaptor
 
-    // TODO show an empty layout when there is no data
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // todo Add shimmer
-        val rootView = inflater.inflate(R.layout.fragment_attendance_list, container, false)
-        val frame = rootView.attendance_frame
+        return inflater.inflate(R.layout.fragment_attendance_list, container, false)
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+        val frame = attendance_frame
         val loadingView = ShimmerListProgress(requireContext()).apply {
             setLayoutChild(R.layout.shimmer_layout_attendance)
         }
         frame.addView(loadingView)
 
-        return rootView
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
         adapter = AttendanceAdaptor()
         val layoutManager = LinearLayoutManager(requireContext())
         val inflater = requireContext().getSystemService<LayoutInflater>()!!
@@ -81,7 +77,6 @@ class AttendanceListFragment(private val attendance: Observable<List<Attendance>
             this.layoutManager = layoutManager
             this.adapter = this@AttendanceListFragment.adapter
         }
-
         emptyView =
             inflater.inflate(R.layout.layout_empty_list, attendance_frame, false) as LinearLayout
     }
@@ -93,13 +88,11 @@ class AttendanceListFragment(private val attendance: Observable<List<Attendance>
             .unsubscribeOn(AndroidSchedulers.mainThread())
             .subscribe {
                 if (it.isEmpty()) {
-                    // todo create empty placeholder
                     if (!frame.contains(emptyView)) {
                         frame.removeAllViews()
                         frame.addView(emptyView, 0)
                     }
                 } else {
-                    // todo create recycler view
                     if (!frame.contains(recyclerView)) {
                         frame.removeAllViews()
                         frame.addView(recyclerView, 0)

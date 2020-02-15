@@ -32,6 +32,6 @@ object BarcodeUtils {
 
 
     @Throws(WriterException::class, IllegalArgumentException::class)
-    fun encode(content: String?, @Px width: Int = 0, @Px height: Int = 0): BitMatrix =
+    fun encode(content: String?, @Px width: Int = 400, @Px height: Int = 100): BitMatrix =
         Code128Writer().encode(content, BarcodeFormat.CODE_128, width, height)
 }

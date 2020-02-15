@@ -85,9 +85,10 @@
     <string name="btn_open">Open</string>
     <string name="msg_empty_student_list">There\'s no students yet, %s</string>
     <string name="msg_reso_add_students">please add students.</string>
-    <string name="rmsg_reso_ask_teacher">ask your teacher to add students.</string>
+    <string name="msg_reso_ask_teacher">ask your teacher to add students.</string>
     <string name="msg_student_deleted">Student deleted</string>
     <string name="err_incorrect_password">Incorrect password</string>
     <string name="label_generate">Generate</string>
     <string name="label_class">Class</string>
+    <string name="label_lrn_barcode">LRN Barcode</string>
 </resources>
