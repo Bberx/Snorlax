@@ -24,14 +24,16 @@ import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
-import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.navigateUp
+import androidx.navigation.ui.onNavDestinationSelected
+import androidx.navigation.ui.setupActionBarWithNavController
 import com.bumptech.glide.Glide
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.snorlax.snorlax.R
-import com.snorlax.snorlax.ui.home.attendance.AttendanceFragment
-import com.snorlax.snorlax.ui.home.generate.GeneratorFragment
 import com.snorlax.snorlax.utils.exitApp
 import com.snorlax.snorlax.utils.startLoginActivity
 import com.snorlax.snorlax.viewmodel.HomeActivityViewModel
@@ -40,6 +42,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_home.*
+import kotlinx.android.synthetic.main.app_bar_home.*
+import kotlinx.android.synthetic.main.content_home.*
 import kotlinx.android.synthetic.main.diag_loading.*
 import kotlinx.android.synthetic.main.navigation_header.view.*
 
@@ -54,6 +58,7 @@ class HomeActivity : AppCompatActivity() {
 
     private lateinit var drawerToggle: ActionBarDrawerToggle
 
+    private lateinit var appBarConfiguration: AppBarConfiguration
 
     private lateinit var viewModel: HomeActivityViewModel
 
@@ -67,6 +72,19 @@ class HomeActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_home)
         setSupportActionBar(toolbar)
+
+
+        val navController = findNavController(R.id.nav_host_fragment)
+
+        appBarConfiguration = AppBarConfiguration(
+            setOf(
+                R.id.nav_scan,
+                R.id.nav_attendance,
+                R.id.nav_students,
+                R.id.nav_generate,
+                R.id.nav_about
+            )
+        )
         drawerToggle = ActionBarDrawerToggle(
             this,
             drawer_layout,
@@ -77,68 +95,21 @@ class HomeActivity : AppCompatActivity() {
         drawer_layout.addDrawerListener(drawerToggle)
         drawerToggle.syncState()
 
-        if (savedInstanceState == null) {
-//            supportFragmentManager.beginTransaction().replace(
-//                R.id.fragment_container,
-//                ScanFragment()
-//            ).commit()
-            supportFragmentManager.commit {
-                replace(R.id.fragment_container, ScanFragment())
-            }
-            nav_view.setCheckedItem(R.id.nav_scan)
-        }
-
+        setupActionBarWithNavController(navController, appBarConfiguration)
         nav_view.setNavigationItemSelectedListener {
             if (nav_view.checkedItem == it) {
                 drawer_layout.closeDrawer(GravityCompat.START)
                 return@setNavigationItemSelectedListener true
             }
             when (it.itemId) {
-                R.id.nav_scan -> {
-                    supportFragmentManager.commit {
-                        replace(R.id.fragment_container, ScanFragment())
-                    }
-                }
-
-                R.id.nav_attendance -> {
-                    supportFragmentManager.commit {
-                        replace(
-                            R.id.fragment_container,
-                            AttendanceFragment()
-                        )
-                    }
-                }
-
-                R.id.nav_students -> {
-                    supportFragmentManager.commit {
-                        replace(R.id.fragment_container, StudentsFragment())
-                    }
-                }
-
-                R.id.nav_generate -> {
-                    supportFragmentManager.commit {
-                        replace(
-                            R.id.fragment_container,
-                            GeneratorFragment()
-                        )
-                    }
-                }
-
-                R.id.nav_about -> {
-                    supportFragmentManager.commit {
-                        replace(R.id.fragment_container, AboutFragment())
-                    }
-                }
-
-
-                R.id.nav_exit -> exit()
                 R.id.nav_sign_out -> logout()
-
+                R.id.nav_exit -> exit()
+                else -> it.onNavDestinationSelected(navController)
             }
             drawer_layout.closeDrawer(GravityCompat.START)
             return@setNavigationItemSelectedListener true
-
         }
+
 
 
         val header = nav_view.getHeaderView(0)
@@ -151,6 +122,11 @@ class HomeActivity : AppCompatActivity() {
 
         initObservables()
 
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        val navController = findNavController(R.id.nav_host_fragment)
+        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 
     private fun initObservables() {
@@ -171,16 +147,6 @@ class HomeActivity : AppCompatActivity() {
                     labelName.text = it.displayName
                     labelRole.text = viewModel.getRole(it)
                 })
-
-//        disposables.add(
-//            FirebaseAuthSource.getInstance().loggedOut().subscribe {
-//                if (it == true) {
-//                    startLoginActivity()
-//                }
-//            }
-//        )
-
-//        btn_logout.clicks().subscribe(homeActivityViewModel.logoutObservable)
     }
 
     override fun onDestroy() {
@@ -216,13 +182,7 @@ class HomeActivity : AppCompatActivity() {
                         Snackbar.LENGTH_LONG
                     ).show()
                 })
-//                setProgressDialog()
-//                viewModel.logout()
-//                    .subscribeOn(Schedulers.io())
-//                    .observeOn(AndroidSchedulers.mainThread())
-//                    .subscribe {
-//                        startLoginActivity()
-//                    }
+
             }
             setIcon(R.drawable.ic_logout)
             setNegativeButton("No", null)
@@ -247,20 +207,6 @@ class HomeActivity : AppCompatActivity() {
         if (show) {
             diag?.show() // fixme: Leaking
         } else diag?.dismiss()
-//        val builder = MaterialAlertDialogBuilder(this).setCancelable(false)
-//        builder.setView(R.layout.diag_loading)
-//        val dialog: Dialog = builder.create()
-//
-//        val window = dialog.window
-//        window?.setLayout(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT)
-//        window?.setGravity(Gravity.CENTER)
-//
-//        dialog.setCanceledOnTouchOutside(false)
-//        if (show) {
-//            dialog.show()
-//            dialog.loading_message.text = getString(R.string.label_logging_out)
-////            dialog.window!!.setLayout(dialog.loading_container.width, ViewGroup.LayoutParams.WRAP_CONTENT)
-//        } else dialog.dismiss()
     }
 
 
@@ -271,24 +217,11 @@ class HomeActivity : AppCompatActivity() {
             setPositiveButton(
                 "Yes"
             ) { dialog, _ ->
-
-                //                val homeIntent =
-//                    Intent(Intent.ACTION_MAIN)
-//                homeIntent.addCategory(Intent.CATEGORY_HOME)
-//                homeIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-//                startActivity(homeIntent)
-//                exitProcess(0)
-
-//                finish()
-//                CameraX.unbindAll()
-//                finishAffinity()
-//                finishAndRemoveTask()
-//                super.onBackPressed()
                 dialog.dismiss()
                 exitApp()
             }
             setIcon(R.drawable.ic_exit)
-            setNegativeButton("No", null)
+            setNegativeButton(R.string.btn_cancel, null)
         }.create().show()
     }
 }
