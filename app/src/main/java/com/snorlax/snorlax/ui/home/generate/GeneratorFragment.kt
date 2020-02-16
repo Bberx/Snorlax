@@ -17,8 +17,12 @@ import kotlinx.android.synthetic.main.fragment_generate.view.*
 
 class GeneratorFragment : Fragment() {
 
+    companion object {
+        const val REQUEST_SAVE_IMAGE = 20
+        const val REQUEST_SAVE_DOCX = 21
+    }
+
     private lateinit var viewModel: GeneratorViewModel
-    private val manualDisposable = CompositeDisposable()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

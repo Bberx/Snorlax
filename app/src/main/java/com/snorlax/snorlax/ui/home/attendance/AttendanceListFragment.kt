@@ -24,12 +24,15 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.core.content.getSystemService
 import androidx.core.view.contains
+import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.model.Attendance
 import com.snorlax.snorlax.utils.adapter.recyclerview.AttendanceAdaptor
+import com.snorlax.snorlax.utils.fadeIn
+import com.snorlax.snorlax.utils.fadeOut
 import com.snorlax.snorlax.utils.toPx
 import com.snorlax.snorlax.views.ShimmerListProgress
 import io.reactivex.Observable
@@ -38,6 +41,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_attendance_list.*
+import kotlinx.android.synthetic.main.fragment_generator_manual.*
 
 class AttendanceListFragment(private val attendance: Observable<List<Attendance>>) : Fragment() {
 
@@ -66,6 +70,7 @@ class AttendanceListFragment(private val attendance: Observable<List<Attendance>
         val loadingView = ShimmerListProgress(requireContext()).apply {
             setLayoutChild(R.layout.shimmer_layout_attendance)
         }
+
         frame.addView(loadingView)
 
         adapter = AttendanceAdaptor()
@@ -77,8 +82,10 @@ class AttendanceListFragment(private val attendance: Observable<List<Attendance>
             this.layoutManager = layoutManager
             this.adapter = this@AttendanceListFragment.adapter
         }
+
         emptyView =
             inflater.inflate(R.layout.layout_empty_list, attendance_frame, false) as LinearLayout
+
     }
 
     private fun attachSubscriber() {
@@ -89,13 +96,23 @@ class AttendanceListFragment(private val attendance: Observable<List<Attendance>
             .subscribe {
                 if (it.isEmpty()) {
                     if (!frame.contains(emptyView)) {
-                        frame.removeAllViews()
+                        if (frame.childCount != 0) {
+                            frame[0].fadeOut()
+                            frame.removeAllViews()
+                        }
                         frame.addView(emptyView, 0)
+                        emptyView.fadeIn()
+
+
                     }
                 } else {
                     if (!frame.contains(recyclerView)) {
-                        frame.removeAllViews()
+                        if (frame.childCount != 0) {
+                            frame[0].fadeOut()
+                            frame.removeAllViews()
+                        }
                         frame.addView(recyclerView, 0)
+                        recyclerView.fadeIn()
                     }
                     adapter.updateData(it)
                 }

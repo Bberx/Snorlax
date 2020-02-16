@@ -22,7 +22,7 @@ import android.provider.DocumentsContract
 import android.text.format.DateUtils
 import androidx.lifecycle.AndroidViewModel
 import com.snorlax.snorlax.data.cache.LocalCacheSource
-import com.snorlax.snorlax.data.files.FileUtils
+import com.snorlax.snorlax.utils.FileUtils
 import com.snorlax.snorlax.data.firebase.FirebaseFirestoreSource
 import com.snorlax.snorlax.model.Attendance
 import com.snorlax.snorlax.model.Student

@@ -14,10 +14,9 @@
  *    limitations under the License.
  */
 
-package com.snorlax.snorlax.data.files
+package com.snorlax.snorlax.utils
 
 import android.app.Application
-import android.content.Context
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
 import com.snorlax.snorlax.utils.exception.TemplateNotFoundException

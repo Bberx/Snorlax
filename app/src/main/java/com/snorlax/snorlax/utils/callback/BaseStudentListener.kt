@@ -16,4 +16,4 @@
 
 package com.snorlax.snorlax.utils.callback
 
-abstract class BaseStudentListener
+interface BaseStudentListener

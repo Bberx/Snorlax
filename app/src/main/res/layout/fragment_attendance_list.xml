@@ -25,7 +25,6 @@
     tools:context=".ui.home.attendance.AttendanceListFragment">
 
     <FrameLayout
-        android:animateLayoutChanges="true"
         android:id="@+id/attendance_frame"
         android:layout_width="0dp"
         android:layout_height="0dp"

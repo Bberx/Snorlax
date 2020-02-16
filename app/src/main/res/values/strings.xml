@@ -91,4 +91,13 @@
     <string name="label_generate">Generate</string>
     <string name="label_class">Class</string>
     <string name="label_lrn_barcode">LRN Barcode</string>
+    <string name="msg_image_saved">LRN barcode saved as %s</string>
+    <string name="action_save_image">Save LRN as image</string>
+    <string name="action_copy">Copy LRN to clipboard</string>
+    <string name="msg_lrn_copied">LRN copied to clipboard</string>
+    <string name="btn_generate">Generate</string>
+    <string name="label_enter_lrn">Enter LRN to generate</string>
+    <string name="label_generate_barcode">Generate Barcode</string>
+    <string name="err_no_lrn">Please input the LRN to generate</string>
+    <string name="err_invalid_lrn">Please enter a valid LRN</string>
 </resources>

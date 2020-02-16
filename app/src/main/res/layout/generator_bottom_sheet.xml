@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:elevation="16dp"
+    android:orientation="vertical">
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/label"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:text="Actions"
+        android:textColor="#8A000000"
+        android:textSize="16sp" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/action_clipboard"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:drawableStart="@drawable/ic_copy"
+        android:drawablePadding="32dp"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:text="@string/action_copy"
+        android:textColor="#DE000000"
+        android:textSize="16sp" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/action_save_image"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:drawableStart="@drawable/ic_save"
+        android:drawablePadding="32dp"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:text="@string/action_save_image"
+        android:textColor="#DE000000"
+        android:textSize="16sp" />
+
+</LinearLayout>
