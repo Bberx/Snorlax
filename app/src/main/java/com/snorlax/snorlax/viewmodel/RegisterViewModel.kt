@@ -16,7 +16,6 @@
 
 package com.snorlax.snorlax.viewmodel
 
-import android.app.Activity
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.snorlax.snorlax.data.cache.LocalCacheSource

@@ -18,7 +18,6 @@ package com.snorlax.snorlax.ui.auth
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.FragmentPagerAdapter
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.snorlax.snorlax.R

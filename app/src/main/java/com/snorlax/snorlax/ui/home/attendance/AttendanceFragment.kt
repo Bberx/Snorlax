@@ -14,6 +14,8 @@
  *    limitations under the License.
  */
 
+@file:Suppress("SpellCheckingInspection", "SpellCheckingInspection")
+
 package com.snorlax.snorlax.ui.home.attendance
 
 
@@ -46,7 +48,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
-import kotlinx.android.synthetic.main.fragment_attendance.*
 import kotlinx.android.synthetic.main.fragment_attendance.view.*
 import java.io.FileNotFoundException
 import java.io.IOException

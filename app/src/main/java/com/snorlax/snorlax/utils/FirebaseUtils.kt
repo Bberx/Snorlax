@@ -18,7 +18,6 @@ package com.snorlax.snorlax.utils
 
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
-import com.google.firebase.firestore.DocumentReference
 import io.reactivex.Completable
 
 fun FirebaseUser.updateAdminProfile(request: UserProfileChangeRequest): Completable =
@@ -30,8 +29,3 @@ fun FirebaseUser.updateAdminProfile(request: UserProfileChangeRequest): Completa
         }
     }
 
-fun DocumentReference.getLastPath() : String {
-    return this.path.substring(this.path.indexOfLast {
-        it == '/'
-    })
-}

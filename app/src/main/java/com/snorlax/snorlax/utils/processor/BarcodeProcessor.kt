@@ -1,7 +1,6 @@
 package com.snorlax.snorlax.utils.processor
 
 import android.graphics.Bitmap
-import android.util.Log
 import com.snorlax.snorlax.model.BarcodeBitmap
 import com.snorlax.snorlax.model.Section
 import com.snorlax.snorlax.model.Student

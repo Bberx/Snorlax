@@ -23,7 +23,7 @@ import android.view.ViewGroup
 
 class CameraPreview(context: Context) :
     ViewGroup(context) {
-    val mTextureView: TextureView = TextureView(context)
+    private val mTextureView: TextureView = TextureView(context)
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         // crop view
 

@@ -86,7 +86,8 @@ object TimeUtils {
 //            return this
 //        }
 
-    fun getMaxMonthDate(month: Date) = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
+    fun getMaxMonthDate(month: Date): Date =
+        GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
         time = month
         set(Calendar.DAY_OF_MONTH, getMaximum(Calendar.DAY_OF_MONTH))
     }.time

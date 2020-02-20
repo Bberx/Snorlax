@@ -16,31 +16,20 @@
 
 package com.snorlax.snorlax.viewmodel
 
-import android.app.Activity
 import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LifecycleOwner
 import com.google.firebase.auth.FirebaseAuth
-import com.snorlax.snorlax.data.cache.LocalCacheSource
 import com.snorlax.snorlax.data.repositories.UserRepository
 import com.snorlax.snorlax.model.User
 import com.snorlax.snorlax.utils.Constants.SECTION_LIST
 import com.snorlax.snorlax.utils.caps
 import io.reactivex.Completable
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
 import java.util.*
 
 class HomeActivityViewModel(application: Application) : AndroidViewModel(application) {
 
     private val userRepository: UserRepository by lazy { UserRepository }
-
-    private val localCacheSource: LocalCacheSource by lazy {
-        LocalCacheSource.getInstance(
-            application
-        )
-    }
 
     private val firebaseAuth: FirebaseAuth by lazy {
         FirebaseAuth.getInstance()

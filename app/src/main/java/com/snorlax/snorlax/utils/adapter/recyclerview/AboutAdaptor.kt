@@ -18,16 +18,12 @@ package com.snorlax.snorlax.utils.adapter.recyclerview
 
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.model.Researcher
 import com.snorlax.snorlax.utils.glide.GlideApp
 import com.snorlax.snorlax.utils.inflate
 import com.snorlax.snorlax.views.ResearcherDialog
-import de.hdodenhof.circleimageview.CircleImageView
-import kotlinx.android.extensions.LayoutContainer
-import kotlinx.android.synthetic.main.item_researcher.researcher_image
 import kotlinx.android.synthetic.main.item_researcher.view.*
 
 class AboutAdaptor(private val researcher: List<Researcher>) :

@@ -16,10 +16,7 @@
 
 package com.snorlax.snorlax.data.repositories
 
-import android.app.Activity
-import android.app.Application
 import android.content.Context
-import androidx.lifecycle.LifecycleOwner
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.snorlax.snorlax.data.cache.LocalCacheSource
@@ -31,7 +28,6 @@ import com.snorlax.snorlax.utils.updateAdminProfile
 import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 
 object UserRepository {

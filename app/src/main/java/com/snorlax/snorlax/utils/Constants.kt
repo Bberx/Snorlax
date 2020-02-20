@@ -25,8 +25,6 @@ object Constants {
 
     const val GITHUB_URL = "https://github.com/Bberx/Snorlax"
 
-    const val ATTENDANCE_DATABASE_NAME = "list"
-
     val ACCOUNT_TYPES = listOf("Beadle", "Teacher")
     val SECTION_LIST = mapOf(
         "eco" to Section("Eco", 7),

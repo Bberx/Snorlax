@@ -10,7 +10,6 @@ import androidx.core.content.getSystemService
 import com.snorlax.snorlax.data.cache.LocalCacheSource
 import com.snorlax.snorlax.data.firebase.FirebaseFirestoreSource
 import com.snorlax.snorlax.model.BarcodeBitmap
-import com.snorlax.snorlax.model.Student
 import com.snorlax.snorlax.utils.Constants
 import com.snorlax.snorlax.utils.FileUtils
 import com.snorlax.snorlax.utils.barcode.BarcodeUtils
@@ -20,8 +19,6 @@ import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import org.apache.poi.xwpf.usermodel.XWPFDocument
-import java.io.File
-import kotlin.text.Typography.section
 
 class GeneratorViewModel(application: Application) : BaseStudentViewModel(application) {
     val barcodeBitmapManualObservable = BehaviorSubject.create<BarcodeBitmap>()

@@ -17,7 +17,6 @@
 package com.snorlax.snorlax.viewmodel
 
 
-import android.app.Activity
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.snorlax.snorlax.data.cache.LocalCacheSource
@@ -27,7 +26,6 @@ import com.snorlax.snorlax.utils.validator.FormResult
 import com.snorlax.snorlax.utils.validator.FormValidator
 import io.reactivex.Completable
 import io.reactivex.Observable
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject

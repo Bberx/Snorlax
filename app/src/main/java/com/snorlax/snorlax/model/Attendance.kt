@@ -17,8 +17,6 @@
 package com.snorlax.snorlax.model
 
 import com.google.firebase.Timestamp
-import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ServerTimestamp
 import java.util.*
 

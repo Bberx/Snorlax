@@ -42,44 +42,8 @@ object FirebaseFirestoreSource {
 
     private val userRef = firestoreDB.collection(USER_DATA_NAME)
     private val sectionRef = firestoreDB.collection(SECTIONS_DATA_NAME)
-//    private val attendanceRef = sectionRef.collection(ATTENDANCE_DATA_NAME)
-
-//    private val grade11SectionQuery = sectionRef.whereEqualTo("grade_level", 11)
-//    private val grade12SectionQuery = sectionRef.whereEqualTo("grade_level", 12)
-//
-//    val studentGroup = firestoreDB.collectionGroup(STUDENTS_DATA_NAME)
-//    val attendanceGroup = firestoreDB.collectionGroup(ATTENDANCE_DATA_NAME)
-
 
     private val gson = Gson()
-
-//    companion object {
-//
-////        private var instance: FirebaseFirestoreSource? = null
-////
-////        fun getInstance(): FirebaseFirestoreSource {
-////            instance?.let { return it }
-////            instance = FirebaseFirestoreSource()
-////            return getInstance()
-////        }
-//
-////        private const val STUDENTS_DATA_NAME = "student"
-////        private const val SECTIONS_DATA_NAME = "section"
-////        private const val ATTENDANCE_DATA_NAME = "attendance"
-////        private const val USER_DATA_NAME = "user"
-////        private const val STUDENT_ATTENDANCE_NAME = "student"
-////        private const val TIME_IN_ATTENDANCE_NAME = "time_in"
-////        private const val LRN_ATTENDANCE_NAME = "lrn"
-//
-//
-//    }
-
-//    fun getDocumentReference(section: String, lrn: String): DocumentReference {
-//        return sectionRef
-//            .document(section)
-//            .collection(STUDENTS_DATA_NAME)
-//            .document(lrn)
-//    }
 
     fun getAdmin(uid: String): Single<User> {
         return Single.create<User> { emitter ->

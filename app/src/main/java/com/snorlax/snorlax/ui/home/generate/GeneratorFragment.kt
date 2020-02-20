@@ -12,7 +12,6 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.utils.adapter.viewpager.GeneratorAdapter
 import com.snorlax.snorlax.viewmodel.GeneratorViewModel
-import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.fragment_generate.view.*
 
 class GeneratorFragment : Fragment() {

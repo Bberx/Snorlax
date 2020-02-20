@@ -32,7 +32,6 @@
     <string name="title_activity_main">MainActivity</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
     <string name="label_scan">Scan</string>
@@ -100,4 +99,5 @@
     <string name="label_generate_barcode">Generate Barcode</string>
     <string name="err_no_lrn">Please input the LRN to generate</string>
     <string name="err_invalid_lrn">Please enter a valid LRN</string>
+    <string name="label_action">Actions</string>
 </resources>

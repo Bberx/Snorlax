@@ -20,11 +20,8 @@ import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
-import com.snorlax.snorlax.model.User
 import io.reactivex.Completable
-import io.reactivex.Observable
 import io.reactivex.Single
-import java.lang.RuntimeException
 
 
 object FirebaseAuthSource {
