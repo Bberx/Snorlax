@@ -32,10 +32,6 @@ class BeabotApp : Application() {
             "org.apache.poi.javax.xml.stream.XMLEventFactory",
             "com.fasterxml.aalto.stax.EventFactoryImpl"
         )
-        System.setProperty(
-            "org.apache.poi.javax.xml.stream.XMLStreamReader",
-            "com.fasterxml.aalto.stax.StreamReaderImpl"
-        )
     }
 //
 //    companion object {

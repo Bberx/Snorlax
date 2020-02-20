@@ -37,6 +37,7 @@ class GeneratorManualFragment : Fragment() {
     private val barcodeDisposable = CompositeDisposable()
 
     private val manualDisposable = CompositeDisposable()
+    private val saveDisposable = CompositeDisposable()
 
 
     private val drawerListener = object : DrawerLayout.DrawerListener {
@@ -98,7 +99,8 @@ class GeneratorManualFragment : Fragment() {
         image_generate.setOnClickListener {
             if (viewModel.barcodeBitmapManualObservable.hasValue()) {
                 hideKeyboard()
-                GenerateManualBottomSheet(callback).show(childFragmentManager, "Action sheet")
+                val bottomSheet = GenerateManualBottomSheet(callback)
+                bottomSheet.show(childFragmentManager, bottomSheet.tag)
             }
         }
     }
@@ -118,7 +120,7 @@ class GeneratorManualFragment : Fragment() {
                 if (resultCode == Activity.RESULT_OK) {
                     data?.let { intent ->
                         intent.data?.let { dataUri ->
-                            saveImage(dataUri, viewModel.barcodeBitmapClassObservable.value!!)
+                            saveImage(dataUri, viewModel.barcodeBitmapManualObservable.value!!)
                         }
                     }
                 }
@@ -127,7 +129,7 @@ class GeneratorManualFragment : Fragment() {
     }
 
     private fun saveImage(location: Uri, barcode: BarcodeBitmap) {
-        manualDisposable += viewModel.saveImage(barcode, location)
+        saveDisposable += viewModel.saveImage(barcode, location)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
@@ -180,6 +182,11 @@ class GeneratorManualFragment : Fragment() {
         manualDisposable.clear()
         hideKeyboard()
         activity?.drawer_layout?.removeDrawerListener(drawerListener)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        saveDisposable.clear()
     }
 
     private fun showResult(message: String, length: Int = Snackbar.LENGTH_SHORT) {

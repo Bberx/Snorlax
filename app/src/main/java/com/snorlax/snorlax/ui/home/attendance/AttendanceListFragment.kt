@@ -41,7 +41,6 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_attendance_list.*
-import kotlinx.android.synthetic.main.fragment_generator_manual.*
 
 class AttendanceListFragment(private val attendance: Observable<List<Attendance>>) : Fragment() {
 
@@ -114,7 +113,7 @@ class AttendanceListFragment(private val attendance: Observable<List<Attendance>
                         frame.addView(recyclerView, 0)
                         recyclerView.fadeIn()
                     }
-                    adapter.updateData(it)
+                    adapter.submitList(it)
                 }
 
             }

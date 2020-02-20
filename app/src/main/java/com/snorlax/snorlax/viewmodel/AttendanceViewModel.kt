@@ -85,16 +85,21 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
 //        firestore.getDocumentReference(getAdminSection(context), lrn)
 
     fun deleteFile(location: Uri) {
-        if (!DocumentsContract.deleteDocument(
-                getApplication<Application>().contentResolver,
-                location
-            )
-        ) deleteFile(location)
+        Completable.fromAction {
+            fun delete() {
+                 if (!DocumentsContract.deleteDocument(
+                    getApplication<Application>().contentResolver,
+                    location
+                )) delete()
+            }
+            delete()
+        }.subscribeOn(Schedulers.io()).subscribe()
     }
 
     fun isEmpty(document: Uri) = fileSource.isFileEmpty(getApplication(), document)
 
-    fun outputFileName(outputLocation: Uri) = fileSource.getFileName(getApplication(), outputLocation)
+    fun outputFileName(outputLocation: Uri) =
+        fileSource.getFileName(getApplication(), outputLocation)
 
     private fun saveToFile(document: XWPFDocument, outputLocation: Uri) =
         Completable.fromAction {
@@ -108,26 +113,26 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
 
     fun saveAttendance(outputLocation: Uri, month: Date): Completable {
 
-        val attendance = firestore.getMonthlyAttendance(section, month)
-        val student = firestore.getStudentList(section)
+        val attendance = firestore.getMonthlyAttendance(section, month).subscribeOn(Schedulers.io())
+        val student = firestore.getStudentList(section).subscribeOn(Schedulers.io())
 
         val lists = Single.zip(
             student,
             attendance,
             BiFunction<List<Student>, List<Attendance>, Pair<List<Student>, List<Attendance>>> { studentList, attendanceList ->
                 Pair(studentList, attendanceList)
-            })
+            }).subscribeOn(Schedulers.io())
 
         return lists.flatMap { list ->
             AttendanceProcessor(
-                fileSource.getTemplateDocument(getApplication()),
+                fileSource.getTemplateDocument(getApplication(), "AttendanceSheetTemplate.docx"),
                 month
             ).processTable(
                 Constants.SECTION_LIST.getValue(section),
                 list.first,
                 list.second
-            )
-        }.flatMapCompletable { saveToFile(it, outputLocation) }
+            ).subscribeOn(Schedulers.io())
+        }.flatMapCompletable { saveToFile(it, outputLocation) }.subscribeOn(Schedulers.io())
     }
 
     fun getAttendance(timestamp: Date) =

@@ -53,11 +53,11 @@ object FileUtils {
 
 
     @Throws(TemplateNotFoundException::class)
-    fun getTemplateDocument(application: Application): XWPFDocument {
+    fun getTemplateDocument(application: Application, name: String): XWPFDocument {
         ZipSecureFile.setMinInflateRatio(0.0)
         var template: XWPFDocument? = null
         try {
-            application.assets.open("template/AttendanceSheetTemplate.docx").use { template = XWPFDocument(it) }
+            application.assets.open("template/$name").use { template = XWPFDocument(it) }
         } catch (error: IOException) {
             throw TemplateNotFoundException()
         }

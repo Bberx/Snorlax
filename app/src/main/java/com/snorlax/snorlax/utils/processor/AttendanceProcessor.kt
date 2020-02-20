@@ -16,7 +16,6 @@
 
 package com.snorlax.snorlax.utils.processor
 
-import android.graphics.Bitmap
 import com.snorlax.snorlax.model.Attendance
 import com.snorlax.snorlax.model.Section
 import com.snorlax.snorlax.model.Student
@@ -24,7 +23,10 @@ import com.snorlax.snorlax.utils.TimeUtils
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
-import org.apache.poi.xwpf.usermodel.*
+import org.apache.poi.xwpf.usermodel.UnderlinePatterns
+import org.apache.poi.xwpf.usermodel.XWPFDocument
+import org.apache.poi.xwpf.usermodel.XWPFParagraph
+import org.apache.poi.xwpf.usermodel.XWPFTableCell
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STJc
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTblWidth
 import java.math.BigInteger
@@ -49,6 +51,7 @@ class AttendanceProcessor(document: XWPFDocument, private val month: Date) : Bas
     }
 
     // Entry point
+
     fun processTable(
         section: Section,
         students: List<Student>,
@@ -65,7 +68,7 @@ class AttendanceProcessor(document: XWPFDocument, private val month: Date) : Bas
 
         // Process asynchronously
         return Completable.mergeArray(populateHeader(section), process)
-            .toSingle { document }
+            .toSingleDefault(document)
             .subscribeOn(Schedulers.io())
     }
 

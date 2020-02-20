@@ -111,7 +111,6 @@ object UserRepository {
 
     fun logout() : Completable {
         return Completable.fromAction {
-            firestore.removeListeners()
             firebase.logout()
         }.andThen {
             FirebaseAuth.getInstance().addAuthStateListener {auth ->

@@ -2,14 +2,11 @@ package com.snorlax.snorlax.ui.home.generate
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import androidx.core.content.getSystemService
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -17,19 +14,22 @@ import com.snorlax.snorlax.R
 import com.snorlax.snorlax.model.BarcodeBitmap
 import com.snorlax.snorlax.model.Student
 import com.snorlax.snorlax.ui.home.BaseStudentFragment
+import com.snorlax.snorlax.utils.Constants
 import com.snorlax.snorlax.utils.adapter.recyclerview.StudentListAdaptor
 import com.snorlax.snorlax.utils.callback.StudentSelectListener
+import com.snorlax.snorlax.utils.exception.TemplateNotFoundException
 import com.snorlax.snorlax.viewmodel.GeneratorViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
+import kotlinx.android.synthetic.main.diag_barcode.*
 import kotlinx.android.synthetic.main.fragment_students.*
 import kotlinx.android.synthetic.main.fragment_students.view.*
-import kotlinx.android.synthetic.main.diag_barcode.*
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 class GeneratorClassFragment : BaseStudentFragment() {
@@ -39,6 +39,7 @@ class GeneratorClassFragment : BaseStudentFragment() {
     override lateinit var adaptor: StudentListAdaptor
 
     private val classDisposable = CompositeDisposable()
+    private val saveBarcodeDisposable = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,7 +53,15 @@ class GeneratorClassFragment : BaseStudentFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         btn_action.setOnClickListener {
-            Snackbar.make(requireView(), "Coming soon...", Snackbar.LENGTH_SHORT).show()
+            val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                val fileName =
+                    "Barcode_List-${Constants.SECTION_LIST.getValue(viewModel.section).display_name}.docx"
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                putExtra(Intent.EXTRA_TITLE, fileName)
+                putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false)
+            }
+            startActivityForResult(intent, GeneratorFragment.REQUEST_SAVE_DOCX)
         }
 
         adaptor = StudentListAdaptor(this, true, recyclerOptions, object : StudentSelectListener() {
@@ -111,11 +120,59 @@ class GeneratorClassFragment : BaseStudentFragment() {
                     }
                 }
             }
+            GeneratorFragment.REQUEST_SAVE_DOCX -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    data?.let { intent ->
+                        intent.data?.let { dataUri ->
+                            saveClassBarcode(dataUri)
+                        }
+                    }
+                }
+            }
         }
     }
 
+    private fun saveClassBarcode(outputLocation: Uri) {
+        saveBarcodeDisposable += viewModel.saveClassBarcode(outputLocation)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(onComplete = {
+                showResult(
+                    getString(
+                        R.string.msg_image_saved,
+                        viewModel.outputFileName(outputLocation)
+                    )
+                )
+            }, onError = {
+                when (it) {
+                    is TemplateNotFoundException -> showResult(getString(R.string.err_template_not_found))
+
+                    is FileNotFoundException -> showResult(getString(R.string.err_file_not_found))
+
+                    is IOException -> showResult(
+                        getString(
+                            R.string.err_io_exception,
+                            it.localizedMessage ?: "unknown error occurred."
+                        )
+                    )
+
+                    is NoSuchElementException -> showResult(getString(R.string.err_unknown_section))
+
+                    else -> showResult(
+                        getString(
+                            R.string.err_unknown,
+                            it.localizedMessage ?: "no error message."
+                        ), TimeUnit.SECONDS.toMillis(3).toInt()
+                    )
+                }
+                if (viewModel.isEmpty(outputLocation)) viewModel.deleteFile(outputLocation)
+            })
+    }
+
     private fun saveImage(location: Uri, barcode: BarcodeBitmap) {
-        classDisposable += viewModel.saveImage(barcode, location)
+        saveBarcodeDisposable += viewModel.saveImage(barcode, location)
+            .doOnDispose { viewModel.deleteFile(location) }
+            .unsubscribeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
@@ -156,6 +213,11 @@ class GeneratorClassFragment : BaseStudentFragment() {
     override fun onPause() {
         super.onPause()
         classDisposable.clear()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        saveBarcodeDisposable.clear()
     }
 
 }

@@ -26,6 +26,8 @@ import com.snorlax.snorlax.utils.glide.GlideApp
 import com.snorlax.snorlax.utils.inflate
 import com.snorlax.snorlax.views.ResearcherDialog
 import de.hdodenhof.circleimageview.CircleImageView
+import kotlinx.android.extensions.LayoutContainer
+import kotlinx.android.synthetic.main.item_researcher.researcher_image
 import kotlinx.android.synthetic.main.item_researcher.view.*
 
 class AboutAdaptor(private val researcher: List<Researcher>) :
@@ -39,27 +41,34 @@ class AboutAdaptor(private val researcher: List<Researcher>) :
 
 
     override fun onBindViewHolder(holder: AboutHolder, position: Int) {
-        val currentResearcher = researcher[position]
-        holder.displayName.text = currentResearcher.name
-        holder.role.text = currentResearcher.role
-
-        GlideApp
-            .with(holder.itemView.context)
-            .load(currentResearcher.displayImage)
-//            .apply(RequestOptions.bitmapTransform(CropCircleWithBorderTransformation()))
-//            .transition(DrawableTransitionOptions.withCrossFade())
-            .placeholder(R.drawable.img_avatar)
-            .into(holder.image)
-
-
-        holder.itemView.setOnClickListener {
-            ResearcherDialog(holder.itemView.context, currentResearcher).show()
-        }
+        holder.bind( researcher[position])
     }
 
-    inner class AboutHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val image: CircleImageView = itemView.researcher_image
-        val displayName: TextView = itemView.researcher_displayName
-        val role: TextView = itemView.researcher_role
+    class AboutHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+//        override val containerView: View?
+//            get() = itemView
+
+        fun bind(item: Researcher) {
+            GlideApp
+                .with(itemView.context)
+                .load(item.displayImage)
+//            .apply(RequestOptions.bitmapTransform(CropCircleWithBorderTransformation()))
+//            .transition(DrawableTransitionOptions.withCrossFade())
+                .placeholder(R.drawable.img_avatar)
+                .into(itemView.researcher_image)
+
+            itemView.researcher_displayName.text = item.name
+            itemView.researcher_role.text = item.role
+
+            itemView.setOnClickListener {
+                ResearcherDialog(itemView.context, item).show()
+            }
+        }
+
+//            val image: CircleImageView = researcher_image
+//            val displayName: TextView = researcher_displayName
+//            val role: TextView = researcher_role
+
+
     }
 }

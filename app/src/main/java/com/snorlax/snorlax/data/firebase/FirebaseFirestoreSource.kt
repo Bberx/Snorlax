@@ -16,11 +16,8 @@
 
 package com.snorlax.snorlax.data.firebase
 
-import android.app.Activity
-
 import com.google.firebase.firestore.*
 import com.google.gson.Gson
-
 import com.snorlax.snorlax.model.Attendance
 import com.snorlax.snorlax.model.Student
 import com.snorlax.snorlax.model.User
@@ -33,7 +30,6 @@ import io.reactivex.SingleEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import java.util.*
-import kotlin.collections.HashMap
 
 object FirebaseFirestoreSource {
 
@@ -41,9 +37,6 @@ object FirebaseFirestoreSource {
     private const val SECTIONS_DATA_NAME = "section"
     private const val ATTENDANCE_DATA_NAME = "attendance"
     private const val USER_DATA_NAME = "user"
-
-    private val listeners = mutableListOf<ListenerRegistration>()
-
 
     private val firestoreDB = FirebaseFirestore.getInstance()
 
@@ -81,12 +74,12 @@ object FirebaseFirestoreSource {
 //
 //    }
 
-    fun getDocumentReference(section: String, lrn: String): DocumentReference {
-        return sectionRef
-            .document(section)
-            .collection(STUDENTS_DATA_NAME)
-            .document(lrn)
-    }
+//    fun getDocumentReference(section: String, lrn: String): DocumentReference {
+//        return sectionRef
+//            .document(section)
+//            .collection(STUDENTS_DATA_NAME)
+//            .document(lrn)
+//    }
 
     fun getAdmin(uid: String): Single<User> {
         return Single.create<User> { emitter ->
@@ -116,43 +109,13 @@ object FirebaseFirestoreSource {
 
     fun getStudentList(section: String): Single<List<Student>> {
         return Single.create { emitter: SingleEmitter<List<Student>> ->
-            //            Log.d("Threading", "get student list ${Thread.currentThread().name}")
-//            val listenerRegistration = sectionRef
-//                .document(section)
-//                .collection(STUDENTS_DATA_NAME)
-//                .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-//                    firebaseFirestoreException?.let {
-//                        emitter.onError(it)
-//                        return@addSnapshotListener
-//                    }
-//                    val students = arrayListOf<Student>()
-//
-//                    for (document in querySnapshot!!) {
-//                        students.add(document.toObject(Student::class.java))
-//                    }
-//                    if (students.isEmpty()) emitter.onSuccess(emptyList())
-//                    else {
-//                        students.sortBy {
-//                            it.name.getValue(Student.LAST_NAME_VAL)
-//                        }
-//                        emitter.onSuccess(students)
-//                    }
-//                }
-//            emitter.setCancellable {
-//                listenerRegistration.remove()
-//            }
             getStudentQuery(section).get()
                 .addOnSuccessListener {
-                    emitter.onSuccess(it.documents.map { documentSnapshot ->
-                        documentSnapshot.toObject(Student::class.java)!!
-                    })
+                    emitter.onSuccess(it.toObjects(Student::class.java))
+//                    emitter.onSuccess(it.documents.map { documentSnapshot ->
+//                        documentSnapshot.toObject(Student::class.java)!!
+//                    })
                 }.addOnFailureListener { emitter.onError(it) }
-        }
-    }
-
-    fun removeListeners() {
-        listeners.forEach {
-            it.remove()
         }
     }
 
@@ -308,8 +271,8 @@ object FirebaseFirestoreSource {
                 .document(dateStamp.time.toString())
                 .addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
                     firebaseFirestoreException?.let {
-//                        if (!(it.code == FirebaseFirestoreException.Code.PERMISSION_DENIED && FirebaseAuthSource.getInstance().currentUser() == null)) {
-                            emitter.onError(it)
+                        //                        if (!(it.code == FirebaseFirestoreException.Code.PERMISSION_DENIED && FirebaseAuthSource.getInstance().currentUser() == null)) {
+                        emitter.onError(it)
 //                        }
                         return@addSnapshotListener
                     }
@@ -317,16 +280,20 @@ object FirebaseFirestoreSource {
                     documentSnapshot?.let {
                         it.data?.let { map ->
 
-                            val attendance = map.map { mapEntry ->
+                            val raw = map.map { mapEntry ->
                                 val entry = mapEntry.value as HashMap<*, *>
                                 gson.fromJson(gson.toJsonTree(entry), Attendance::class.java)
                             }
+                            val attendance = raw.sortedByDescending { attendance ->
+                                attendance.time_in
+                            }
+
 
                             emitter.onNext(attendance)
                         } ?: emitter.onNext(emptyList())
                     } ?: emitter.onNext(emptyList())
                 }
-            listeners.add(listener)
+//            listeners.add(listener)
             emitter.setCancellable {
                 listener.remove()
             }

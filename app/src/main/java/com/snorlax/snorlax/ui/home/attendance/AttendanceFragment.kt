@@ -44,6 +44,7 @@ import com.snorlax.snorlax.utils.exception.TemplateNotFoundException
 import com.snorlax.snorlax.viewmodel.AttendanceViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_attendance.*
 import kotlinx.android.synthetic.main.fragment_attendance.view.*
@@ -223,20 +224,27 @@ class AttendanceFragment : Fragment() {
         val saveAttendance = viewModel.saveAttendance(
             outputLocation,
             getMonthDate(Date(viewModel.selectedTimeObservable.value!!))
-        )
+        ).doOnDispose {
+                viewModel.deleteFile(outputLocation)
+                Log.d("Threading", "${Thread.currentThread().name} onDispose")
+            }.doOnError {
+                Log.d("Threading", "${Thread.currentThread().name} onError")
+                viewModel.deleteFile(outputLocation)
+
+            }.doOnComplete {
+                Log.d("Threading", "${Thread.currentThread().name} onComplete")
+            }
+            .unsubscribeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
-                btn_export.setImageDrawable(context?.getDrawable(R.drawable.ic_save))
+            .subscribeBy(onComplete = {
                 showSuccessResult(
                     getString(
                         R.string.msg_attendance_saved,
                         viewModel.outputFileName(outputLocation)
-                    )
-                    , outputLocation
+                    ), outputLocation
                 )
-            }, {
-                btn_export.setImageDrawable(context?.getDrawable(R.drawable.ic_save))
+            }, onError = {
                 when (it) {
                     is TemplateNotFoundException -> showResult(getString(R.string.err_template_not_found))
 
@@ -251,14 +259,16 @@ class AttendanceFragment : Fragment() {
 
                     is NoSuchElementException -> showResult(getString(R.string.err_unknown_section))
 
-                    else -> showResult(
-                        getString(
-                            R.string.err_unknown,
-                            it.localizedMessage ?: "no error message."
-                        ), TimeUnit.SECONDS.toMillis(3).toInt()
-                    )
+                    else -> {
+                        showResult(
+                            getString(
+                                R.string.err_unknown,
+                                it.localizedMessage ?: "no error message."
+                            ), TimeUnit.SECONDS.toMillis(3).toInt()
+                        )
+                        Log.d("FIXME", it.message)
+                    }
                 }
-                if (viewModel.isEmpty(outputLocation)) viewModel.deleteFile(outputLocation)
             })
 
         disposables.add(saveAttendance)
