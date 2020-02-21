@@ -46,7 +46,6 @@ class CredentialsActivity : AppCompatActivity() {
         }
         setTheme(R.style.AppTheme)
         super.onCreate(savedInstanceState)
-
         setContentView(R.layout.activity_credentials)
 
         view_pager.adapter = AuthenticationPageAdapter(this)
@@ -54,7 +53,8 @@ class CredentialsActivity : AppCompatActivity() {
         TabLayoutMediator(tabs, view_pager) { tab: TabLayout.Tab, index: Int ->
             tab.text = when (index) {
                 0 -> getString(R.string.act_log_in)
-                else -> getString(R.string.act_register)
+                1 -> getString(R.string.act_register)
+                else -> throw IllegalStateException("Invalid page index")
             }
         }.attach()
     }

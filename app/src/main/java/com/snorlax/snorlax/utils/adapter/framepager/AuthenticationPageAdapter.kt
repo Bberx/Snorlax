@@ -23,21 +23,7 @@ import com.snorlax.snorlax.ui.auth.LoginFragment
 import com.snorlax.snorlax.ui.auth.RegisterFragment
 
 class AuthenticationPageAdapter(activity: FragmentActivity) : FragmentStateAdapter(activity) {
-//    override fun getItem(position: Int): Fragment {
-//        return when (position) {
-//            0 -> LoginFragment()
-//            1 -> RegisterFragment()
-//            else -> null!!
-//        }
-//    }
-
     override fun getItemCount() = 2
-
-//    override fun getPageTitle(position: Int): CharSequence =
-//        when (position) {
-//            0 -> mContext.resources.getString(R.string.act_log_in)
-//            else -> mContext.resources.getString(R.string.act_register)
-//        }
 
     override fun createFragment(position: Int): Fragment {
         return when (position) {

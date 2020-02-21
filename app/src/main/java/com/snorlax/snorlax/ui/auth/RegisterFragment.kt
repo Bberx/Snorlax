@@ -58,6 +58,7 @@ class RegisterFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = ViewModelProvider(this)[RegisterViewModel::class.java]
+
     }
 
     override fun onCreateView(

@@ -47,10 +47,6 @@ import kotlinx.android.synthetic.main.diag_forgot_password.*
 import kotlinx.android.synthetic.main.fragment_login.*
 import kotlinx.android.synthetic.main.fragment_login.view.*
 
-
-/**
- * A simple [Fragment] subclass.
- */
 class LoginFragment : Fragment() {
 
 
@@ -70,7 +66,6 @@ class LoginFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-
         val view: View = inflater.inflate(R.layout.fragment_login, container, false)
 
         vibrator = context!!.getSystemService()!!
@@ -129,7 +124,7 @@ class LoginFragment : Fragment() {
                     .subscribe({
                         loadingView.visibility = View.GONE
                         dialog.dismiss()
-                        debugMessage(getString(R.string.msg_password_reset_success))
+                        showMessage(getString(R.string.msg_password_reset_success))
                     }, {
                         loadingView.visibility = View.GONE
                         if (it is IllegalArgumentException) {
@@ -176,13 +171,15 @@ class LoginFragment : Fragment() {
                                             .subscribeOn(Schedulers.io())
                                             .observeOn(AndroidSchedulers.mainThread())
                                             .subscribe({}, {error ->
-                                                debugMessage(error.localizedMessage ?: "Logout failed")
+                                                showMessage(
+                                                    error.localizedMessage ?: "Logout failed"
+                                                )
                                             })
                                     }
                                 }
                                 btn_login.revertAnimation()
                                 it.localizedMessage?.let { message ->
-                                    debugMessage(message)
+                                    showMessage(message)
                                 }
                             })
                     )
@@ -232,81 +229,10 @@ class LoginFragment : Fragment() {
                     }
                 }
             })
-
-//            // Button observable
-//            add(viewModel.loginButtonObservable.subscribe {
-//                btn_login.startAnimation()
-//            })
-//
-//            // Button state observable
-//            add(viewModel.resultObservable.subscribe {
-//                btn_login.isEnabled = it
-//            })
-
-            // Login result observable
-//            add(viewModel.loginObservable.subscribe { completable ->
-//                completable.subscribe({
-//                    btn_login.revertAnimation()
-//                    activity!!.startHomeActivity()
-//                    debugMessage("Success")
-//                }, {
-//                    btn_login.revertAnimation()
-//                    debugMessage(it.message!!)
-//                })
-//            })
-
-//            add(viewModel.loginObservable.subscribe {
-//                it.subscribe({
-//
-//                    val sharedPref =
-//                        activity!!.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
-//
-//                    viewModel.getAdmin(viewModel.getCurrentUser()!!.uid)
-//                        .subscribe { currentAdmin ->
-//
-//                            val sharedPrefEdit = sharedPref.edit()
-//
-//                            sharedPrefEdit.putString(USER_KEY, Gson().toJson(currentAdmin))
-//
-//                            val commitObservable: Single<Boolean> = Single.fromCallable {
-//                                sharedPrefEdit.commit()
-//                            }
-//                                .subscribeOn(Schedulers.io())
-//                                .observeOn(Schedulers.io())
-//
-//                            add(commitObservable.subscribe { result ->
-//                                if (result) {
-//                                    debugMessage("Success")
-//                                    activity!!.startHomeActivity()
-//                                }
-//                            })
-//
-//
-//                        }
-//
-//                }, { error ->
-//                    btn_login.revertAnimation()
-//                    debugMessage(error.localizedMessage!!)
-//                })
-//            })
-
-//            add(viewModel.loginObservable.subscribe { completable ->
-//
-//                completable.subscribe({
-//                    btn_login.revertAnimation()
-//                    activity!!.startHomeActivity()
-//                    debugMessage("Success")
-//                }, {
-//                    btn_login.revertAnimation()
-//                    debugMessage(it.message!!)
-//                })
-//            })
-
-//            add(viewModel.loginObservable.s)
         }
     }
 
-    private fun debugMessage(text: String) {
+    private fun showMessage(text: String) {
         Snackbar.make(view!!, text, Snackbar.LENGTH_LONG).show()
     }
 

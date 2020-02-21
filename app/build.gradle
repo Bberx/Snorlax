@@ -118,7 +118,7 @@ android {
             ext.alwaysUpdateBuildId = false
             debuggable true
             firebaseAppDistribution {
-                releaseNotes = "Debug build\nRedo the fix of crash when logging out in attendance fragment"
+                releaseNotes = "Debug build\nFull implementation of barcode generator"
                 groups = "researchers, developer"
             }
 //            manifestPlaceholders = [crashlyticsCollectionEnabled:"false"]
