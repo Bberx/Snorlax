@@ -18,11 +18,9 @@ package com.snorlax.snorlax.ui.auth
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.tabs.TabLayout
-import com.google.android.material.tabs.TabLayoutMediator
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.data.firebase.FirebaseAuthSource
-import com.snorlax.snorlax.utils.adapter.framepager.AuthenticationPageAdapter
+import com.snorlax.snorlax.utils.adapter.framepager.AuthenticationViewPagerAdapter
 import com.snorlax.snorlax.utils.startHomeActivity
 import kotlinx.android.synthetic.main.activity_credentials.*
 
@@ -48,16 +46,19 @@ class CredentialsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_credentials)
 
-        view_pager.adapter = AuthenticationPageAdapter(this)
+        view_pager.adapter = AuthenticationViewPagerAdapter(this, supportFragmentManager)
+        tabs.setupWithViewPager(view_pager)
+//        view_pager.adapter = AuthenticationPageAdapter(this)
 //        tabs.setupWithViewPager(view_pager)
-        TabLayoutMediator(tabs, view_pager) { tab: TabLayout.Tab, index: Int ->
-            tab.text = when (index) {
-                0 -> getString(R.string.act_log_in)
-                1 -> getString(R.string.act_register)
-                else -> throw IllegalStateException("Invalid page index")
-            }
-        }.attach()
+//        TabLayoutMediator(tabs, view_pager) { tab: TabLayout.Tab, index: Int ->
+//            tab.text = when (index) {
+//                0 -> getString(R.string.act_log_in)
+//                1 -> getString(R.string.act_register)
+//                else -> throw IllegalStateException("Invalid page index")
+//            }
+//        }.attach()
     }
+
 
 
 }

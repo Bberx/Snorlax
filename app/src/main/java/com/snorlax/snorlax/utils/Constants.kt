@@ -16,6 +16,7 @@
 
 package com.snorlax.snorlax.utils
 
+import com.snorlax.snorlax.model.LateData
 import com.snorlax.snorlax.model.Section
 
 object Constants {
@@ -27,38 +28,38 @@ object Constants {
 
     val ACCOUNT_TYPES = listOf("Beadle", "Teacher")
     val SECTION_LIST = mapOf(
-        "eco" to Section("Eco", 7),
-        "elle" to Section("Elle", 7),
-        "jam" to Section("Jam", 7),
-        "jyn" to Section("Jyn", 7),
-        "mac" to Section("Mac", 7),
-        "artz" to Section("Artz", 8),
-        "carmz" to Section("Carmz", 8),
-        "joanz" to Section("Joanz", 8),
-        "linz" to Section("Linz", 8),
-        "vearz" to Section("Vearz", 8),
-        "charz" to Section("Charz", 9),
-        "jazz" to Section("Jazz", 9),
-        "kimz" to Section("Kimz", 9),
-        "maze" to Section("Maze", 9),
-        "salz" to Section("Salz", 9),
-        "lloydy" to Section("Lloydy", 10),
-        "ly" to Section("Ly", 10),
-        "ranz" to Section("Ranz", 10),
-        "rose" to Section("Rose", 10),
-        "ryl" to Section("Ryl", 10),
-        "exactness" to Section("Exactness", 11),
-        "generosity" to Section("Generosity", 11),
-        "humility" to Section("Humility", 11),
-        "resilience" to Section("Resilience", 11),
-        "sincerity" to Section("Sincerity", 11),
-        "steadfastness" to Section("Steadfastness", 11),
-        "excellence" to Section("Excellence", 12),
-        "gratitude" to Section("Gratitude", 12),
-        "honor" to Section("Honor", 12),
-        "respect" to Section("Respect", 12),
-        "self_discipline" to Section("Self-Discipline", 12),
-        "service" to Section("Service", 12)
+        "eco" to Section("Eco", 7, LateData(27300)),
+        "elle" to Section("Elle", 7, LateData(27300)),
+        "jam" to Section("Jam", 7, LateData(27300)),
+        "jyn" to Section("Jyn", 7, LateData(27300)),
+        "mac" to Section("Mac", 7, LateData(27300)),
+        "artz" to Section("Artz", 8, LateData(27300)),
+        "carmz" to Section("Carmz", 8, LateData(27300)),
+        "joanz" to Section("Joanz", 8, LateData(27300)),
+        "linz" to Section("Linz", 8, LateData(27300)),
+        "vearz" to Section("Vearz", 8, LateData(27300)),
+        "charz" to Section("Charz", 9, LateData(27300)),
+        "jazz" to Section("Jazz", 9, LateData(27300)),
+        "kimz" to Section("Kimz", 9, LateData(27300)),
+        "maze" to Section("Maze", 9, LateData(27300)),
+        "salz" to Section("Salz", 9, LateData(27300)),
+        "lloydy" to Section("Lloydy", 10, LateData(27300)),
+        "ly" to Section("Ly", 10, LateData(27300)),
+        "ranz" to Section("Ranz", 10, LateData(27300)),
+        "rose" to Section("Rose", 10, LateData(27300)),
+        "ryl" to Section("Ryl", 10, LateData(27300)),
+        "exactness" to Section("Exactness", 11, LateData(27300)),
+        "generosity" to Section("Generosity", 11, LateData(27300)),
+        "humility" to Section("Humility", 11, LateData(27300)),
+        "resilience" to Section("Resilience", 11, LateData(27300)),
+        "sincerity" to Section("Sincerity", 11, LateData(27300)),
+        "steadfastness" to Section("Steadfastness", 11, LateData(27300)),
+        "excellence" to Section("Excellence", 12, LateData(27300)),
+        "gratitude" to Section("Gratitude", 12, LateData(27300)),
+        "honor" to Section("Honor", 12, LateData(27300)),
+        "respect" to Section("Respect", 12, LateData(27300)),
+        "self_discipline" to Section("Self-Discipline", 12, LateData(27300)),
+        "service" to Section("Service", 12, LateData(27300))
 
     )
 }

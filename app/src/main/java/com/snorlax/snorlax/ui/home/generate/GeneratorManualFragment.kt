@@ -197,6 +197,7 @@ class GeneratorManualFragment : Fragment() {
 
     private fun hideKeyboard() {
         val imm = context?.getSystemService<InputMethodManager>()
-        imm?.hideSoftInputFromWindow(view?.windowToken, 0)
+        imm?.hideSoftInputFromWindow(requireView().windowToken, 0)
+        requireView().clearFocus()
     }
 }

@@ -9,13 +9,17 @@ import android.provider.DocumentsContract
 import androidx.core.content.getSystemService
 import com.snorlax.snorlax.data.cache.LocalCacheSource
 import com.snorlax.snorlax.data.firebase.FirebaseFirestoreSource
+import com.snorlax.snorlax.data.repositories.SectionRepository
 import com.snorlax.snorlax.model.BarcodeBitmap
-import com.snorlax.snorlax.utils.Constants
+import com.snorlax.snorlax.model.Section
+import com.snorlax.snorlax.model.Student
 import com.snorlax.snorlax.utils.FileUtils
 import com.snorlax.snorlax.utils.barcode.BarcodeUtils
 import com.snorlax.snorlax.utils.barcode.writeToFile
 import com.snorlax.snorlax.utils.processor.BarcodeProcessor
 import io.reactivex.Completable
+import io.reactivex.Single
+import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import org.apache.poi.xwpf.usermodel.XWPFDocument
@@ -72,14 +76,22 @@ class GeneratorViewModel(application: Application) : BaseStudentViewModel(applic
 
     fun saveClassBarcode(outputLocation: Uri): Completable {
         val students = FirebaseFirestoreSource.getStudentList(section).subscribeOn(Schedulers.io())
+        val sectionSingle = SectionRepository.getSection(section, SectionRepository.Source.LOCAL)
+            .subscribeOn(Schedulers.io())
 
-        return students.flatMap {
+        val params = Single.zip<List<Student>, Section, Pair<List<Student>, Section>>(
+            students,
+            sectionSingle,
+            BiFunction(::Pair)
+        )
+
+        return params.flatMap {
             BarcodeProcessor(
                 FileUtils.getTemplateDocument(
                     getApplication(),
                     "BarcodeSheetTemplate.docx"
                 )
-            ).processTable(Constants.SECTION_LIST.getValue(section), it)
+            ).processTable(it.second, it.first)
         }.subscribeOn(Schedulers.io()).flatMapCompletable { writeToFile(it, outputLocation) }
         // TODO: implement
     }

@@ -22,16 +22,17 @@ import android.provider.DocumentsContract
 import android.text.format.DateUtils
 import androidx.lifecycle.AndroidViewModel
 import com.snorlax.snorlax.data.cache.LocalCacheSource
-import com.snorlax.snorlax.utils.FileUtils
 import com.snorlax.snorlax.data.firebase.FirebaseFirestoreSource
+import com.snorlax.snorlax.data.repositories.SectionRepository
 import com.snorlax.snorlax.model.Attendance
+import com.snorlax.snorlax.model.Section
 import com.snorlax.snorlax.model.Student
-import com.snorlax.snorlax.utils.Constants
+import com.snorlax.snorlax.utils.FileUtils
 import com.snorlax.snorlax.utils.TimeUtils.getTodayDateLocal
 import com.snorlax.snorlax.utils.processor.AttendanceProcessor
 import io.reactivex.Completable
 import io.reactivex.Single
-import io.reactivex.functions.BiFunction
+import io.reactivex.functions.Function3
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import org.apache.poi.xwpf.usermodel.XWPFDocument
@@ -87,10 +88,11 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
     fun deleteFile(location: Uri) {
         Completable.fromAction {
             fun delete() {
-                 if (!DocumentsContract.deleteDocument(
-                    getApplication<Application>().contentResolver,
-                    location
-                )) delete()
+                if (!DocumentsContract.deleteDocument(
+                        getApplication<Application>().contentResolver,
+                        location
+                    )
+                ) delete()
             }
             delete()
         }.subscribeOn(Schedulers.io()).subscribe()
@@ -111,26 +113,56 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
         }.subscribeOn(Schedulers.io())
 
 
+    companion object {
+        private const val SECTION_VAL = "section"
+        private const val STUDENT_VAL = "students"
+        private const val ATTENDANCE_VAL = "attendance"
+    }
+
+    @Suppress("UNCHECKED_CAST")
     fun saveAttendance(outputLocation: Uri, month: Date): Completable {
 
-        val attendance = firestore.getMonthlyAttendance(section, month).subscribeOn(Schedulers.io())
-        val student = firestore.getStudentList(section).subscribeOn(Schedulers.io())
+        fun zipper(
+            student: List<Student>,
+            attendance: List<Attendance>,
+            section: Section
+        ): Map<String, Any> {
+            return mapOf(
+                STUDENT_VAL to student,
+                ATTENDANCE_VAL to attendance,
+                SECTION_VAL to section
+            )
+        }
 
-        val lists = Single.zip(
+        val student = firestore.getStudentList(section).subscribeOn(Schedulers.io())
+        val attendance = firestore.getMonthlyAttendance(section, month).subscribeOn(Schedulers.io())
+        val section = SectionRepository.getSection(section, SectionRepository.Source.LOCAL)
+            .subscribeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
+
+//        val lists = Single.zip(
+//            student,
+//            attendance,
+//            BiFunction<List<Student>, List<Attendance>, Pair<List<Student>, List<Attendance>>> { studentList, attendanceList ->
+//                Pair(studentList, attendanceList)
+//            }).subscribeOn(Schedulers.io())
+
+        val params = Single.zip<List<Student>, List<Attendance>, Section, Map<String, Any>>(
             student,
             attendance,
-            BiFunction<List<Student>, List<Attendance>, Pair<List<Student>, List<Attendance>>> { studentList, attendanceList ->
-                Pair(studentList, attendanceList)
-            }).subscribeOn(Schedulers.io())
+            section,
+            Function3(::zipper)
+        )
 
-        return lists.flatMap { list ->
+        return params.flatMap { param: Map<String, *> ->
+
             AttendanceProcessor(
                 fileSource.getTemplateDocument(getApplication(), "AttendanceSheetTemplate.docx"),
                 month
             ).processTable(
-                Constants.SECTION_LIST.getValue(section),
-                list.first,
-                list.second
+                param.getValue(SECTION_VAL)!! as Section,
+                param.getValue(STUDENT_VAL)!! as List<Student>,
+                param.getValue(ATTENDANCE_VAL)!! as List<Attendance>
             ).subscribeOn(Schedulers.io())
         }.flatMapCompletable { saveToFile(it, outputLocation) }.subscribeOn(Schedulers.io())
     }

@@ -17,6 +17,7 @@
 package com.snorlax.snorlax
 
 import android.app.Application
+
 class BeabotApp : Application() {
     override fun onCreate() {
         super.onCreate()
@@ -33,6 +34,7 @@ class BeabotApp : Application() {
             "com.fasterxml.aalto.stax.EventFactoryImpl"
         )
     }
+
 //
 //    companion object {
 //        init {

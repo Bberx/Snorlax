@@ -75,8 +75,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     fun sendPasswordReset(email: String) = firebaseAuth.sendResetPasswordEmail(email)
 
     fun logout(): Completable {
-        return userRepository.logout()
-            .andThen(localCacheSource.removeToCache())
+        return userRepository.logout(getApplication())
             .subscribeOn(Schedulers.io())
     }
 

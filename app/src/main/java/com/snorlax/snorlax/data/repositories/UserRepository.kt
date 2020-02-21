@@ -28,6 +28,7 @@ import com.snorlax.snorlax.utils.updateAdminProfile
 import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
+import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 
 object UserRepository {
@@ -49,7 +50,6 @@ object UserRepository {
 //    }
 
 
-
     private val firebase: FirebaseAuthSource by lazy {
         FirebaseAuthSource
     }
@@ -68,7 +68,8 @@ object UserRepository {
     }
 
     fun login(email: String, password: String) = firebase.login(email, password)
-        .flatMap { firestore.getAdmin(it.uid) }
+        .map { it.uid }
+        .flatMap(firestore::getAdmin)
         .subscribeOn(Schedulers.io())
 
     fun register(
@@ -105,12 +106,29 @@ object UserRepository {
     }
 
 
-    fun logout() : Completable {
+//    fun logout(): Completable {
+//        return Completable.fromAction {
+//            firebase.logout()
+//        }.andThen {
+//            FirebaseAuth.getInstance().addAuthStateListener { auth ->
+//                if (auth.currentUser == null) it.onComplete()
+//            }
+//        }
+//    }
+
+    fun logout(context: Context): Completable {
         return Completable.fromAction {
             firebase.logout()
         }.andThen {
-            FirebaseAuth.getInstance().addAuthStateListener {auth ->
-                if (auth.currentUser == null) it.onComplete()
+            FirebaseAuth.getInstance().addAuthStateListener { auth ->
+                if (auth.currentUser == null) {
+                    LocalCacheSource.getInstance(context.applicationContext).removeToCache()
+                        .subscribeBy(onComplete = {
+                            it.onComplete()
+                        }, onError = { error ->
+                            it.onError(error)
+                        })
+                }
             }
         }
     }

@@ -230,8 +230,7 @@ class RegisterViewModel(application: Application) : AndroidViewModel(application
 //        return localCacheSource.addToCache(context, user)
 //    }
     fun logout(): Completable {
-        return userRepository.logout()
-            .andThen(localCacheSource.removeToCache())
+        return userRepository.logout(getApplication())
             .subscribeOn(Schedulers.io())
     }
 }

@@ -20,7 +20,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
+import androidx.core.content.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
@@ -100,12 +102,18 @@ class RegisterFragment : Fragment() {
         view.btn_register.clicks()
             .subscribe(viewModel.registerButtonObservable)
         view.btn_have_account.setOnClickListener {
-            (requireActivity() as CredentialsActivity).view_pager.currentItem = 0
+            val activity = requireActivity() as CredentialsActivity
+            activity.view_pager.currentItem = 0
         }
 
         return view
     }
 
+    private fun hideKeyboard() {
+        val imm = requireContext().getSystemService<InputMethodManager>()
+        imm?.hideSoftInputFromWindow(requireView().windowToken, 0)
+        requireView().clearFocus()
+    }
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         initObservables()
@@ -114,6 +122,7 @@ class RegisterFragment : Fragment() {
     private fun initObservables() {
         disposables.apply {
             add(viewModel.registerButtonObservable.subscribe {
+                hideKeyboard()
 
                 val results = viewModel.validateFields(
                     input_first_name.text.toString(),

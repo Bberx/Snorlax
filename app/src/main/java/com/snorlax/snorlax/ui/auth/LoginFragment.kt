@@ -22,6 +22,7 @@ import android.os.Vibrator
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import androidx.core.content.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -81,11 +82,18 @@ class LoginFragment : Fragment() {
             showForgotDialog()
         }
         view.btn_create_account.setOnClickListener {
-            (requireActivity() as CredentialsActivity).view_pager.currentItem = 1
+            val activity = requireActivity() as CredentialsActivity
+            activity.view_pager.currentItem = 1
         }
 
 
         return view
+    }
+
+    private fun hideKeyboard() {
+        val imm = requireContext().getSystemService<InputMethodManager>()
+        imm?.hideSoftInputFromWindow(requireView().windowToken, 0)
+        requireView().clearFocus()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -146,7 +154,7 @@ class LoginFragment : Fragment() {
         disposables.apply {
 
             add(viewModel.loginButtonObservable.subscribe {
-
+                hideKeyboard()
                 val results = viewModel.validateFields(
                     input_email.text.toString(),
                     input_password.text.toString()

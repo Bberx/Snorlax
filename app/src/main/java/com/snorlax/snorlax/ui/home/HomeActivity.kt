@@ -56,6 +56,8 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var labelName: TextView
     private lateinit var labelRole: TextView
 
+//    private lateinit var authListener: FirebaseAuth.AuthStateListener
+
     private lateinit var drawerToggle: ActionBarDrawerToggle
 
     private lateinit var appBarConfiguration: AppBarConfiguration
@@ -68,11 +70,18 @@ class HomeActivity : AppCompatActivity() {
         setTheme(R.style.AppTheme_NoActionBar)
         super.onCreate(savedInstanceState)
 
+
         viewModel = ViewModelProvider(this)[HomeActivityViewModel::class.java]
 
         setContentView(R.layout.activity_home)
         setSupportActionBar(toolbar)
 
+//        authListener = FirebaseAuth.AuthStateListener {
+//            if (it.currentUser == null) {
+//                logout()
+//            }
+//        }
+//        FirebaseAuth.getInstance().addAuthStateListener(authListener)
 
         val navController = findNavController(R.id.nav_host_fragment)
 
@@ -172,9 +181,11 @@ class HomeActivity : AppCompatActivity() {
                 "Yes"
             ) { _, _ ->
                 setDialog(true)
+//                FirebaseAuth.getInstance().removeAuthStateListener(authListener)
                 viewModel.logout().subscribe({
                     startLoginActivity()
                 }, {
+                    //                    FirebaseAuth.getInstance().addAuthStateListener(authListener)
                     setDialog(false)
                     Snackbar.make(
                         home_layout,

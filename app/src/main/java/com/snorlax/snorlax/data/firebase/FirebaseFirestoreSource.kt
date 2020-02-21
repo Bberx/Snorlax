@@ -19,8 +19,10 @@ package com.snorlax.snorlax.data.firebase
 import com.google.firebase.firestore.*
 import com.google.gson.Gson
 import com.snorlax.snorlax.model.Attendance
+import com.snorlax.snorlax.model.Section
 import com.snorlax.snorlax.model.Student
 import com.snorlax.snorlax.model.User
+import com.snorlax.snorlax.utils.Constants
 import com.snorlax.snorlax.utils.TimeUtils.getMaxMonthDate
 import com.snorlax.snorlax.utils.TimeUtils.getTodayDateUTC
 import io.reactivex.Completable
@@ -45,6 +47,18 @@ object FirebaseFirestoreSource {
 
     private val gson = Gson()
 
+    fun getSection(section: String): Single<Section> {
+        return Single.create { emitter ->
+            sectionRef.document(section)
+                .get()
+                .addOnSuccessListener {
+                    emitter.onSuccess(it.toObject(Section::class.java)!!)
+                }.addOnFailureListener {
+                    emitter.onError(it)
+                }
+        }
+    }
+
     fun getAdmin(uid: String): Single<User> {
         return Single.create<User> { emitter ->
             userRef
@@ -68,7 +82,29 @@ object FirebaseFirestoreSource {
                     if (it.isSuccessful) emitter.onComplete()
                     else emitter.onError(it.exception!!)
                 }
-        }.subscribeOn(Schedulers.io())
+        }.andThen(writeSection(user.section)).subscribeOn(Schedulers.io())
+    }
+
+    private fun writeSection(section: String): Completable {
+        return Completable.create { emitter ->
+            sectionRef.whereEqualTo(FieldPath.documentId(), section)
+                .whereEqualTo("display_name", Constants.SECTION_LIST.getValue(section).display_name)
+                .get().addOnSuccessListener { query ->
+                    if (query.isEmpty) {
+                        sectionRef
+                            .document(section)
+                            .set(Constants.SECTION_LIST.getValue(section), SetOptions.merge())
+                            .addOnCompleteListener {
+                                if (it.isSuccessful) emitter.onComplete()
+                                else emitter.onError(it.exception!!)
+                            }
+                    } else {
+                        emitter.onComplete()
+                    }
+                }.addOnFailureListener { error ->
+                    emitter.onError(error)
+                }
+        }
     }
 
     fun getStudentList(section: String): Single<List<Student>> {
@@ -169,7 +205,7 @@ object FirebaseFirestoreSource {
                 .document(section)
                 .collection(STUDENTS_DATA_NAME)
                 .document(student.lrn)
-                .set(student)
+                .set(student, SetOptions.merge())
                 .addOnSuccessListener {
                     completableEmitter.onComplete()
                 }.addOnFailureListener {

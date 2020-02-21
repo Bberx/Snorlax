@@ -48,7 +48,7 @@ class HomeActivityViewModel(application: Application) : AndroidViewModel(applica
 //    }
 
     fun logout(): Completable {
-        return userRepository.logout()
+        return userRepository.logout(getApplication())
 //        return Completable.fromAction { userRepository.logout() }.andThen {
 //            FirebaseAuth.AuthStateListener {auth ->
 //                if (auth.currentUser == null) it.onComplete()
