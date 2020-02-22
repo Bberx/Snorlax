@@ -19,5 +19,5 @@ package com.snorlax.snorlax.model
 data class Section(
     val display_name: String = "",
     val grade_level: Int = 0,
-    val late_data: LateData = LateData()
+    val late_data: LateData? = null
 )

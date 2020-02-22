@@ -23,16 +23,15 @@ import android.text.format.DateUtils
 import androidx.lifecycle.AndroidViewModel
 import com.snorlax.snorlax.data.cache.LocalCacheSource
 import com.snorlax.snorlax.data.firebase.FirebaseFirestoreSource
-import com.snorlax.snorlax.data.repositories.SectionRepository
+import com.snorlax.snorlax.data.section.SectionSource
 import com.snorlax.snorlax.model.Attendance
-import com.snorlax.snorlax.model.Section
 import com.snorlax.snorlax.model.Student
 import com.snorlax.snorlax.utils.FileUtils
 import com.snorlax.snorlax.utils.TimeUtils.getTodayDateLocal
 import com.snorlax.snorlax.utils.processor.AttendanceProcessor
 import io.reactivex.Completable
 import io.reactivex.Single
-import io.reactivex.functions.Function3
+import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import org.apache.poi.xwpf.usermodel.XWPFDocument
@@ -47,43 +46,6 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
     private val fileSource = FileUtils
 
     val selectedTimeObservable = BehaviorSubject.create<Long>()
-
-
-//    companion object {
-//        private var instance: AttendanceViewModel? = null
-//        fun getInstance() : AttendanceViewModel {
-//            instance?.let { return it }
-//            instance = AttendanceViewModel()
-//            return getInstance()
-//        }
-//    }
-
-    // Only allow previous days
-//    val bounds =
-//        CalendarConstraints.Builder()
-//            .setEnd(Calendar.getInstance().timeInMillis)
-//            .setValidator(object : CalendarConstraints.DateValidator {
-//                var date: Long = 0
-//                override fun isValid(date: Long): Boolean {
-//                    this.date = date
-//                    return date <= Calendar.getInstance().timeInMillis
-//                }
-//
-//                override fun writeToParcel(dest: Parcel?, flags: Int) {
-//                    dest?.writeInt(if (date <= Calendar.getInstance().timeInMillis) 1 else 0)
-//                }
-//                override fun describeContents() = 0
-//            })
-//            .build()
-
-
-    //    fun getStudentFromLrn(context: Context, lrn: String) : Single<Student> {
-//        return cache.getUserCache(context).flatMap {admin ->
-//            firestore.getStudentByLrn(admin.section, lrn)
-//        }.toSingle()
-//    }
-//    fun getStudentDocumentReference(context: Context, lrn: String): DocumentReference =
-//        firestore.getDocumentReference(getAdminSection(context), lrn)
 
     fun deleteFile(location: Uri) {
         Completable.fromAction {
@@ -121,48 +83,30 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
 
     @Suppress("UNCHECKED_CAST")
     fun saveAttendance(outputLocation: Uri, month: Date): Completable {
-
-        fun zipper(
-            student: List<Student>,
-            attendance: List<Attendance>,
-            section: Section
-        ): Map<String, Any> {
-            return mapOf(
-                STUDENT_VAL to student,
-                ATTENDANCE_VAL to attendance,
-                SECTION_VAL to section
-            )
-        }
+//        }
 
         val student = firestore.getStudentList(section).subscribeOn(Schedulers.io())
         val attendance = firestore.getMonthlyAttendance(section, month).subscribeOn(Schedulers.io())
-        val section = SectionRepository.getSection(section, SectionRepository.Source.LOCAL)
-            .subscribeOn(Schedulers.io())
-            .subscribeOn(Schedulers.io())
+        val section = SectionSource.getSection(section)
 
-//        val lists = Single.zip(
-//            student,
-//            attendance,
-//            BiFunction<List<Student>, List<Attendance>, Pair<List<Student>, List<Attendance>>> { studentList, attendanceList ->
-//                Pair(studentList, attendanceList)
-//            }).subscribeOn(Schedulers.io())
 
-        val params = Single.zip<List<Student>, List<Attendance>, Section, Map<String, Any>>(
+        val params =
+            Single.zip<List<Student>, List<Attendance>, Pair<List<Student>, List<Attendance>>>(
             student,
             attendance,
-            section,
-            Function3(::zipper)
+//            section,
+                BiFunction(::Pair)
         )
 
-        return params.flatMap { param: Map<String, *> ->
+        return params.flatMap { param ->
 
             AttendanceProcessor(
                 fileSource.getTemplateDocument(getApplication(), "AttendanceSheetTemplate.docx"),
                 month
             ).processTable(
-                param.getValue(SECTION_VAL)!! as Section,
-                param.getValue(STUDENT_VAL)!! as List<Student>,
-                param.getValue(ATTENDANCE_VAL)!! as List<Attendance>
+                section,
+                param.first,
+                param.second
             ).subscribeOn(Schedulers.io())
         }.flatMapCompletable { saveToFile(it, outputLocation) }.subscribeOn(Schedulers.io())
     }
@@ -213,22 +157,4 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
             }
         } else return dayOfWeek
     }
-
-//    private fun dayOfWeek(): String = when (currentCalendar.get(Calendar.DAY_OF_WEEK)) {
-//        Calendar.SUNDAY -> "Sunday"
-//        Calendar.MONDAY -> "Monday"
-//        Calendar.TUESDAY -> "Tuesday"
-//        Calendar.WEDNESDAY -> "Wednesday"
-//        Calendar.THURSDAY -> "Thursday"
-//        Calendar.FRIDAY -> "Friday"
-//        Calendar.SATURDAY -> "Saturday"
-//        else -> ""
-//    }
-
-//    private fun Long.isNegative(): Boolean {
-//        return (this < 0L)
-//    }
-
-//    private fun Long.countHowManyTime(unit: Long) = (this / unit).toInt()
-
 }

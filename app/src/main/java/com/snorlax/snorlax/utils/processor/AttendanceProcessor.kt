@@ -166,8 +166,9 @@ class AttendanceProcessor(document: XWPFDocument, private val month: Date) : Bas
                     }
                     val day = calendar.get(Calendar.DAY_OF_MONTH)
 
+                    val legend = if (it.isLate!!) "L" else "✓"
                     row.getCell(day).paragraphs[0].runs[0].run {
-                        setText("✓", 0)
+                        setText(legend, 0)
                     }
                 }
             }

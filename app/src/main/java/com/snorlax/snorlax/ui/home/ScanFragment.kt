@@ -51,6 +51,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.camera_placeholder.view.*
+import kotlinx.android.synthetic.main.fragment_scan.*
 import kotlinx.android.synthetic.main.fragment_scan.view.*
 import java.util.*
 import java.util.concurrent.Executor
@@ -230,10 +231,12 @@ class ScanFragment : Fragment() {
                     }
                 }
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+//                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
                     if (it.first) {
-                        studentScannerAdaptor.notifyDataSetChanged()
+                        student_log_list.post {
+                            studentScannerAdaptor.notifyDataSetChanged()
+                        }
                         vibrate()
                         addAttendance()
                     }

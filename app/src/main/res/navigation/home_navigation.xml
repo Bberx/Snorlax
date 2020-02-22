@@ -34,4 +34,8 @@
         android:name="com.snorlax.snorlax.ui.home.AboutFragment"
         android:label="@string/label_about"
         tools:layout="@layout/fragment_about" />
+    <fragment
+        android:id="@+id/nav_settings"
+        android:name="com.snorlax.snorlax.ui.home.SettingsFragment"
+        android:label="@string/label_settings" />
 </navigation>

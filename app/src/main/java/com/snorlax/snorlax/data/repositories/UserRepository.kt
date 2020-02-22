@@ -93,7 +93,7 @@ object UserRepository {
     }
 
     fun currentUser(context: Context): Maybe<User> {
-        val cache = LocalCacheSource.getInstance(context).getUserCache()
+        val cache = LocalCacheSource.getInstance(context.applicationContext).getUserCache()
 
         val databaseUser =
             firestore.getAdmin(firebase.currentUser()!!.uid)

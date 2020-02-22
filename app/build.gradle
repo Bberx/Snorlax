@@ -118,7 +118,7 @@ android {
             ext.alwaysUpdateBuildId = false
             debuggable true
             firebaseAppDistribution {
-                releaseNotes = "Debug build\nFix logout bugs"
+                releaseNotes = "Debug build\nPartial late implementation"
                 groups = "researchers, developer"
             }
 //            manifestPlaceholders = [crashlyticsCollectionEnabled:"false"]
@@ -196,6 +196,14 @@ dependencies {
 
     //New Material Design
     implementation 'com.google.android.material:material:1.2.0-alpha04'
+
+    // Preferences
+    def preference_version = "1.1.0"
+
+    // Java language implementation
+    implementation "androidx.preference:preference:$preference_version"
+    // Kotlin
+    implementation "androidx.preference:preference-ktx:$preference_version"
 
     //RxJava
     implementation 'io.reactivex.rxjava2:rxjava:2.2.17'

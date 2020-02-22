@@ -72,7 +72,7 @@ class AttendanceListFragment(private val attendance: Observable<List<Attendance>
 
         frame.addView(loadingView)
 
-        adapter = AttendanceAdaptor()
+        adapter = AttendanceAdaptor(requireContext())
         val layoutManager = LinearLayoutManager(requireContext())
         val inflater = requireContext().getSystemService<LayoutInflater>()!!
         recyclerView = RecyclerView(requireContext()).apply {
@@ -101,8 +101,6 @@ class AttendanceListFragment(private val attendance: Observable<List<Attendance>
                         }
                         frame.addView(emptyView, 0)
                         emptyView.fadeIn()
-
-
                     }
                 } else {
                     if (!frame.contains(recyclerView)) {

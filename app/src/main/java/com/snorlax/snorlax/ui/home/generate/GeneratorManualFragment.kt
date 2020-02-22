@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.core.text.isDigitsOnly
 import androidx.drawerlayout.widget.DrawerLayout
@@ -134,11 +135,11 @@ class GeneratorManualFragment : Fragment() {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onComplete = {
-                    showResult(
+                    showSuccessResult(
                         getString(
                             R.string.msg_image_saved,
                             viewModel.outputFileName(location)
-                        )
+                        ), location
                     )
                 }, onError = {
                     when (it) {
@@ -192,6 +193,34 @@ class GeneratorManualFragment : Fragment() {
     private fun showResult(message: String, length: Int = Snackbar.LENGTH_SHORT) {
         view?.let {
             Snackbar.make(it, message, length).show()
+        }
+    }
+
+    private fun showSuccessResult(message: String, location: Uri) {
+        view?.let {
+            val snackbar = Snackbar.make(it, message, 3000)
+            val intent =
+                Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(location, "image/png")
+                    flags = Intent.FLAG_ACTIVITY_NO_HISTORY or
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                }
+
+            if (intent.resolveActivity(requireActivity().packageManager) != null) {
+                snackbar.setAction(getString(R.string.btn_open)) {
+                    startActivity(
+                        Intent.createChooser(
+                            intent,
+                            getString(R.string.act_open_barcode_image)
+                        )
+                    )
+                }.setActionTextColor(ContextCompat.getColor(requireContext(), R.color.alertColor))
+                    .show()
+            } else {
+                snackbar.show()
+            }
+
         }
     }
 

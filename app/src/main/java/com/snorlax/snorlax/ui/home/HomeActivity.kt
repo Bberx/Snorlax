@@ -91,7 +91,8 @@ class HomeActivity : AppCompatActivity() {
                 R.id.nav_attendance,
                 R.id.nav_students,
                 R.id.nav_generate,
-                R.id.nav_about
+                R.id.nav_about,
+                R.id.nav_settings
             )
         )
         drawerToggle = ActionBarDrawerToggle(

@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -108,6 +109,48 @@ class GeneratorClassFragment : BaseStudentFragment() {
         barcodeDialog.show()
     }
 
+    private fun showSuccessResult(message: String, location: Uri, isDocx: Boolean) {
+        view?.let {
+            val snackbar = Snackbar.make(it, message, 3000)
+            val intent = if (isDocx) {
+                Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(
+                        location,
+                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    )
+                    flags = Intent.FLAG_ACTIVITY_NO_HISTORY or
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                }
+            } else {
+                Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(
+                        location,
+                        "image/png"
+                    )
+                    flags = Intent.FLAG_ACTIVITY_NO_HISTORY or
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                }
+            }
+
+            if (intent.resolveActivity(requireActivity().packageManager) != null) {
+                snackbar.setAction(getString(R.string.btn_open)) {
+                    startActivity(
+                        Intent.createChooser(
+                            intent,
+                            if (isDocx) getString(R.string.act_open_attendance)
+                            else getString(R.string.act_open_attendance)
+                        )
+                    )
+                }.setActionTextColor(ContextCompat.getColor(requireContext(), R.color.alertColor))
+                    .show()
+            } else {
+                snackbar.show()
+            }
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         when (requestCode) {
@@ -137,12 +180,18 @@ class GeneratorClassFragment : BaseStudentFragment() {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(onComplete = {
-                showResult(
+                showSuccessResult(
                     getString(
                         R.string.msg_image_saved,
                         viewModel.outputFileName(outputLocation)
-                    )
+                    ), outputLocation, true
                 )
+//                showResult(
+//                    getString(
+//                        R.string.msg_image_saved,
+//                        viewModel.outputFileName(outputLocation)
+//                    )
+//                )
             }, onError = {
                 when (it) {
                     is TemplateNotFoundException -> showResult(getString(R.string.err_template_not_found))
@@ -177,11 +226,11 @@ class GeneratorClassFragment : BaseStudentFragment() {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onComplete = {
-                    showResult(
+                    showSuccessResult(
                         getString(
                             R.string.msg_image_saved,
                             viewModel.outputFileName(location)
-                        )
+                        ), location, false
                     )
                 }, onError = {
                     when (it) {

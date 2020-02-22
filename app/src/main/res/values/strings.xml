@@ -100,4 +100,6 @@
     <string name="err_no_lrn">Please input the LRN to generate</string>
     <string name="err_invalid_lrn">Please enter a valid LRN</string>
     <string name="label_action">Actions</string>
+    <string name="act_open_barcode_image">Open barcode image with</string>
+    <string name="act_open_attendance">Open attendance with</string>
 </resources>

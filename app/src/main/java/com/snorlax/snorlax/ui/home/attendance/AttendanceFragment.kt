@@ -267,7 +267,7 @@ class AttendanceFragment : Fragment() {
                                 it.localizedMessage ?: "no error message."
                             ), TimeUnit.SECONDS.toMillis(3).toInt()
                         )
-                        Log.d("FIXME", it.message)
+//                        Log.d("FIXME", it.message)
                     }
                 }
             })

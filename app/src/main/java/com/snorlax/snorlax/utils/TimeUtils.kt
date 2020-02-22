@@ -27,7 +27,6 @@ object TimeUtils {
     }
 
 
-
     fun getTodayDateUTC(): Date {
         val rawCalendar = GregorianCalendar.getInstance()
         val safe = getCalendar()
@@ -54,6 +53,7 @@ object TimeUtils {
         return safe.time
 
     }
+
     fun getTodayDateLocal(): Date {
 //            val calendar = Calendar.getInstance(TimeZone.getDefault())
 //
@@ -65,6 +65,17 @@ object TimeUtils {
         val raw = GregorianCalendar.getInstance()
         raw.time = getTodayDateUTC()
         return raw.time
+    }
+
+    fun getCurrentTime(): Long {
+        val src = Calendar.getInstance()
+        val cal = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
+            clear()
+            set(Calendar.HOUR, src.get(Calendar.HOUR_OF_DAY))
+            set(Calendar.MINUTE, src.get(Calendar.MINUTE))
+            set(Calendar.SECOND, src.get(Calendar.SECOND))
+        }
+        return cal.timeInMillis / 1000
     }
 
     private fun getCalendar(): Calendar {
@@ -88,9 +99,9 @@ object TimeUtils {
 
     fun getMaxMonthDate(month: Date): Date =
         GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
-        time = month
-        set(Calendar.DAY_OF_MONTH, getMaximum(Calendar.DAY_OF_MONTH))
-    }.time
+            time = month
+            set(Calendar.DAY_OF_MONTH, getMaximum(Calendar.DAY_OF_MONTH))
+        }.time
 
     fun timeToPosition(timeInMillis: Long): Int {
         return (timeInMillis / 86_400_000).toInt()
@@ -98,6 +109,18 @@ object TimeUtils {
 
     fun positionToTime(position: Int): Date {
         return Date(86_400_000 * position.toLong())
+    }
+
+    fun secondsToHour(seconds: Long): Int {
+        return (seconds / 3600).toInt()
+    }
+
+    fun secondsToMinute(seconds: Long): Int {
+        return ((seconds / 60) % 60).toInt()
+    }
+
+    fun hoursMinutesToSeconds(hours: Int, minutes: Int): Long {
+        return (hours * 3600 + minutes * 60).toLong()
     }
 }
 

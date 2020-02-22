@@ -37,8 +37,10 @@ import com.snorlax.snorlax.BeabotApp
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.data.cache.LocalCacheSource
 import com.snorlax.snorlax.data.firebase.FirebaseFirestoreSource
+import com.snorlax.snorlax.data.repositories.LateDataRepository
 import com.snorlax.snorlax.model.Attendance
 import com.snorlax.snorlax.model.Student
+import com.snorlax.snorlax.utils.TimeUtils
 import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.schedulers.Schedulers
@@ -140,7 +142,14 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun addAttendance(attendanceList: List<Attendance>): Completable {
-        return firestore.addAttendance(getCurrentSection(), attendanceList)
+
+        return LateDataRepository.getLateDataSingle(getCurrentSection()).flatMapCompletable {
+            attendanceList.forEach { attendance ->
+                attendance.lateTimestamp = it.late_time
+                attendance.isLate = TimeUtils.getCurrentTime() > it.late_time
+            }
+            firestore.addAttendance(getCurrentSection(), attendanceList)
+        }
     }
 
 //    fun getStudentRef(context: Context, student: Student): Single<DocumentReference> {
@@ -187,7 +196,6 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
 //
 //        return studentObservable.subscribeOn(Schedulers.io()).observeOn(Schedulers.io()).blockingGet()
 //    }
-
 
 
     private inner class SnorlaxPermissionListener(

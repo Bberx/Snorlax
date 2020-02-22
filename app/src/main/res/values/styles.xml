@@ -29,6 +29,9 @@
         <item name="actionOverflowMenuStyle">@style/Widget.MaterialComponents.PopupMenu.Overflow
         </item>
 
+        <!--        <item name="android:dialogTheme">@style/Theme.Dialog</item> &lt;!&ndash; TimePicker dialog &ndash;&gt;-->
+        <!--        <item name="android:alertDialogTheme">@style/Theme.Dialog</item> &lt;!&ndash; Alert dialog &ndash;&gt;-->
+
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -36,8 +39,11 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="windowNoTitle">true</item>
         <item name="popupMenuStyle">@style/Widget.MaterialComponents.PopupMenu</item>
+        <item name="android:timePickerDialogTheme">@style/DialogTheme</item>
         <item name="actionOverflowMenuStyle">@style/Widget.MaterialComponents.PopupMenu.Overflow
         </item>
+        <!--        <item name="android:dialogTheme">@style/Theme.Dialog</item> &lt;!&ndash; TimePicker dialog &ndash;&gt;-->
+        <!--        <item name="android:alertDialogTheme">@style/Theme.Dialog</item> &lt;!&ndash; Alert dialog &ndash;&gt;-->
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
@@ -49,7 +55,23 @@
     <style name="AppTheme.SplashScreen">
         <item name="android:windowBackground">@drawable/splash_background</item>
         <item name="android:windowAnimationStyle">@null</item>
-<!--        <item name="colorPrimaryDark">@color/colorPrimary</item>-->
+        <!--        <item name="colorPrimaryDark">@color/colorPrimary</item>-->
+    </style>
+
+    <!--    <style name="Theme"-->
+    <!--        parent="AppTheme.Base">-->
+
+    <!--    <style name="Dialog" parent="Base.Theme.AppCompat.Dialog">-->
+    <!--        <item name="android:timePickerDialogTheme">@style/AppTheme2</item>-->
+    <!--    </style>-->
+    <!--    <style name="AppTheme2" parent="AppTheme">-->
+    <!--        <item name="android:windowIsFloating">true</item>-->
+    <!--    </style>-->
+
+    <style name="DialogTheme" parent="ThemeOverlay.MaterialComponents.Dialog">
+
+        <item name="colorAccent">@color/colorPrimary</item>
+        <!--        <item name="colorControlNormal">@color/colorPrimary</item>-->
     </style>
 
 </resources>

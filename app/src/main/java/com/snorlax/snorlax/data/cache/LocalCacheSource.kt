@@ -34,8 +34,8 @@ class LocalCacheSource private constructor(application: Context) {
                 return it
             }
 
-            instance = LocalCacheSource(application)
-            return getInstance(application)
+            instance = LocalCacheSource(application.applicationContext)
+            return getInstance(application.applicationContext)
         }
 
     }

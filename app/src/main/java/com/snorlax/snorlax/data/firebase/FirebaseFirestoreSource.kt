@@ -18,10 +18,7 @@ package com.snorlax.snorlax.data.firebase
 
 import com.google.firebase.firestore.*
 import com.google.gson.Gson
-import com.snorlax.snorlax.model.Attendance
-import com.snorlax.snorlax.model.Section
-import com.snorlax.snorlax.model.Student
-import com.snorlax.snorlax.model.User
+import com.snorlax.snorlax.model.*
 import com.snorlax.snorlax.utils.Constants
 import com.snorlax.snorlax.utils.TimeUtils.getMaxMonthDate
 import com.snorlax.snorlax.utils.TimeUtils.getTodayDateUTC
@@ -60,6 +57,7 @@ object FirebaseFirestoreSource {
     }
 
     fun getAdmin(uid: String): Single<User> {
+//        if (uid == null) return Single.just(null)
         return Single.create<User> { emitter ->
             userRef
                 .document(uid)
@@ -82,30 +80,95 @@ object FirebaseFirestoreSource {
                     if (it.isSuccessful) emitter.onComplete()
                     else emitter.onError(it.exception!!)
                 }
-        }.andThen(writeSection(user.section)).subscribeOn(Schedulers.io())
+        }
+//            .andThen(writeSection(user.section))
+            .subscribeOn(Schedulers.io())
     }
 
-    private fun writeSection(section: String): Completable {
+    fun updateLateData(section: String, lateData: LateData): Completable {
         return Completable.create { emitter ->
-            sectionRef.whereEqualTo(FieldPath.documentId(), section)
-                .whereEqualTo("display_name", Constants.SECTION_LIST.getValue(section).display_name)
-                .get().addOnSuccessListener { query ->
-                    if (query.isEmpty) {
-                        sectionRef
-                            .document(section)
-                            .set(Constants.SECTION_LIST.getValue(section), SetOptions.merge())
-                            .addOnCompleteListener {
-                                if (it.isSuccessful) emitter.onComplete()
-                                else emitter.onError(it.exception!!)
-                            }
-                    } else {
-                        emitter.onComplete()
-                    }
-                }.addOnFailureListener { error ->
-                    emitter.onError(error)
-                }
+            sectionRef.document(section)
+                .set(lateData, SetOptions.merge())
+                .addOnSuccessListener { emitter.onComplete() }
+                .addOnFailureListener { emitter.onError(it) }
         }
     }
+
+    fun getAttendanceObservable(
+        section: String,
+        dateStamp: Date
+    ): Observable<List<Attendance>> {
+
+        return Observable.create<List<Attendance>> { emitter ->
+            val listener = sectionRef.document(section)
+                .collection(ATTENDANCE_DATA_NAME)
+                .document(dateStamp.time.toString())
+                .addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
+                    firebaseFirestoreException?.let {
+                        emitter.onError(it)
+                        return@addSnapshotListener
+                    }
+                    documentSnapshot?.let {
+                        it.data?.let { map ->
+                            val raw = map.map { mapEntry ->
+                                val entry = mapEntry.value as HashMap<*, *>
+                                gson.fromJson(gson.toJsonTree(entry), Attendance::class.java)
+                            }
+                            val attendance = raw.sortedByDescending { attendance ->
+                                attendance.time_in
+                            }
+                            emitter.onNext(attendance)
+                        } ?: emitter.onNext(emptyList())
+                    } ?: emitter.onNext(emptyList())
+                }
+            emitter.setCancellable {
+                listener.remove()
+            }
+        }.subscribeOn(Schedulers.io()).unsubscribeOn(AndroidSchedulers.mainThread())
+    }
+
+    fun getLateData(section: String): Observable<LateData> {
+        return Observable.create<LateData> { emitter ->
+            val listener = sectionRef.document(section)
+                .addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
+                    firebaseFirestoreException?.let {
+                        emitter.onError(it)
+                        return@addSnapshotListener
+                    }
+                    documentSnapshot!!.data?.let { data ->
+                        if (data.isNotEmpty()) {
+                            val lateData = documentSnapshot.toObject(LateData::class.java)!!
+                            emitter.onNext(lateData)
+                        } else emitter.onNext(Constants.SECTION_LIST.getValue(section).late_data!!)
+                    }
+                }
+            emitter.setCancellable {
+                listener.remove()
+            }
+        }.subscribeOn(Schedulers.io()).unsubscribeOn(AndroidSchedulers.mainThread())
+    }
+
+//    private fun writeSection(section: String): Completable {
+//        return Completable.create { emitter ->
+//            sectionRef.whereEqualTo(FieldPath.documentId(), section)
+//                .whereEqualTo("display_name", Constants.SECTION_LIST.getValue(section).display_name)
+//                .get().addOnSuccessListener { query ->
+//                    if (query.isEmpty) {
+//                        sectionRef
+//                            .document(section)
+//                            .set(Constants.SECTION_LIST.getValue(section), SetOptions.merge())
+//                            .addOnCompleteListener {
+//                                if (it.isSuccessful) emitter.onComplete()
+//                                else emitter.onError(it.exception!!)
+//                            }
+//                    } else {
+//                        emitter.onComplete()
+//                    }
+//                }.addOnFailureListener { error ->
+//                    emitter.onError(error)
+//                }
+//        }
+//    }
 
     fun getStudentList(section: String): Single<List<Student>> {
         return Single.create { emitter: SingleEmitter<List<Student>> ->
@@ -260,46 +323,6 @@ object FirebaseFirestoreSource {
     }
 
 
-    fun getAttendanceObservable(
-        section: String,
-        dateStamp: Date
-    ): Observable<List<Attendance>> {
-
-        return Observable.create<List<Attendance>> { emitter ->
-            val listener = sectionRef.document(section)
-                .collection(ATTENDANCE_DATA_NAME)
-                .document(dateStamp.time.toString())
-                .addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
-                    firebaseFirestoreException?.let {
-                        //                        if (!(it.code == FirebaseFirestoreException.Code.PERMISSION_DENIED && FirebaseAuthSource.getInstance().currentUser() == null)) {
-                        emitter.onError(it)
-//                        }
-                        return@addSnapshotListener
-                    }
-
-                    documentSnapshot?.let {
-                        it.data?.let { map ->
-
-                            val raw = map.map { mapEntry ->
-                                val entry = mapEntry.value as HashMap<*, *>
-                                gson.fromJson(gson.toJsonTree(entry), Attendance::class.java)
-                            }
-                            val attendance = raw.sortedByDescending { attendance ->
-                                attendance.time_in
-                            }
-
-
-                            emitter.onNext(attendance)
-                        } ?: emitter.onNext(emptyList())
-                    } ?: emitter.onNext(emptyList())
-                }
-//            listeners.add(listener)
-            emitter.setCancellable {
-                listener.remove()
-            }
-        }
-            .subscribeOn(Schedulers.io()).unsubscribeOn(AndroidSchedulers.mainThread())
-    }
 
     private fun getAttendanceByDocument(document: DocumentSnapshot): List<Attendance> {
         document.data?.let { map ->

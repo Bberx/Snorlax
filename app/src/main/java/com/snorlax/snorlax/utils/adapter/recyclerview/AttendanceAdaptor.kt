@@ -16,9 +16,11 @@
 
 package com.snorlax.snorlax.utils.adapter.recyclerview
 
+import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -31,7 +33,7 @@ import kotlinx.android.synthetic.main.item_attendance.view.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-class AttendanceAdaptor :
+class AttendanceAdaptor(private val context: Context) :
     ListAdapter<Attendance, AttendanceAdaptor.AttendanceHolder>(diffCallback) {
 
     companion object {
@@ -54,6 +56,7 @@ class AttendanceAdaptor :
         val inflatedView = parent.inflate(R.layout.item_attendance)
         return AttendanceHolder(inflatedView)
     }
+
     class AttendanceHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val studentLogo: CircleImageView = itemView.student_image
         val studentName: TextView = itemView.student_displayName
@@ -74,6 +77,21 @@ class AttendanceAdaptor :
         GlideApp.with(holder.studentLogo)
             .load(R.drawable.img_avatar)
             .into(holder.studentLogo)
+
+        currentAttendance.isLate?.let {
+            if (it) {
+                holder.itemView.setBackgroundColor(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.lateColor
+                    )
+                )
+            } else {
+                holder.itemView.setBackgroundColor(0)
+            }
+        } ?: run {
+            holder.itemView.setBackgroundColor(0)
+        }
 
     }
 }
