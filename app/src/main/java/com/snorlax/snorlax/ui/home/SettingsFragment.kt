@@ -61,24 +61,28 @@ class SettingsFragment : PreferenceFragmentCompat() {
         disposable += viewmodel.lateDataObservable
             .flatMapSingle { data ->
                 val user =
-                    if (data.who_uid == null) Single.just(null) else FirebaseFirestoreSource.getAdmin(
+                    if (data.who_uid == null) Single.just("") else FirebaseFirestoreSource.getAdmin(
                         data.who_uid
                     ).map { it.displayName }
-                Single.zip<String?, Timestamp?, Pair<String?, Timestamp?>>(
+                val editTime =
+                    if (data.last_edit == null) Single.just(Timestamp(Date(0))) else Single.just(
+                        data.last_edit
+                    )
+                Single.zip<String, Timestamp, Pair<String, Timestamp>>(
                     user,
-                    Single.just(data.last_edit),
+                    editTime,
                     BiFunction(::Pair)
                 )
             }.subscribeOn(Schedulers.io())
             .unsubscribeOn(AndroidSchedulers.mainThread())
-            .subscribeBy(onNext = { data: Pair<String?, Timestamp?> ->
-                val who: String? = data.first
-                val time: Timestamp? = data.second
+            .subscribeBy(onNext = { data ->
+                val who: String = data.first
+                val time: Timestamp = data.second
                 val timeFormat = SimpleDateFormat("MMM-dd-yyyy", Locale.getDefault())
 
                 val timePref = preferenceManager.findPreference<TimePickerPreference>("lateTime")!!
                 timePref.summaryProvider = Preference.SummaryProvider<TimePickerPreference> {
-                    if (!who.isNullOrEmpty() && time != null) {
+                    if (who.isNotEmpty() && time.toDate().time != 0L) {
                         "Last changed by $who on ${timeFormat.format(time.toDate())}"
                     } else {
                         "Default late time"

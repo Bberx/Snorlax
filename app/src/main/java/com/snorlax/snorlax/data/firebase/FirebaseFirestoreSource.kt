@@ -140,7 +140,7 @@ object FirebaseFirestoreSource {
                             val lateData = documentSnapshot.toObject(LateData::class.java)!!
                             emitter.onNext(lateData)
                         } else emitter.onNext(Constants.SECTION_LIST.getValue(section).late_data!!)
-                    }
+                    } ?: emitter.onNext(Constants.SECTION_LIST.getValue(section).late_data!!)
                 }
             emitter.setCancellable {
                 listener.remove()
