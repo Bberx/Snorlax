@@ -74,13 +74,6 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
             }
         }.subscribeOn(Schedulers.io())
 
-
-    companion object {
-        private const val SECTION_VAL = "section"
-        private const val STUDENT_VAL = "students"
-        private const val ATTENDANCE_VAL = "attendance"
-    }
-
     @Suppress("UNCHECKED_CAST")
     fun saveAttendance(outputLocation: Uri, month: Date): Completable {
 //        }

@@ -25,7 +25,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.snorlax.snorlax.R
-import com.snorlax.snorlax.model.Attendance
+import com.snorlax.snorlax.model.ResolvedAttendance
 import com.snorlax.snorlax.utils.glide.GlideApp
 import com.snorlax.snorlax.utils.inflate
 import de.hdodenhof.circleimageview.CircleImageView
@@ -34,17 +34,23 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class AttendanceAdaptor(private val context: Context) :
-    ListAdapter<Attendance, AttendanceAdaptor.AttendanceHolder>(diffCallback) {
+    ListAdapter<ResolvedAttendance, AttendanceAdaptor.AttendanceHolder>(diffCallback) {
 
     companion object {
-        private val diffCallback = object : DiffUtil.ItemCallback<Attendance>() {
-            override fun areItemsTheSame(oldItem: Attendance, newItem: Attendance): Boolean {
-                return oldItem.lrn == newItem.lrn
+        private val diffCallback = object : DiffUtil.ItemCallback<ResolvedAttendance>() {
+            override fun areItemsTheSame(
+                oldItem: ResolvedAttendance,
+                newItem: ResolvedAttendance
+            ): Boolean {
+                return oldItem.attendance.lrn == newItem.attendance.lrn
             }
 
-            override fun areContentsTheSame(oldItem: Attendance, newItem: Attendance): Boolean {
-                return oldItem.lrn == newItem.lrn &&
-                        oldItem.time_in == newItem.time_in &&
+            override fun areContentsTheSame(
+                oldItem: ResolvedAttendance,
+                newItem: ResolvedAttendance
+            ): Boolean {
+                return oldItem.attendance.lrn == newItem.attendance.lrn &&
+                        oldItem.attendance.time_in == newItem.attendance.time_in &&
                         oldItem.student == newItem.student
             }
         }
@@ -65,9 +71,9 @@ class AttendanceAdaptor(private val context: Context) :
     }
 
     override fun onBindViewHolder(holder: AttendanceHolder, position: Int) {
-        val currentAttendance = getItem(position)
+        val currentAttendance = getItem(position).attendance
 
-        val student = currentAttendance.student
+        val student = getItem(position).student
 
         holder.studentTimeIn.text =
             clockFormat.format(currentAttendance.time_in.toDate())
@@ -78,7 +84,7 @@ class AttendanceAdaptor(private val context: Context) :
             .load(R.drawable.img_avatar)
             .into(holder.studentLogo)
 
-        currentAttendance.isLate?.let {
+        currentAttendance.late?.let {
             if (it) {
                 holder.itemView.setBackgroundColor(
                     ContextCompat.getColor(

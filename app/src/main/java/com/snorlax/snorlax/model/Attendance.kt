@@ -28,8 +28,8 @@ import java.util.*
 
 data class Attendance(
     @ServerTimestamp val time_in: Timestamp = Timestamp(Date().apply { time = 0 }),
-    val student: Student = Student(),
+    val student: String,
     val lrn: String,
     var lateTimestamp: Long? = null,
-    @JvmField var isLate: Boolean? = null
+    var late: Boolean? = null
 )

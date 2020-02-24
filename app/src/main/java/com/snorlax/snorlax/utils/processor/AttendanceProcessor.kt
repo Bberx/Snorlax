@@ -135,7 +135,7 @@ class AttendanceProcessor(document: XWPFDocument, private val month: Date) : Bas
                 }
 
                 val studentAttendance = attendance.filter {
-                    student == it.student
+                    student.lrn == it.lrn
                 }
 
                 // Fill each day with "A" first
@@ -166,7 +166,7 @@ class AttendanceProcessor(document: XWPFDocument, private val month: Date) : Bas
                     }
                     val day = calendar.get(Calendar.DAY_OF_MONTH)
 
-                    val legend = if (it.isLate!!) "L" else "✓"
+                    val legend = if (it.late!!) "L" else "✓"
                     row.getCell(day).paragraphs[0].runs[0].run {
                         setText(legend, 0)
                     }

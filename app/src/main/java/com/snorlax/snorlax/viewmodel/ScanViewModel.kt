@@ -102,6 +102,9 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
 //        }, BackpressureStrategy.DROP)
 //    }
 
+    fun getStudent(lrn: String) = firestore.getStudentPath(getCurrentSection(), lrn)
+
+
     fun analyzeLRN(lrn: String): Maybe<Student> {
         // Checks if LRN is valid
         if (lrn.length != 12) return Maybe.empty()
@@ -134,7 +137,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
 
 
     fun requestPermission(fragment: Fragment, calledFromOnStart: Boolean) {
-        Dexter.withActivity(fragment.activity!!)
+        Dexter.withActivity(fragment.requireActivity())
             .withPermission(Manifest.permission.CAMERA)
             .withListener(SnorlaxPermissionListener(fragment, calledFromOnStart))
             .onSameThread()
@@ -146,7 +149,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
         return LateDataRepository.getLateDataSingle(getCurrentSection()).flatMapCompletable {
             attendanceList.forEach { attendance ->
                 attendance.lateTimestamp = it.late_time
-                attendance.isLate = TimeUtils.getCurrentTime() > it.late_time
+                attendance.late = TimeUtils.getCurrentTime() > it.late_time
             }
             firestore.addAttendance(getCurrentSection(), attendanceList)
         }
@@ -236,7 +239,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
                         }
                         .setActionTextColor(
                             ContextCompat.getColor(
-                                fragment.context!!,
+                                fragment.requireContext(),
                                 R.color.alertColor
                             )
                         )

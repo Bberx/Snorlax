@@ -65,7 +65,7 @@ class ScanFragment : Fragment() {
     }
 
     private val vibrator: Vibrator by lazy {
-        context!!.getSystemService<Vibrator>()!!
+        requireContext().getSystemService<Vibrator>()!!
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,7 +88,7 @@ class ScanFragment : Fragment() {
         val cameraPlaceholderView =
             inflater.inflate(R.layout.camera_placeholder, rootView.camera_frame, false)
 
-        val cameraView = CameraView(context!!).apply {
+        val cameraView = CameraView(requireContext()).apply {
             flash = FlashMode.OFF
             captureMode = CameraView.CaptureMode.IMAGE
             scaleType = CameraView.ScaleType.CENTER_CROP
@@ -124,7 +124,7 @@ class ScanFragment : Fragment() {
                     rootView.camera_frame.removeAllViews()
 
                     val attrs = intArrayOf(R.attr.selectableItemBackground)
-                    val typedArray: TypedArray = activity!!.obtainStyledAttributes(attrs)
+                    val typedArray: TypedArray = requireActivity().obtainStyledAttributes(attrs)
                     val backgroundResource = typedArray.getResourceId(0, 0)
                     typedArray.recycle()
                     rootView.camera_frame.setBackgroundResource(backgroundResource)
@@ -253,8 +253,8 @@ class ScanFragment : Fragment() {
             listOf(
                 Attendance(
                     Timestamp(Date(it.second)),
-//                    viewModel.getStudent(it.first.lrn),
-                    it.first,
+                    viewModel.getStudent(it.first.lrn),
+//                    it.first,
                     it.first.lrn
                 )
             )

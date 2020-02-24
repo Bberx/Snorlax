@@ -28,7 +28,15 @@ import io.reactivex.Single
 import io.reactivex.SingleEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.tasks.await
 import java.util.*
+
+suspend fun String.getStudent(): Student {
+    return FirebaseFirestore.getInstance().document(this).get().await().toObject(Student::class.java)!!
+//    return get().result!!.toObject(Student::class.java)!!
+}
+
+//fun String.getReference(): DocumentReference = FirebaseFirestore.getInstance().document(this)
 
 object FirebaseFirestoreSource {
 
@@ -69,6 +77,11 @@ object FirebaseFirestoreSource {
                     emitter.onError(it)
                 }
         }.subscribeOn(Schedulers.io())
+    }
+
+    fun getStudentPath(section: String, lrn: String): String {
+        return sectionRef.document(section).collection(STUDENTS_DATA_NAME)
+            .document(lrn).path
     }
 
     fun addAdmin(user: User): Completable {
