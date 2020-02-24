@@ -35,7 +35,7 @@ import com.snorlax.snorlax.R
 import com.snorlax.snorlax.model.Student
 import com.snorlax.snorlax.utils.adapter.recyclerview.StudentListAdaptor
 import com.snorlax.snorlax.utils.callback.StudentEditListener
-import com.snorlax.snorlax.utils.caps
+import com.snorlax.snorlax.utils.capitalizeWords
 import com.snorlax.snorlax.utils.exception.StudentAlreadyExistException
 import com.snorlax.snorlax.viewmodel.StudentsViewModel
 import io.reactivex.Completable
@@ -296,8 +296,8 @@ class StudentsFragment : BaseStudentFragment() {
                                     viewModel.addStudent(
                                         Student(
                                             mapOf(
-                                                Student.FIRST_NAME_VAL to firstNameInput.text.toString().trim().caps(),
-                                                Student.LAST_NAME_VAL to lastNameInput.text.toString().trim().caps()
+                                                Student.FIRST_NAME_VAL to firstNameInput.text.toString().trim().capitalizeWords(),
+                                                Student.LAST_NAME_VAL to lastNameInput.text.toString().trim().capitalizeWords()
                                             ), lrnInput.text.toString().trim()
                                         )
                                     )

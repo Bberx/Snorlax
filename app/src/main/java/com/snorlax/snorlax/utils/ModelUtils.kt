@@ -35,3 +35,7 @@ fun String.caps(locale: Locale = Locale.getDefault()): String {
     }
     return this
 }
+
+
+fun String.capitalizeWords(): String =
+    split(" ").joinToString(" ") { it.toLowerCase(Locale.getDefault()).caps() }

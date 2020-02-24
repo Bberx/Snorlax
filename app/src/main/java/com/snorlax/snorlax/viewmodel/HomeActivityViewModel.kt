@@ -23,9 +23,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.snorlax.snorlax.data.repositories.UserRepository
 import com.snorlax.snorlax.model.User
 import com.snorlax.snorlax.utils.Constants.SECTION_LIST
-import com.snorlax.snorlax.utils.caps
+import com.snorlax.snorlax.utils.capitalizeWords
 import io.reactivex.Completable
-import java.util.*
 
 class HomeActivityViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -69,13 +68,18 @@ class HomeActivityViewModel(application: Application) : AndroidViewModel(applica
 
     fun getRole(user: User): String {
         val builder: StringBuilder = StringBuilder()
-
         val section = SECTION_LIST.getValue(user.section)
-        builder.append("${section.grade_level}-${section.display_name} ")
+        return buildString {
+            append("${section.grade_level}-${section.display_name} ")
+            append("(${user.accType.capitalizeWords()})")
+        }
 
-        builder.append("(${user.accType.caps(Locale.getDefault())})")
 
-        return builder.toString()
+//        builder.append("${section.grade_level}-${section.display_name} ")
+//
+//        builder.append("(${user.accType.caps(Locale.getDefault())})")
+//
+//        return builder.toString()
     }
 
     fun getUserPhoto(): Uri {

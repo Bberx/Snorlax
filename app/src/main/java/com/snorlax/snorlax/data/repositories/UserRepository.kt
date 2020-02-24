@@ -24,12 +24,14 @@ import com.snorlax.snorlax.data.firebase.FirebaseAuthSource
 import com.snorlax.snorlax.data.firebase.FirebaseFirestoreSource
 import com.snorlax.snorlax.data.firebase.StorageSource
 import com.snorlax.snorlax.model.User
+import com.snorlax.snorlax.utils.capitalizeWords
 import com.snorlax.snorlax.utils.updateAdminProfile
 import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
+import java.util.*
 
 object UserRepository {
 
@@ -73,12 +75,15 @@ object UserRepository {
         .subscribeOn(Schedulers.io())
 
     fun register(
-        email: String,
+        _email: String,
         password: String,
-        name: String,
+        _name: String,
         section: String,
         accType: String
     ): Single<User> {
+
+        val email = _email.toLowerCase(Locale.getDefault())
+        val name = _name.capitalizeWords()
 
         val profileUpdates = UserProfileChangeRequest.Builder()
             .setDisplayName(name)

@@ -16,7 +16,7 @@
 
 package com.snorlax.snorlax.model
 
-import com.snorlax.snorlax.utils.caps
+import com.snorlax.snorlax.utils.capitalizeWords
 import java.util.*
 
 data class Student(
@@ -33,7 +33,7 @@ data class Student(
     val displayName: String
         get() = "${name.getValue(LAST_NAME_VAL).toUpperCase(Locale.getDefault())}, ${name.getValue(
             FIRST_NAME_VAL
-        ).caps()}"
+        ).capitalizeWords()}"
 
 //    fun getDisplayName() : String {
 //        return "${name.getValue("last").toUpperCase(Locale.getDefault())}, ${name.getValue("first")}"
