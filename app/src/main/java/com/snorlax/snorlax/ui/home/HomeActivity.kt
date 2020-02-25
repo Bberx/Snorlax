@@ -40,6 +40,7 @@ import com.snorlax.snorlax.viewmodel.HomeActivityViewModel
 import de.hdodenhof.circleimageview.CircleImageView
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.app_bar_home.*
@@ -88,6 +89,7 @@ class HomeActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.nav_scan,
+                R.id.nav_hub,
                 R.id.nav_attendance,
                 R.id.nav_students,
                 R.id.nav_generate,
@@ -183,7 +185,7 @@ class HomeActivity : AppCompatActivity() {
             ) { _, _ ->
                 setDialog(true)
 //                FirebaseAuth.getInstance().removeAuthStateListener(authListener)
-                viewModel.logout().subscribe({
+                disposables += viewModel.logout().subscribe({
                     startLoginActivity()
                 }, {
                     //                    FirebaseAuth.getInstance().addAuthStateListener(authListener)

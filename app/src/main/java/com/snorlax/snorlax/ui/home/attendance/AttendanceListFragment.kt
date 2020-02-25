@@ -30,6 +30,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.data.firebase.getStudent
 import com.snorlax.snorlax.model.Attendance
@@ -44,6 +45,7 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_attendance_list.*
 import kotlinx.coroutines.Dispatchers
@@ -108,7 +110,7 @@ class AttendanceListFragment(private val attendance: Observable<List<Attendance>
             .subscribeOn(Schedulers.io())
             .unsubscribeOn(AndroidSchedulers.mainThread())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { rawList ->
+            .subscribeBy(onNext = { rawList ->
 
                 //                Log.d("test", "dd")
                 lifecycleScope.launchWhenResumed {
@@ -137,8 +139,15 @@ class AttendanceListFragment(private val attendance: Observable<List<Attendance>
                         adapter.submitList(list)
                     }
                 }
-
-            }
+            }, onError = {
+                view?.let { view ->
+                    Snackbar.make(
+                        view,
+                        it.localizedMessage ?: "Unknown error occurred",
+                        Snackbar.LENGTH_LONG
+                    ).show()
+                }
+            })
         disposables += attendanceDisposable
     }
 

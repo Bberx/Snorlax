@@ -24,6 +24,12 @@
             android:id="@+id/nav_scan"
             android:icon="@drawable/ic_scan"
             android:title="@string/label_scan" />
+
+        <item
+            android:id="@+id/nav_hub"
+            android:icon="@drawable/ic_hub"
+            android:title="@string/label_hub" />
+
         <item
             android:id="@+id/nav_attendance"
             android:icon="@drawable/ic_attendance"

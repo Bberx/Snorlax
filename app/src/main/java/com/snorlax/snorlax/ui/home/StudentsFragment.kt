@@ -16,6 +16,7 @@
 
 package com.snorlax.snorlax.ui.home
 
+import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
 import android.text.Html
@@ -125,7 +126,7 @@ class StudentsFragment : BaseStudentFragment() {
                         }
 
                     }
-                    .setNegativeButton(android.R.string.no, null)
+                    .setNegativeButton(android.R.string.cancel, null)
                     .create()
 
                 alertDialog.show()
@@ -140,6 +141,7 @@ class StudentsFragment : BaseStudentFragment() {
                 }
             }
 
+            @SuppressLint("RxSubscribeOnError")
             override fun deleteStudent(student: Student) {
                 val deleteDialog = MaterialAlertDialogBuilder(
                     context,
@@ -157,7 +159,7 @@ class StudentsFragment : BaseStudentFragment() {
                     )
                     .setView(R.layout.diag_delete_student)
                     .setPositiveButton(R.string.btn_ok, null)
-                    .setNegativeButton(android.R.string.no, null)
+                    .setNegativeButton(android.R.string.cancel, null)
                     .create()
 
                 deleteDialog.setOnShowListener { dialog ->

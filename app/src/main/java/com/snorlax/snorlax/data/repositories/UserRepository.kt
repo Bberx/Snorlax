@@ -16,6 +16,7 @@
 
 package com.snorlax.snorlax.data.repositories
 
+import android.annotation.SuppressLint
 import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
@@ -121,6 +122,7 @@ object UserRepository {
 //        }
 //    }
 
+    @SuppressLint("RxLeakedSubscription")
     fun logout(context: Context): Completable {
         return Completable.fromAction {
             firebase.logout()

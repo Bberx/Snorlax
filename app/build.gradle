@@ -40,73 +40,14 @@ android {
             keyPassword keystoreProperties['keyPassword']
         }
     }
-    compileSdkVersion 29
-    buildToolsVersion "29.0.2"
+    compileSdkVersion 'android-R'
+    buildToolsVersion '30.0.0 rc1'
 
-
-//    def versionPropsFile = file('version.properties')
-//    def valueRelease = 0
-//    def valueDebug = 0
-//    Properties versionProps = new Properties()
-//    if (!versionPropsFile.exists()) {
-//        versionProps['VERSION_PATCH'] = "0"
-//        versionProps['VERSION_NUMBER'] = "0"
-//        versionProps['VERSION_BUILD'] = "-1"
-//        // I set it to minus one so the first build is 0 which isn't super important.
-//        versionProps.store(versionPropsFile.newWriter(), null)
-//    }
-//
-//    def runTasks = gradle.startParameter.taskNames
-//    if (':app:assembleRelease' in runTasks) {
-//        valueRelease = 1
-//    }
-//    if (':app:assembleDebug' in runTasks) {
-//        valueDebug = 1
-//    }
-//
-//    def mVersionName = ""
-//    def mFileName = ""
-//
-//    if (versionPropsFile.canRead()) {
-//        versionProps.load(new FileInputStream(versionPropsFile))
-//
-//        versionProps['DEBUG_VERSION'] = (versionProps['DEBUG_VERSION'].toInteger() + valueDebug).toString()
-//        versionProps['VERSION_PATCH'] = (versionProps['VERSION_PATCH'].toInteger() + valueRelease).toString()
-//        versionProps['VERSION_NUMBER'] = (versionProps['VERSION_NUMBER'].toInteger() + valueRelease).toString()
-//        versionProps['VERSION_BUILD'] = (versionProps['VERSION_BUILD'].toInteger() + 1).toString()
-//
-//        versionProps.store(versionPropsFile.newWriter(), null)
-//
-//        mVersionName = "v1.${versionProps['VERSION_PATCH']}.${versionProps['VERSION_BUILD']}"
-//        mFileName = "Snorlax-${mVersionName}.apk"
-//
-//        defaultConfig {
-//            minSdkVersion 21
-//            targetSdkVersion 29
-//            applicationId "com.snorlax.snorlax" // 3: change to your package name
-//            versionCode versionProps['VERSION_NUMBER'].toInteger()
-//            versionName "${mVersionName}"
-//            multiDexEnabled = true
-//        }
-//
-//    } else {
-//        throw new FileNotFoundException("Could not read version.properties!")
-//    }
-
-//    if (':app:assembleRelease' in runTasks) {
-//        android.applicationVariants.all { variant ->
-//            variant.outputs.all { output ->
-//                if (output.outputFile != null && output.outputFile.name.endsWith('.apk')) {
-//                    outputFileName = mFileName
-//                }
-//            }
-//
-//    }
 
     defaultConfig {
         applicationId "com.snorlax.snorlax"
         minSdkVersion 21
-        targetSdkVersion 29
+        targetSdkVersion 30
         versionCode 18
         versionName "1.3.17"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -134,7 +75,7 @@ android {
             renderscriptOptimLevel = 3
             signingConfig signingConfigs.release
             multiDexEnabled = true
-            manifestPlaceholders = [crashlyticsCollectionEnabled:"true"]
+            manifestPlaceholders = [crashlyticsCollectionEnabled: "true"]
             firebaseAppDistribution {
                 releaseNotes = "Release build\nFix crash when saving to image"
                 groups = "researchers, developer"
@@ -211,7 +152,7 @@ dependencies {
     implementation "androidx.preference:preference-ktx:$preference_version"
 
     //RxJava
-    implementation 'io.reactivex.rxjava2:rxjava:2.2.17'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.18'
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
     //RxKotlin
     implementation 'io.reactivex.rxjava2:rxkotlin:2.4.0'

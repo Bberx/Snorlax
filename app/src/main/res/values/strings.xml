@@ -44,7 +44,7 @@
     <string name="label_section">Section</string>
     <string name="msg_camera_loading">Camera loading please wait…</string>
     <string name="msg_enable_camera_permission">Please allow camera permission</string>
-    <string name="msg_allow_permission_in_settings">To use the scan functionality, allow camera permission to scan the barcodes</string>
+    <string name="msg_allow_permission_in_settings">To use the scan functionality, allow camera permission to scan the barcode</string>
     <string name="label_attendance_list">Attendance list:</string>
     <string name="act_edit">Edit</string>
     <string name="act_delete">Delete</string>
@@ -102,4 +102,9 @@
     <string name="label_action">Actions</string>
     <string name="act_open_barcode_image">Open barcode image with</string>
     <string name="act_open_attendance">Open attendance with</string>
+    <string name="label_hub">Hub</string>
+    <string name="label_sensitive_action">Sensitive action</string>
+    <string name="msg_sensitive_late_time">Changing late time will be effective immediately. This action requires you to type your password.</string>
+    <string name="msg_late_time_not_saved">Late time setting not saved</string>
+    <string name="msg_late_time_saved">Late time setting saved</string>
 </resources>
