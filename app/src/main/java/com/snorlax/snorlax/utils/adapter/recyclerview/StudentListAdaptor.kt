@@ -35,10 +35,12 @@ import com.snorlax.snorlax.utils.callback.StudentSelectListener
 import com.snorlax.snorlax.utils.glide.GlideApp
 import com.snorlax.snorlax.utils.inflate
 import de.hdodenhof.circleimageview.CircleImageView
-import kotlinx.android.synthetic.main.item_student.view.student_displayName
-import kotlinx.android.synthetic.main.item_student.view.student_image
-import kotlinx.android.synthetic.main.item_student.view.student_lrn
-import kotlinx.android.synthetic.main.item_student_list.view.*
+import kotlinx.android.extensions.LayoutContainer
+import kotlinx.android.synthetic.main.item_student_list.*
+
+//import kotlinx.android.synthetic.main.item_student.view.student_image
+//import kotlinx.android.synthetic.main.item_student.view.student_lrn
+//import kotlinx.android.synthetic.main.item_student_list.view.*
 
 
 class StudentListAdaptor(
@@ -70,7 +72,7 @@ class StudentListAdaptor(
         holder.swipeRevealLayout.setLockDrag(lock)
 
         if (studentActionListener is StudentSelectListener) {
-            holder.itemView.layout_main.setOnClickListener {
+            holder.layout_main.setOnClickListener {
                 studentActionListener.onSelectStudent(model)
             }
         } else if (studentActionListener is StudentEditListener) {
@@ -81,7 +83,7 @@ class StudentListAdaptor(
                 studentActionListener.editStudent(position, model, options)
             }
             if (!lock) {
-                holder.itemView.layout_main.setOnClickListener {
+                holder.layout_main.setOnClickListener {
                     if (holder.swipeRevealLayout.isOpened) holder.swipeRevealLayout.close(true)
                     else holder.swipeRevealLayout.open(true)
                 }
@@ -101,13 +103,14 @@ class StudentListAdaptor(
         return StudentViewHolder(inflatedView)
     }
 
-    class StudentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val displayName: TextView = itemView.student_displayName
-        val lrn: TextView = itemView.student_lrn
-        val image: CircleImageView = itemView.student_image
-        val swipeRevealLayout: SwipeRevealLayout = itemView.layout_reveal
-        val deleteButton: ImageButton = itemView.img_delete
-        val editButton: ImageButton = itemView.img_edit
+    class StudentViewHolder(override val containerView: View) :
+        RecyclerView.ViewHolder(containerView), LayoutContainer {
+        val displayName: TextView = student_displayName
+        val lrn: TextView = student_lrn
+        val image: CircleImageView = student_image
+        val swipeRevealLayout: SwipeRevealLayout = layout_reveal
+        val deleteButton: ImageButton = img_delete
+        val editButton: ImageButton = img_edit
 
 
     }

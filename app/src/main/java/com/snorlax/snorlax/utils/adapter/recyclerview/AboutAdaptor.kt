@@ -24,7 +24,8 @@ import com.snorlax.snorlax.model.Researcher
 import com.snorlax.snorlax.utils.glide.GlideApp
 import com.snorlax.snorlax.utils.inflate
 import com.snorlax.snorlax.views.ResearcherDialog
-import kotlinx.android.synthetic.main.item_researcher.view.*
+import kotlinx.android.extensions.LayoutContainer
+import kotlinx.android.synthetic.main.item_researcher.*
 
 class AboutAdaptor(private val researcher: List<Researcher>) :
     RecyclerView.Adapter<AboutAdaptor.AboutHolder>() {
@@ -37,29 +38,29 @@ class AboutAdaptor(private val researcher: List<Researcher>) :
 
 
     override fun onBindViewHolder(holder: AboutHolder, position: Int) {
-        holder.bind( researcher[position])
+        holder.bind(researcher[position])
     }
 
-    class AboutHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-//        override val containerView: View?
-//            get() = itemView
+    class AboutHolder(override val containerView: View) : RecyclerView.ViewHolder(containerView),
+        LayoutContainer {
 
         fun bind(item: Researcher) {
             GlideApp
-                .with(itemView.context)
+                .with(containerView.context)
                 .load(item.displayImage)
 //            .apply(RequestOptions.bitmapTransform(CropCircleWithBorderTransformation()))
 //            .transition(DrawableTransitionOptions.withCrossFade())
                 .placeholder(R.drawable.img_avatar)
-                .into(itemView.researcher_image)
+                .into(researcher_image)
 
-            itemView.researcher_displayName.text = item.name
-            itemView.researcher_role.text = item.role
+            researcher_displayName.text = item.name
+            researcher_role.text = item.role
 
-            itemView.setOnClickListener {
-                ResearcherDialog(itemView.context, item).show()
+            containerView.setOnClickListener {
+                ResearcherDialog(containerView.context, item).show()
             }
         }
+
 
 //            val image: CircleImageView = researcher_image
 //            val displayName: TextView = researcher_displayName

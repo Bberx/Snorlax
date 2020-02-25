@@ -29,7 +29,8 @@ import com.snorlax.snorlax.model.ResolvedAttendance
 import com.snorlax.snorlax.utils.glide.GlideApp
 import com.snorlax.snorlax.utils.inflate
 import de.hdodenhof.circleimageview.CircleImageView
-import kotlinx.android.synthetic.main.item_attendance.view.*
+import kotlinx.android.extensions.LayoutContainer
+import kotlinx.android.synthetic.main.item_attendance.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -63,11 +64,12 @@ class AttendanceAdaptor(private val context: Context) :
         return AttendanceHolder(inflatedView)
     }
 
-    class AttendanceHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val studentLogo: CircleImageView = itemView.student_image
-        val studentName: TextView = itemView.student_displayName
-        val studentLrn: TextView = itemView.student_lrn
-        val studentTimeIn: TextView = itemView.label_time_in
+    class AttendanceHolder(override val containerView: View) :
+        RecyclerView.ViewHolder(containerView), LayoutContainer {
+        val studentLogo: CircleImageView = student_image
+        val studentName: TextView = student_displayName
+        val studentLrn: TextView = student_lrn
+        val studentTimeIn: TextView = label_time_in
     }
 
     override fun onBindViewHolder(holder: AttendanceHolder, position: Int) {
@@ -86,17 +88,17 @@ class AttendanceAdaptor(private val context: Context) :
 
         currentAttendance.late?.let {
             if (it) {
-                holder.itemView.setBackgroundColor(
+                holder.containerView.setBackgroundColor(
                     ContextCompat.getColor(
                         context,
                         R.color.lateColor
                     )
                 )
             } else {
-                holder.itemView.setBackgroundColor(0)
+                holder.containerView.setBackgroundColor(0)
             }
         } ?: run {
-            holder.itemView.setBackgroundColor(0)
+            holder.containerView.setBackgroundColor(0)
         }
 
     }

@@ -26,7 +26,8 @@ import com.snorlax.snorlax.R
 import com.snorlax.snorlax.model.Student
 import com.snorlax.snorlax.utils.inflate
 import de.hdodenhof.circleimageview.CircleImageView
-import kotlinx.android.synthetic.main.item_student_scan.view.*
+import kotlinx.android.extensions.LayoutContainer
+import kotlinx.android.synthetic.main.item_student_scan.*
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -61,13 +62,12 @@ class StudentScannerAdaptor :
 
     }
 
-    inner class StudentHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-
-        val displayName: TextView = itemView.student_displayName
-        val lrn: TextView = itemView.student_lrn
-        val image: CircleImageView = itemView.student_image
-        val timeIn: TextView = itemView.student_timeIn
-
+    class StudentHolder(override val containerView: View) : RecyclerView.ViewHolder(containerView),
+        LayoutContainer {
+        val displayName: TextView = student_displayName
+        val lrn: TextView = student_lrn
+        val image: CircleImageView = student_image
+        val timeIn: TextView = student_timeIn
     }
 
 }

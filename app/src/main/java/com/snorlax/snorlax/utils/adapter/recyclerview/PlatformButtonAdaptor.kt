@@ -31,7 +31,8 @@ import com.snorlax.snorlax.model.SocialMedia.SocialPlatform.EMAIL
 import com.snorlax.snorlax.model.SocialMedia.SocialPlatform.FACEBOOK
 import com.snorlax.snorlax.utils.customTab.CustomTabHelper
 import com.snorlax.snorlax.utils.inflate
-import kotlinx.android.synthetic.main.button_item.view.*
+import kotlinx.android.extensions.LayoutContainer
+import kotlinx.android.synthetic.main.button_item.*
 
 class PlatformButtonAdaptor(private val socialMedia: List<SocialMedia>) :
     RecyclerView.Adapter<PlatformButtonAdaptor.ButtonHolder>() {
@@ -53,18 +54,23 @@ class PlatformButtonAdaptor(private val socialMedia: List<SocialMedia>) :
         val url = platform.getPrefix() + socialMediaID
 
         val tabIntent = CustomTabsIntent.Builder().apply {
-            setToolbarColor(ContextCompat.getColor(holder.itemView.context, R.color.colorPrimary))
+            setToolbarColor(
+                ContextCompat.getColor(
+                    holder.containerView.context,
+                    R.color.colorPrimary
+                )
+            )
         }.build()
 
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
 
         val customTabHelper = CustomTabHelper()
-        val packageName = customTabHelper.getPackageNameToUse(holder.itemView.context, url)
+        val packageName = customTabHelper.getPackageNameToUse(holder.containerView.context, url)
 
 
         val shouldUserCustomTab =
             packageName != null && !customTabHelper.hasSpecializedHandlerIntents(
-                holder.itemView.context,
+                holder.containerView.context,
                 intent
             )
 
@@ -141,7 +147,8 @@ class PlatformButtonAdaptor(private val socialMedia: List<SocialMedia>) :
         }
     }
 
-    inner class ButtonHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var platformButton: MaterialButton = itemView.platform_button
+    inner class ButtonHolder(override val containerView: View) :
+        RecyclerView.ViewHolder(containerView), LayoutContainer {
+        var platformButton: MaterialButton = platform_button
     }
 }
