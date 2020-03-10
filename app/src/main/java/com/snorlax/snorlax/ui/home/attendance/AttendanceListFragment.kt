@@ -17,6 +17,7 @@
 package com.snorlax.snorlax.ui.home.attendance
 
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -31,17 +32,17 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.firestore.ListenerRegistration
 import com.snorlax.snorlax.R
-import com.snorlax.snorlax.data.firebase.getStudent
 import com.snorlax.snorlax.model.Attendance
 import com.snorlax.snorlax.model.ResolvedAttendance
+import com.snorlax.snorlax.model.Student
 import com.snorlax.snorlax.utils.adapter.recyclerview.AttendanceAdaptor
 import com.snorlax.snorlax.utils.fadeIn
 import com.snorlax.snorlax.utils.fadeOut
 import com.snorlax.snorlax.utils.toPx
 import com.snorlax.snorlax.viewmodel.AttendanceViewModel
 import com.snorlax.snorlax.views.ShimmerListProgress
-import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
@@ -51,8 +52,9 @@ import kotlinx.android.synthetic.main.fragment_attendance_list.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
+import java.util.*
 
-class AttendanceListFragment(private val attendance: Observable<List<Attendance>>) : Fragment() {
+class AttendanceListFragment : Fragment() {
 
     private val disposables = CompositeDisposable()
 
@@ -61,17 +63,31 @@ class AttendanceListFragment(private val attendance: Observable<List<Attendance>
 ////        viewModel = ViewModelProviders.of(parentFragment!!)[AttendanceViewModel::class.java]
 //    }
 
+    companion object {
+        const val ATTENDANCE_DATE = "attendance_date"
+    }
+
     private lateinit var viewModel: AttendanceViewModel
+    private lateinit var date: Date
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var emptyView: LinearLayout
     private lateinit var adapter: AttendanceAdaptor
+
+    private val listeners = mutableListOf<ListenerRegistration>()
+
+//    private val list = BehaviorSubject.create<List<Attendance>>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(R.layout.fragment_attendance_list, container, false)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        date = requireArguments().get(ATTENDANCE_DATE) as Date
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -104,41 +120,54 @@ class AttendanceListFragment(private val attendance: Observable<List<Attendance>
         map { async(Dispatchers.Default) { f(it) } }.map { it.await() }
     }
 
-    private fun attachSubscriber() {
+    private fun setData(rawList: List<Attendance>, students: List<Student>) {
         val frame = attendance_frame
-        val attendanceDisposable = attendance
+        val studentsLrn = students.map { it.lrn }
+
+        lifecycleScope.launchWhenResumed {
+            val list = rawList.map {
+                ResolvedAttendance(it, students[studentsLrn.indexOf(it.lrn)])
+            }
+
+            if (list.isEmpty()) {
+                if (!frame.contains(emptyView)) {
+                    if (frame.childCount != 0) {
+                        frame[0].fadeOut()
+                        frame.removeAllViews()
+                    }
+                    frame.addView(emptyView, 0)
+                    emptyView.fadeIn()
+                }
+            } else {
+                if (!frame.contains(recyclerView)) {
+                    if (frame.childCount != 0) {
+                        frame[0].fadeOut()
+                        frame.removeAllViews()
+                    }
+                    frame.addView(recyclerView, 0)
+                    recyclerView.fadeIn()
+                }
+                adapter.submitList(list)
+            }
+        }
+    }
+
+
+    @SuppressLint("RxSubscribeOnError")
+    private fun attachSubscriber() {
+        var lastAttendance: List<Attendance>? = null
+        val attendanceDisposable = viewModel.getAttendance(date)
             .subscribeOn(Schedulers.io())
             .unsubscribeOn(AndroidSchedulers.mainThread())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribeBy(onNext = { rawList ->
-
-                //                Log.d("test", "dd")
-                lifecycleScope.launchWhenResumed {
-                    val list = rawList.map {
-                        ResolvedAttendance(it, it.student.getStudent())
-                    }
-
-                    if (list.isEmpty()) {
-                        if (!frame.contains(emptyView)) {
-                            if (frame.childCount != 0) {
-                                frame[0].fadeOut()
-                                frame.removeAllViews()
-                            }
-                            frame.addView(emptyView, 0)
-                            emptyView.fadeIn()
-                        }
-                    } else {
-                        if (!frame.contains(recyclerView)) {
-                            if (frame.childCount != 0) {
-                                frame[0].fadeOut()
-                                frame.removeAllViews()
-                            }
-                            frame.addView(recyclerView, 0)
-                            recyclerView.fadeIn()
-                        }
-                        adapter.submitList(list)
-                    }
-                }
+            .doOnNext {
+                lastAttendance = it
+            }
+            .flatMap {attendance ->
+                viewModel.getStudentList(attendance.map { it.lrn })
+            }
+            .subscribeBy(onNext = { students ->
+                setData(lastAttendance!!, students)
             }, onError = {
                 view?.let { view ->
                     Snackbar.make(
@@ -159,6 +188,9 @@ class AttendanceListFragment(private val attendance: Observable<List<Attendance>
     override fun onPause() {
         super.onPause()
         disposables.clear()
+        listeners.forEach {
+            it.remove()
+        }
     }
 
 }

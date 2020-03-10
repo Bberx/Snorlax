@@ -20,9 +20,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
-import androidx.core.content.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
@@ -32,6 +30,7 @@ import com.jakewharton.rxbinding3.widget.textChanges
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.utils.Constants.ACCOUNT_TYPES
 import com.snorlax.snorlax.utils.Constants.SECTION_LIST
+import com.snorlax.snorlax.utils.hideKeyboard
 import com.snorlax.snorlax.utils.startHomeActivity
 import com.snorlax.snorlax.utils.validator.FormResult
 import com.snorlax.snorlax.utils.validator.FormResult.Message.Item.*
@@ -109,11 +108,11 @@ class RegisterFragment : Fragment() {
         return view
     }
 
-    private fun hideKeyboard() {
-        val imm = requireContext().getSystemService<InputMethodManager>()
-        imm?.hideSoftInputFromWindow(requireView().windowToken, 0)
-        requireView().clearFocus()
-    }
+//    private fun hideKeyboard() {
+//        val imm = requireContext().getSystemService<InputMethodManager>()
+//        imm?.hideSoftInputFromWindow(requireView().windowToken, 0)
+//        requireView().clearFocus()
+//    }
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         initObservables()
@@ -122,7 +121,7 @@ class RegisterFragment : Fragment() {
     private fun initObservables() {
         disposables.apply {
             add(viewModel.registerButtonObservable.subscribe {
-                hideKeyboard()
+                hideKeyboard(requireView())
 
                 val results = viewModel.validateFields(
                     input_first_name.text.toString(),

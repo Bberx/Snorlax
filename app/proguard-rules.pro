@@ -20,8 +20,11 @@
 # hide the original source file displayName.
 #-renamesourcefileattribute SourceFile
 
--optimizations !field/*,!class/merging/*,*
--mergeinterfacesaggressively
+#-optimizations !field/*,!class/merging/*,*
+#-mergeinterfacesaggressively
+
+#-keep class org.apache.poi.** {*; }
+-keep class org.apache.xmlbeans.** { *; }
 
 -keep public class * implements com.bumptech.glide.module.GlideModule
 -keep public class * extends com.bumptech.glide.module.AppGlideModule
@@ -31,14 +34,20 @@
 }
 
 -keep class com.snorlax.snorlax.model.** { *; }
+#-keep
+#-keep class org.apache.poi.openxml4j.opc.PackagePart
+#-keep class org.apache.poi.xwpf.usermodel.XWPFStyles
+-keep class org.apache.poi.POIXMLFactory { *; }
 
 -keep class org.apache.poi.javax.xml.stream.FactoryFinder
 -keep class org.apache.poi.xwpf.usermodel.** { *; }
 -keep class org.apache.xmlbeans.** { *; }
 #-keep class org.apache.xmlbeans.impl.regex.SchemaRegularExpression
-#-keep class  org.openxmlformats.schemas.wordprocessingml.x2006.main.** { *; }
+-keep class  org.openxmlformats.schemas.wordprocessingml.x2006.main.** { *; }
 #-keep class org.apache.xmlbeans.** { *; }
 #-keep class org.apache.poi.** { *; }
+-keep class org.apache.xmlbeans.impl.schema.** { *; }
+
 
 
 # Apache POI
@@ -197,5 +206,8 @@
 -keep class com.microsoft.schemas.vml.impl.CTTextboxImpl { *; }
 -keep class com.microsoft.schemas.office.excel.impl.CTClientDataImpl { *; }
 -keep class com.microsoft.schemas.office.excel.impl.STTrueFalseBlankImpl { *; }
+-keep class org.openxmlformats.schemas.wordprocessingml.x2006.main.DocumentDocument { *; }
+-keep class org.apache.xmlbeans.impl.values.XmlComplexContentImpl { *; }
+
 
 -dontobfuscate

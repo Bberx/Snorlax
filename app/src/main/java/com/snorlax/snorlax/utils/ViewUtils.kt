@@ -17,11 +17,15 @@
 package com.snorlax.snorlax.utils
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import androidx.annotation.LayoutRes
+import androidx.core.content.getSystemService
+import androidx.fragment.app.Fragment
 import com.snorlax.snorlax.ui.auth.CredentialsActivity
 import com.snorlax.snorlax.ui.home.HomeActivity
 
@@ -74,3 +78,13 @@ fun ViewGroup?.inflate(@LayoutRes layoutRes: Int, attachToRoot: Boolean = false)
 //fun ViewGroup?.inflate(view: View, attachToRoot: Boolean = false): View {
 //    return LayoutInflater.from(this?.context).i
 //}
+
+fun Context.hideKeyboard(rootView: View, removeFocus: View? = null) {
+    val imm = getSystemService<InputMethodManager>()
+    imm?.hideSoftInputFromWindow(rootView.windowToken, 0)
+    removeFocus?.clearFocus() ?: rootView.clearFocus()
+}
+
+fun Fragment.hideKeyboard(rootView: View, removeFocus: View? = null) {
+    context?.hideKeyboard(rootView, removeFocus)
+}

@@ -17,14 +17,11 @@
 package com.snorlax.snorlax.ui.home
 
 import android.annotation.SuppressLint
-import android.os.Build
+import android.content.DialogInterface
 import android.os.Bundle
-import android.text.Html
-import android.text.Spanned
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.core.text.isDigitsOnly
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -38,6 +35,8 @@ import com.snorlax.snorlax.utils.adapter.recyclerview.StudentListAdaptor
 import com.snorlax.snorlax.utils.callback.StudentEditListener
 import com.snorlax.snorlax.utils.capitalizeWords
 import com.snorlax.snorlax.utils.exception.StudentAlreadyExistException
+import com.snorlax.snorlax.utils.getSpannedText
+import com.snorlax.snorlax.utils.hideKeyboard
 import com.snorlax.snorlax.viewmodel.StudentsViewModel
 import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -49,17 +48,10 @@ import kotlinx.android.synthetic.main.diag_add_student.*
 import kotlinx.android.synthetic.main.diag_delete_student.*
 import kotlinx.android.synthetic.main.fragment_students.*
 
-
-/**
- * A simple [Fragment] subclass.
- */
-
 class StudentsFragment : BaseStudentFragment() {
 
     override lateinit var viewModel: StudentsViewModel
     override lateinit var adaptor: StudentListAdaptor
-
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,8 +63,11 @@ class StudentsFragment : BaseStudentFragment() {
 
         btn_action.setImageResource(R.drawable.ic_person_add)
 
-        val studentActionListener = object : StudentEditListener() {
+        val studentActionListener = object : StudentEditListener {
+            override val editDisposable: CompositeDisposable = CompositeDisposable()
+            override val deleteDisposable: CompositeDisposable = CompositeDisposable()
 
+            @SuppressLint("PrivateResource")
             override fun editStudent(
                 position: Int,
                 student: Student,
@@ -86,6 +81,7 @@ class StudentsFragment : BaseStudentFragment() {
                     .setIcon(R.drawable.ic_edit)
                     .setView(R.layout.diag_add_student)
                     .setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
+                        hideKeyboard(requireView())
 
                         val alert = (dialogInterface as AlertDialog)
 
@@ -94,11 +90,12 @@ class StudentsFragment : BaseStudentFragment() {
                             alert.input_lrn.text!!.isNotEmpty()
                         ) {
                             editDisposable.add(Completable.create { emitter ->
-                                options.snapshots.getSnapshot(position).reference.set(
+                                val index = options.snapshots.indexOf(student)
+                                options.snapshots.getSnapshot(index).reference.set(
                                     Student(
                                         mapOf(
-                                            Student.FIRST_NAME_VAL to alert.input_first_name.text.toString().trim(),
-                                            Student.LAST_NAME_VAL to alert.input_last_name.text.toString().trim()
+                                            Student.FIRST_NAME_VAL to alert.input_first_name.text.toString().trim().capitalizeWords(),
+                                            Student.LAST_NAME_VAL to alert.input_last_name.text.toString().trim().capitalizeWords()
                                         ), alert.input_lrn.text.toString().trim()
                                     )
                                 ).addOnSuccessListener {
@@ -106,16 +103,19 @@ class StudentsFragment : BaseStudentFragment() {
                                 }.addOnFailureListener {
                                     emitter.onError(it)
                                 }
-                            }
-                                .subscribeOn(Schedulers.io())
+                            }.subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
+                                .doFinally {
+                                    alert.dismiss()
+                                    editDisposable.clear()
+                                    hideKeyboard(requireView())
+                                }
                                 .subscribe({
                                     Snackbar.make(
                                         view,
                                         "Student edited",
                                         Snackbar.LENGTH_SHORT
-                                    )
-                                        .show()
+                                    ).show()
                                 }, {
                                     Snackbar.make(
                                         view,
@@ -124,9 +124,11 @@ class StudentsFragment : BaseStudentFragment() {
                                     ).show()
                                 }))
                         }
-
+                        hideKeyboard(requireView())
                     }
-                    .setNegativeButton(android.R.string.cancel, null)
+                    .setNegativeButton(android.R.string.cancel) { _: DialogInterface, _: Int ->
+                        hideKeyboard(requireView(), view)
+                    }
                     .create()
 
                 alertDialog.show()
@@ -138,10 +140,11 @@ class StudentsFragment : BaseStudentFragment() {
 
                 alertDialog.setOnDismissListener {
                     editDisposable.clear()
+                    hideKeyboard(requireView())
                 }
             }
 
-            @SuppressLint("RxSubscribeOnError")
+            @SuppressLint("RxSubscribeOnError", "PrivateResource")
             override fun deleteStudent(student: Student) {
                 val deleteDialog = MaterialAlertDialogBuilder(
                     context,
@@ -150,12 +153,10 @@ class StudentsFragment : BaseStudentFragment() {
                     .setTitle(getString(R.string.title_delete_student))
                     .setIcon(R.drawable.ic_delete)
                     .setMessage(
-                        getSpannedText(
                             getString(
                                 R.string.msg_delete_student,
                                 "${student.name[Student.FIRST_NAME_VAL]} ${student.name[Student.LAST_NAME_VAL]}"
-                            )
-                        )
+                            ).getSpannedText()
                     )
                     .setView(R.layout.diag_delete_student)
                     .setPositiveButton(R.string.btn_ok, null)
@@ -176,6 +177,7 @@ class StudentsFragment : BaseStudentFragment() {
 
 
                     positiveButton.setOnClickListener {
+                        hideKeyboard(requireView())
                         passwordLayout.error = null
 
                         loadingView.visibility = View.VISIBLE
@@ -185,6 +187,10 @@ class StudentsFragment : BaseStudentFragment() {
                             .doOnComplete {
                                 loadingView.visibility = View.GONE
                             }.andThen(viewModel.deleteStudent(student))
+                            .doFinally {
+                                deleteDisposable.clear()
+                                hideKeyboard(requireView())
+                            }
                             .subscribeBy(
                                 onComplete = {
                                     dialog.dismiss()
@@ -221,12 +227,17 @@ class StudentsFragment : BaseStudentFragment() {
                                 }
                             )
                         deleteDisposable.add(disposable)
+                        hideKeyboard(requireView())
                     }
 
                 }
                 deleteDialog.setCanceledOnTouchOutside(false)
+                deleteDialog.setOnCancelListener {
+                    hideKeyboard(requireView())
+                }
                 deleteDialog.setOnDismissListener {
                     deleteDisposable.clear()
+                    hideKeyboard(requireView())
                 }
                 deleteDialog.show()
             }
@@ -246,14 +257,15 @@ class StudentsFragment : BaseStudentFragment() {
         else btn_action.visibility = View.GONE
     }
 
-    private fun getSpannedText(text: String): Spanned {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Html.fromHtml(text, Html.FROM_HTML_MODE_COMPACT)
-        } else {
-            Html.fromHtml(text)
-        }
-    }
+//    private fun getSpannedText(text: String): Spanned {
+//        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+//            Html.fromHtml(text, Html.FROM_HTML_MODE_COMPACT)
+//        } else {
+//            Html.fromHtml(text)
+//        }
+//    }
 
+    @SuppressLint("PrivateResource")
     private fun showAddStudentDialog() {
         val addStudentAlertDialog = MaterialAlertDialogBuilder(
             context,
@@ -304,6 +316,9 @@ class StudentsFragment : BaseStudentFragment() {
                                         )
                                     )
                                 }
+                            }.doFinally {
+                                addDisposable.clear()
+                                hideKeyboard(requireView())
                             }.subscribeBy(
                                 onError = { error ->
                                     if (error is StudentAlreadyExistException) {
@@ -340,12 +355,18 @@ class StudentsFragment : BaseStudentFragment() {
                             lrnLayout.error = "Please enter a valid LRN"
                         }
                     }
+                    hideKeyboard(requireView())
                 }
+            addStudentAlertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener {
+                addStudentAlertDialog.dismiss()
+                hideKeyboard(requireView())
+            }
         }
 
         addStudentAlertDialog.setCanceledOnTouchOutside(false)
         addStudentAlertDialog.setOnDismissListener {
             addDisposable.clear()
+            hideKeyboard(requireView())
         }
         addStudentAlertDialog.show()
     }

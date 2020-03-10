@@ -16,6 +16,7 @@
 
 package com.snorlax.snorlax.viewmodel
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.net.Uri
 import android.provider.DocumentsContract
@@ -30,6 +31,7 @@ import com.snorlax.snorlax.utils.FileUtils
 import com.snorlax.snorlax.utils.TimeUtils.getTodayDateLocal
 import com.snorlax.snorlax.utils.processor.AttendanceProcessor
 import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
@@ -47,6 +49,7 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
 
     val selectedTimeObservable = BehaviorSubject.create<Long>()
 
+    @SuppressLint("RxLeakedSubscription", "RxSubscribeOnError")
     fun deleteFile(location: Uri) {
         Completable.fromAction {
             fun delete() {
@@ -74,6 +77,10 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
             }
         }.subscribeOn(Schedulers.io())
 
+    fun getStudentList(lrn: List<String>): Observable<List<Student>> {
+        return firestore.getStudentAttendance(section, lrn)
+    }
+
     @Suppress("UNCHECKED_CAST")
     fun saveAttendance(outputLocation: Uri, month: Date): Completable {
 //        }
@@ -85,11 +92,11 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
 
         val params =
             Single.zip<List<Student>, List<Attendance>, Pair<List<Student>, List<Attendance>>>(
-            student,
-            attendance,
+                student,
+                attendance,
 //            section,
                 BiFunction(::Pair)
-        )
+            )
 
         return params.flatMap { param ->
 
@@ -104,8 +111,16 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
         }.flatMapCompletable { saveToFile(it, outputLocation) }.subscribeOn(Schedulers.io())
     }
 
-    fun getAttendance(timestamp: Date) =
-        firestore.getAttendanceObservable(section, timestamp)
+    fun studentChange(): Observable<Student> {
+        return Observable.just(Student())
+    }
+
+    fun getAttendance(timestamp: Date): Observable<List<Attendance>> {
+
+//        val behaviorSubject = BehaviorSubject.create<List<Attendance>>()
+        return firestore.getAttendanceObservable(section, timestamp)
+//        return behaviorSubject
+    }
 
     val section: String
         get() = cache.getUserCache()!!.section

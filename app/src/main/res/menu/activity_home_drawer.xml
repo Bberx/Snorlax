@@ -26,9 +26,11 @@
             android:title="@string/label_scan" />
 
         <item
-            android:id="@+id/nav_hub"
-            android:icon="@drawable/ic_hub"
-            android:title="@string/label_hub" />
+            android:enabled="false"
+            android:visible="false"
+            android:id="@+id/nav_dashboard"
+            android:icon="@drawable/ic_dashboard"
+            android:title="@string/label_dashboard" />
 
         <item
             android:id="@+id/nav_attendance"

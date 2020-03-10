@@ -11,6 +11,7 @@ import com.snorlax.snorlax.data.cache.LocalCacheSource
 import com.snorlax.snorlax.data.firebase.FirebaseFirestoreSource
 import com.snorlax.snorlax.data.section.SectionSource
 import com.snorlax.snorlax.model.BarcodeBitmap
+import com.snorlax.snorlax.ui.home.generate.GenerateManualBottomSheet
 import com.snorlax.snorlax.utils.FileUtils
 import com.snorlax.snorlax.utils.barcode.BarcodeUtils
 import com.snorlax.snorlax.utils.barcode.writeToFile
@@ -18,12 +19,18 @@ import com.snorlax.snorlax.utils.processor.BarcodeProcessor
 import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
+import io.reactivex.subjects.PublishSubject
 import org.apache.poi.xwpf.usermodel.XWPFDocument
 
 class GeneratorViewModel(application: Application) : BaseStudentViewModel(application) {
     val barcodeBitmapManualObservable = BehaviorSubject.create<BarcodeBitmap>()
     val barcodeBitmapClassObservable = BehaviorSubject.create<BarcodeBitmap>()
-    val buttonObservable = BehaviorSubject.create<Boolean>()
+
+    val bottomSheetObservable:
+            PublishSubject<GenerateManualBottomSheet.BottomSheetAction> = PublishSubject.create()
+
+
+    val buttonObservable = PublishSubject.create<Boolean>()
 
     val section: String
         get() = LocalCacheSource.getInstance(getApplication()).getUserCache()!!.section

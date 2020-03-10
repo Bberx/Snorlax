@@ -177,9 +177,9 @@ class AttendanceFragment : Fragment() {
         rootView.label_relative_time.text = viewModel.getRelativeDateString(getTodayDateUTC())
         rootView.label_date.text = dateFormat.format(getTodayDateUTC())
 
-        rootView.attendance_pager.adapter = AttendancePageAdapter(this) {
+        rootView.attendance_pager.adapter = AttendancePageAdapter(this)/* {
             viewModel.getAttendance(it)
-        }
+        }*/
 
         rootView.attendance_pager.offscreenPageLimit = 1
 
@@ -267,8 +267,10 @@ class AttendanceFragment : Fragment() {
                                 it.localizedMessage ?: "no error message."
                             ), TimeUnit.SECONDS.toMillis(3).toInt()
                         )
-//                        Log.d("FIXME", it.message)
-                    }
+                        throw it
+//                        Log.d("FIXME", it.message ?: "null")
+//                        org.apache.poi.openxml4j.opc.PackagePart
+                }
                 }
             })
 

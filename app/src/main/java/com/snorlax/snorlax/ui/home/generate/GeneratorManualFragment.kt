@@ -1,5 +1,6 @@
 package com.snorlax.snorlax.ui.home.generate
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -7,24 +8,21 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import androidx.core.content.ContextCompat
-import androidx.core.content.getSystemService
 import androidx.core.text.isDigitsOnly
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding3.widget.textChanges
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.model.BarcodeBitmap
+import com.snorlax.snorlax.utils.hideKeyboard
 import com.snorlax.snorlax.viewmodel.GeneratorViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
-import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.fragment_generator_manual.*
 import kotlinx.android.synthetic.main.fragment_generator_manual.view.*
 import java.io.FileNotFoundException
@@ -37,22 +35,24 @@ class GeneratorManualFragment : Fragment() {
     private lateinit var viewModel: GeneratorViewModel
     private val barcodeDisposable = CompositeDisposable()
 
+    private val sheetDisposable = CompositeDisposable()
+
     private val manualDisposable = CompositeDisposable()
     private val saveDisposable = CompositeDisposable()
 
 
-    private val drawerListener = object : DrawerLayout.DrawerListener {
-        override fun onDrawerStateChanged(newState: Int) {}
-
-        override fun onDrawerSlide(drawerView: View, slideOffset: Float) {}
-
-        override fun onDrawerClosed(drawerView: View) {}
-
-        override fun onDrawerOpened(drawerView: View) {
-            hideKeyboard()
-        }
-
-    }
+//    private val drawerListener = object : DrawerLayout.DrawerListener {
+//        override fun onDrawerStateChanged(newState: Int) {}
+//
+//        override fun onDrawerSlide(drawerView: View, slideOffset: Float) {}
+//
+//        override fun onDrawerClosed(drawerView: View) {}
+//
+//        override fun onDrawerOpened(drawerView: View) {
+//            requireContext().hideKeyboard(requireView(), input_generate)
+//        }
+//
+//    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -76,33 +76,42 @@ class GeneratorManualFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProvider(requireParentFragment())[GeneratorViewModel::class.java]
 
-        activity?.drawer_layout?.addDrawerListener(drawerListener)
+//        activity?.drawer_layout?.addDrawerListener(drawerListener)
 
         input_generate.textChanges().map {
             it.length == 12 && it.isDigitsOnly() && it.isNotBlank() && it.isNotEmpty()
         }.distinctUntilChanged().subscribe(viewModel.buttonObservable)
 
-        val callback = object : GenerateManualBottomSheet.GenerateBottomSheetCallback {
-            override fun onSaveImage() {
-                startActivityForResult(
-                    viewModel.getSaveImageIntent(viewModel.barcodeBitmapManualObservable.value!!.value),
-                    GeneratorFragment.REQUEST_SAVE_IMAGE
-                )
-            }
+//        val callback = object : GenerateManualBottomSheet.GenerateBottomSheetCallback {
+//            override fun onSaveImage() {
+//                startActivityForResult(
+//                    viewModel.getSaveImageIntent(viewModel.barcodeBitmapManualObservable.value!!.value),
+//                    GeneratorFragment.REQUEST_SAVE_IMAGE
+//                )
+//            }
+//
+//            override fun onCopyToClipboard() {
+//                viewModel.saveToClipboard(viewModel.barcodeBitmapManualObservable.value!!.value)
+//                showResult(getString(R.string.msg_lrn_copied))
+//            }
+//
+//        }
 
-            override fun onCopyToClipboard() {
-                viewModel.saveToClipboard(viewModel.barcodeBitmapManualObservable.value!!.value)
-                showResult(getString(R.string.msg_lrn_copied))
-            }
+        fun showSheet(): Boolean {
+            return if (viewModel.barcodeBitmapManualObservable.hasValue()) {
+                hideKeyboard(requireView(), input_generate)
+                val bottomSheet = GenerateManualBottomSheet()
+                bottomSheet.show(childFragmentManager, bottomSheet.tag)
+                true
+            } else false
+        }
 
+        image_generate.setOnLongClickListener {
+            showSheet()
         }
 
         image_generate.setOnClickListener {
-            if (viewModel.barcodeBitmapManualObservable.hasValue()) {
-                hideKeyboard()
-                val bottomSheet = GenerateManualBottomSheet(callback)
-                bottomSheet.show(childFragmentManager, bottomSheet.tag)
-            }
+            showSheet()
         }
     }
 
@@ -163,26 +172,52 @@ class GeneratorManualFragment : Fragment() {
             )
     }
 
+    @SuppressLint("RxSubscribeOnError")
     override fun onResume() {
         super.onResume()
         barcodeDisposable += viewModel.barcodeBitmapManualObservable
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
+            .subscribeBy(onNext = {
                 image_generate.setImageBitmap(it.bitmap)
                 barcode_label.text = it.value
+            }, onError = {
+                view?.let { view ->
+                    Snackbar.make(
+                        view,
+                        "Barcode not saved, ${it.localizedMessage}",
+                        Snackbar.LENGTH_LONG
+                    ).show()
+                }
             }
+            )
         barcodeDisposable += viewModel.buttonObservable.subscribe {
             btn_generate.isEnabled = it
         }
+
+        sheetDisposable += viewModel.bottomSheetObservable
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(onNext = {
+                if (it == GenerateManualBottomSheet.BottomSheetAction.SAVE_IMAGE) {
+                    startActivityForResult(
+                        viewModel.getSaveImageIntent(viewModel.barcodeBitmapManualObservable.value!!.value),
+                        GeneratorFragment.REQUEST_SAVE_IMAGE
+                    )
+                } else if (it == GenerateManualBottomSheet.BottomSheetAction.COPY_BARCODE) {
+                    viewModel.saveToClipboard(viewModel.barcodeBitmapManualObservable.value!!.value)
+                    showResult(getString(R.string.msg_lrn_copied))
+                }
+            })
     }
 
     override fun onPause() {
         super.onPause()
         barcodeDisposable.clear()
         manualDisposable.clear()
-        hideKeyboard()
-        activity?.drawer_layout?.removeDrawerListener(drawerListener)
+        sheetDisposable.clear()
+        hideKeyboard(requireView())
+//        activity?.drawer_layout?.removeDrawerListener(drawerListener)
     }
 
     override fun onDestroy() {
@@ -198,7 +233,7 @@ class GeneratorManualFragment : Fragment() {
 
     private fun showSuccessResult(message: String, location: Uri) {
         view?.let {
-            val snackbar = Snackbar.make(it, message, 3000)
+            val snackbar = Snackbar.make(it, message, 3000) // 3 secs
             val intent =
                 Intent(Intent.ACTION_VIEW).apply {
                     setDataAndType(location, "image/png")
@@ -210,10 +245,7 @@ class GeneratorManualFragment : Fragment() {
             if (intent.resolveActivity(requireActivity().packageManager) != null) {
                 snackbar.setAction(getString(R.string.btn_open)) {
                     startActivity(
-                        Intent.createChooser(
-                            intent,
-                            getString(R.string.act_open_barcode_image)
-                        )
+                        Intent.createChooser(intent, getString(R.string.act_open_barcode_image))
                     )
                 }.setActionTextColor(ContextCompat.getColor(requireContext(), R.color.alertColor))
                     .show()
@@ -224,9 +256,4 @@ class GeneratorManualFragment : Fragment() {
         }
     }
 
-    private fun hideKeyboard() {
-        val imm = context?.getSystemService<InputMethodManager>()
-        imm?.hideSoftInputFromWindow(requireView().windowToken, 0)
-        requireView().clearFocus()
-    }
 }

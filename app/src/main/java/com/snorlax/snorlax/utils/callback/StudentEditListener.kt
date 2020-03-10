@@ -4,14 +4,14 @@ import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.snorlax.snorlax.model.Student
 import io.reactivex.disposables.CompositeDisposable
 
-abstract class StudentEditListener : BaseStudentListener {
-    protected val editDisposable: CompositeDisposable = CompositeDisposable()
-    protected val deleteDisposable: CompositeDisposable = CompositeDisposable()
-    abstract fun editStudent(
+interface StudentEditListener: BaseStudentListener  {
+    val editDisposable: CompositeDisposable
+    val deleteDisposable: CompositeDisposable
+     fun editStudent(
         position: Int,
         student: Student,
         options: FirestoreRecyclerOptions<Student>
     )
 
-    abstract fun deleteStudent(student: Student)
+    fun deleteStudent(student: Student)
 }

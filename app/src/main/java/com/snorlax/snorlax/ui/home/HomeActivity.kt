@@ -19,11 +19,13 @@ package com.snorlax.snorlax.ui.home
 
 import android.app.Dialog
 import android.os.Bundle
+import android.view.View
 import android.view.Window
 import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -35,6 +37,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.utils.exitApp
+import com.snorlax.snorlax.utils.hideKeyboard
 import com.snorlax.snorlax.utils.startLoginActivity
 import com.snorlax.snorlax.viewmodel.HomeActivityViewModel
 import de.hdodenhof.circleimageview.CircleImageView
@@ -89,7 +92,7 @@ class HomeActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.nav_scan,
-                R.id.nav_hub,
+                R.id.nav_dashboard,
                 R.id.nav_attendance,
                 R.id.nav_students,
                 R.id.nav_generate,
@@ -122,7 +125,22 @@ class HomeActivity : AppCompatActivity() {
             return@setNavigationItemSelectedListener true
         }
 
+        val drawerListener = object : DrawerLayout.DrawerListener {
+            override fun onDrawerStateChanged(newState: Int) {}
 
+            override fun onDrawerSlide(drawerView: View, slideOffset: Float) {}
+
+            override fun onDrawerClosed(drawerView: View) {}
+
+            override fun onDrawerOpened(drawerView: View) {
+                    nav_host_fragment.childFragmentManager.primaryNavigationFragment?.view?.let {
+                        hideKeyboard(it)
+                    }
+            }
+
+        }
+
+        drawer_layout.addDrawerListener(drawerListener)
 
         val header = nav_view.getHeaderView(0)
         emailTextView = header.label_email

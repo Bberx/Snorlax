@@ -65,7 +65,7 @@ class GeneratorClassFragment : BaseStudentFragment() {
             startActivityForResult(intent, GeneratorFragment.REQUEST_SAVE_DOCX)
         }
 
-        adaptor = StudentListAdaptor(this, true, recyclerOptions, object : StudentSelectListener() {
+        adaptor = StudentListAdaptor(this, true, recyclerOptions, object : StudentSelectListener {
             override fun onSelectStudent(student: Student) {
                 showBarcodeDialog(student.lrn, student.name.getValue(Student.LAST_NAME_VAL))
             }
@@ -85,10 +85,14 @@ class GeneratorClassFragment : BaseStudentFragment() {
 
 
         barcodeDialog.setOnShowListener { dialog ->
-            classDisposable += viewModel.barcodeBitmapClassObservable.subscribe {
+            classDisposable += viewModel.barcodeBitmapClassObservable.subscribeBy( onNext =  {
                 barcodeDialog.barcode_image.setImageBitmap(it.bitmap)
                 barcodeDialog.barcode_label.text = it.value
-            }
+            }, onError = {
+                view?.let {view ->
+                    Snackbar.make(view, "Barcode not saved, ${it.localizedMessage}", Snackbar.LENGTH_LONG).show()
+                }
+            })
             viewModel.encodeBarcodeClass(lrn)
 
             barcodeDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener { button ->

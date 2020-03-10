@@ -22,7 +22,6 @@ import android.os.Vibrator
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import androidx.core.content.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -32,6 +31,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.widget.textChanges
 import com.snorlax.snorlax.R
+import com.snorlax.snorlax.utils.hideKeyboard
 import com.snorlax.snorlax.utils.startHomeActivity
 import com.snorlax.snorlax.utils.validator.FormResult.Message.Item.EMAIL
 import com.snorlax.snorlax.utils.validator.FormResult.Message.Item.PASSWORD
@@ -69,7 +69,7 @@ class LoginFragment : Fragment() {
         // Inflate the layout for this fragment
         val view: View = inflater.inflate(R.layout.fragment_login, container, false)
 
-        vibrator = context!!.getSystemService()!!
+        vibrator = requireContext().getSystemService()!!
 
         view.btn_login.clicks()
             .subscribe(viewModel.loginButtonObservable)
@@ -90,11 +90,11 @@ class LoginFragment : Fragment() {
         return view
     }
 
-    private fun hideKeyboard() {
-        val imm = requireContext().getSystemService<InputMethodManager>()
-        imm?.hideSoftInputFromWindow(requireView().windowToken, 0)
-        requireView().clearFocus()
-    }
+//    private fun hideKeyboard() {
+//        val imm = requireContext().getSystemService<InputMethodManager>()
+//        imm?.hideSoftInputFromWindow(requireView().windowToken, 0)
+//        requireView().clearFocus()
+//    }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -154,7 +154,7 @@ class LoginFragment : Fragment() {
         disposables.apply {
 
             add(viewModel.loginButtonObservable.subscribe {
-                hideKeyboard()
+                hideKeyboard(requireView())
                 val results = viewModel.validateFields(
                     input_email.text.toString(),
                     input_password.text.toString()
@@ -241,7 +241,7 @@ class LoginFragment : Fragment() {
     }
 
     private fun showMessage(text: String) {
-        Snackbar.make(view!!, text, Snackbar.LENGTH_LONG).show()
+        Snackbar.make(requireView(), text, Snackbar.LENGTH_LONG).show()
     }
 
 

@@ -52,8 +52,8 @@ android {
         applicationId "com.snorlax.snorlax"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 20
-        versionName "1.3.19"
+        versionCode 24
+        versionName "1.4.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
     }
@@ -63,7 +63,7 @@ android {
             ext.alwaysUpdateBuildId = false
             debuggable true
             firebaseAppDistribution {
-                releaseNotes = "Debug build\nRevert back compile target to API 29\nAdd password check on chaging late time"
+                releaseNotes = "Debug build\nBug fixes"
                 groups = "researchers, developer"
             }
 //            manifestPlaceholders = [crashlyticsCollectionEnabled:"false"]
@@ -73,15 +73,15 @@ android {
             debuggable = false
             ext.enableCrashlytics = true
             ext.alwaysUpdateBuildId = true
-            shrinkResources true
-            minifyEnabled true
+//            shrinkResources true
+            minifyEnabled false
             proguardFiles 'proguard-rules.pro', getDefaultProguardFile('proguard-android-optimize.txt')
             renderscriptOptimLevel = 3
             signingConfig signingConfigs.release
             multiDexEnabled = true
             manifestPlaceholders = [crashlyticsCollectionEnabled: "true"]
             firebaseAppDistribution {
-                releaseNotes = "Release build\nFix crash when saving to image"
+                releaseNotes = "Release build\nRelease build ready for defence"
                 groups = "researchers, developer"
             }
         }
@@ -178,7 +178,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-ml-vision:24.0.1'
 
     // Firestore
-    implementation 'com.google.firebase:firebase-firestore:21.4.0'
+    implementation 'com.google.firebase:firebase-firestore:21.4.1'
     implementation 'com.firebaseui:firebase-ui-firestore:6.0.2'
 
     // Firebase Storage
@@ -197,7 +197,7 @@ dependencies {
     implementation 'com.karumi:dexter:6.0.2'
 
     // (Recommended) Add Analytics
-    implementation 'com.google.firebase:firebase-analytics:17.2.2'
+    implementation 'com.google.firebase:firebase-analytics:17.2.3'
 
     // Crashlytics
     releaseImplementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
@@ -239,14 +239,14 @@ dependencies {
 //        exclude group: 'org.hamcrest', module:'hamcrest-core'
 //    }
 
-//    def poiVersion = "3.17"
+    def poiVersion = "3.17"
 //    compileOnly "org.apache.poi:poi-ooxml:$poiVersion"
 //    implementation group: 'org.apache.poi', name: 'poi', version: '3.17'
 //    implementation "com.github.SUPERCILEX.poi-android:poi:$poiVersion"
-//    implementation "com.github.SUPERCILEX.poi-android:proguard:$poiVersion"
-
+    implementation "com.github.SUPERCILEX.poi-android:proguard:$poiVersion"
+    implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
     // ZXing
-    implementation 'com.google.zxing:core:3.3.3'
+    implementation 'com.google.zxing:core:3.4.0'
 //    implementation('com.journeyapps:zxing-android-embedded:4.0.2') { transitive = false }
 
     // RxLint

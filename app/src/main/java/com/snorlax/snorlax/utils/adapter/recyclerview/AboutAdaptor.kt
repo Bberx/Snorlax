@@ -46,7 +46,7 @@ class AboutAdaptor(private val researcher: List<Researcher>) :
 
         fun bind(item: Researcher) {
             GlideApp
-                .with(containerView.context)
+                .with(researcher_image)
                 .load(item.displayImage)
 //            .apply(RequestOptions.bitmapTransform(CropCircleWithBorderTransformation()))
 //            .transition(DrawableTransitionOptions.withCrossFade())

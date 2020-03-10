@@ -111,6 +111,7 @@ object FirebaseFirestoreSource {
         section: String,
         dateStamp: Date
     ): Observable<List<Attendance>> {
+//        var listeners: MutableList<ListenerRegistration>? = mutableListOf()
 
         return Observable.create<List<Attendance>> { emitter ->
             val listener = sectionRef.document(section)
@@ -134,10 +135,64 @@ object FirebaseFirestoreSource {
                         } ?: emitter.onNext(emptyList())
                     } ?: emitter.onNext(emptyList())
                 }
+//            listeners?.add(listener)
             emitter.setCancellable {
                 listener.remove()
             }
         }.subscribeOn(Schedulers.io()).unsubscribeOn(AndroidSchedulers.mainThread())
+    }
+
+    fun getStudentAttendance(section: String, lrn: List<String>): Observable<List<Student>> {
+        var lastVal: List<Student>? = null
+//        val listeners = mutableListOf<ListenerRegistration>()
+        return Observable.create<List<Student>> { emitter ->
+            if (lrn.isEmpty()) {
+                emitter.onNext(emptyList())
+                lastVal = emptyList()
+            } else {
+                val query = getStudentQuery(section).whereIn("lrn", lrn)
+                val listener =
+                    query.addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+                        firebaseFirestoreException?.let {
+                            emitter.onError(it)
+                            return@addSnapshotListener
+                        }
+                        val snapshot = querySnapshot!!
+
+                        if (lastVal != null) {
+                            if (lastVal!!.isNotEmpty()) {
+                                val newList = lastVal!!.toMutableList()
+                                snapshot.documentChanges.forEach { change ->
+                                    if (change.type == DocumentChange.Type.MODIFIED) {
+//                              val oldList = subject.value!!.toMutableList()
+                                        val oldLrnList = lastVal!!.map { it.lrn }
+                                        val newStudent =
+                                            change.document.toObject(Student::class.java)
+//                                        val index = oldLrnList.indexOf(newStudent.lrn)
+                                        newList[ oldLrnList.indexOf(newStudent.lrn)] = newStudent
+//                                        newList.removeAt(index)
+//                                        newList.add(index, newStudent)
+
+                                    }
+                                }
+                                emitter.onNext(newList.toList())
+                                lastVal = newList.toList()
+                            } else {
+                                emitter.onNext(lastVal!!)
+                            }
+                        } else {
+                            val list = snapshot.toObjects(Student::class.java)
+                            emitter.onNext(list)
+                            lastVal = list
+                        }
+                    }
+//                listeners += listener
+
+                emitter.setCancellable {
+                    listener.remove()
+                }
+            }
+        }.subscribeOn(Schedulers.io())
     }
 
     fun getLateData(section: String): Observable<LateData> {
@@ -334,7 +389,6 @@ object FirebaseFirestoreSource {
             }
         }
     }
-
 
 
     private fun getAttendanceByDocument(document: DocumentSnapshot): List<Attendance> {

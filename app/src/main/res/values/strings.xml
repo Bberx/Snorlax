@@ -102,9 +102,9 @@
     <string name="label_action">Actions</string>
     <string name="act_open_barcode_image">Open barcode image with</string>
     <string name="act_open_attendance">Open attendance with</string>
-    <string name="label_hub">Hub</string>
+    <string name="label_dashboard">Dashboard</string>
     <string name="label_sensitive_action">Sensitive action</string>
-    <string name="msg_sensitive_late_time">Changing late time will be effective immediately. This action requires you to type your password.</string>
+    <string name="msg_sensitive_late_time"><![CDATA[Changing late time will be effective immediately, and will affect all students of <b>%s</b>. This action requires your password to continue.]]></string>
     <string name="msg_late_time_not_saved">Late time setting not saved</string>
     <string name="msg_late_time_saved">Late time setting saved</string>
 </resources>

@@ -17,6 +17,8 @@ import com.jakewharton.rxbinding3.widget.textChanges
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.data.firebase.FirebaseFirestoreSource
 import com.snorlax.snorlax.utils.TimeUtils
+import com.snorlax.snorlax.utils.getSpannedText
+import com.snorlax.snorlax.utils.hideKeyboard
 import com.snorlax.snorlax.utils.preference.TimePickerPreference
 import com.snorlax.snorlax.utils.preference.TimePreferenceDialog
 import com.snorlax.snorlax.viewmodel.SettingsViewModel
@@ -114,7 +116,12 @@ class SettingsFragment : PreferenceFragmentCompat() {
             R.style.ThemeOverlay_MaterialComponents_MaterialAlertDialog_Centered
         )
             .setTitle(R.string.label_sensitive_action)
-            .setMessage(R.string.msg_sensitive_late_time)
+            .setMessage(
+                getString(
+                    R.string.msg_sensitive_late_time,
+                    viewmodel.getSectionName()
+                ).getSpannedText()
+            )
             .setIcon(R.drawable.ic_alert)
             .setView(R.layout.diag_delete_student)
             .setPositiveButton(R.string.btn_ok, null)
@@ -193,6 +200,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         confirmationDialog.setCanceledOnTouchOutside(false)
         confirmationDialog.setOnDismissListener {
             confirmationDisposable.clear()
+            hideKeyboard(requireView())
         }
         confirmationDialog.show()
     }

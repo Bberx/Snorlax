@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.contains
+import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -12,6 +13,8 @@ import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.snorlax.snorlax.R
 import com.snorlax.snorlax.model.Student
 import com.snorlax.snorlax.utils.adapter.recyclerview.StudentListAdaptor
+import com.snorlax.snorlax.utils.fadeIn
+import com.snorlax.snorlax.utils.fadeOut
 import com.snorlax.snorlax.utils.inflate
 import com.snorlax.snorlax.utils.toPx
 import com.snorlax.snorlax.viewmodel.BaseStudentViewModel
@@ -35,28 +38,8 @@ abstract class BaseStudentFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_students, container, false)
-
-    }
-
-    protected val callback = { isEmpty: Boolean ->
-        val frame = student_list_container
-        if (isEmpty) {
-            if (!frame.contains(emptyView)) {
-                frame.removeAllViews()
-                frame.addView(emptyView)
-            }
-        } else {
-            if (!frame.contains(recyclerView)) {
-                frame.removeAllViews()
-                frame.addView(recyclerView)
-            }
-        }
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        val frame = view.student_list_container
+        val rootView = inflater.inflate(R.layout.fragment_students, container, false)
+        val frame = rootView.student_list_container
         val shimmerView = ShimmerListProgress(requireContext()).apply {
             setLayoutChild(R.layout.shimmer_layout_student)
         }
@@ -68,6 +51,44 @@ abstract class BaseStudentFragment : Fragment() {
                 .setQuery(viewModel.getStudentQuery(), Student::class.java)
                 .build()
 
+        return rootView
+
+    }
+
+    protected val callback = { isEmpty: Boolean ->
+        val frame = student_list_container
+
+        if (isEmpty) {
+            if (!frame.contains(emptyView)) {
+                if (frame.childCount != 0) {
+                    frame[0].fadeOut()
+                    frame.removeAllViews()
+                }
+                frame.addView(emptyView, 0)
+                emptyView.fadeIn()
+            }
+        } else {
+            if (!frame.contains(recyclerView)) {
+                if (frame.childCount != 0) {
+                    frame[0].fadeOut()
+                    frame.removeAllViews()
+                }
+                frame.addView(recyclerView, 0)
+                recyclerView.fadeIn()
+            }
+        }
+
+//        if (isEmpty) {
+//            if (!frame.contains(emptyView)) {
+//                frame.removeAllViews()
+//                frame.addView(emptyView)
+//            }
+//        } else {
+//            if (!frame.contains(recyclerView)) {
+//                frame.removeAllViews()
+//                frame.addView(recyclerView)
+//            }
+//        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

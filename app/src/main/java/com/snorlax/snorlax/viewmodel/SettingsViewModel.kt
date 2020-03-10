@@ -6,6 +6,7 @@ import com.snorlax.snorlax.data.cache.LocalCacheSource
 import com.snorlax.snorlax.data.firebase.FirebaseAuthSource
 import com.snorlax.snorlax.data.repositories.LateDataRepository
 import com.snorlax.snorlax.model.LateData
+import com.snorlax.snorlax.utils.Constants
 import io.reactivex.Completable
 import io.reactivex.subjects.BehaviorSubject
 
@@ -21,5 +22,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun reAuth(password: String): Completable {
         return FirebaseAuthSource.reAuth(password)
+    }
+
+    fun getSectionName(): String {
+        return Constants.SECTION_LIST.getValue(section).display_name
     }
 }
